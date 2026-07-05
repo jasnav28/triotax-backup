@@ -455,7 +455,7 @@ export function Chatbot() {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50 dark:bg-[#060e1d]/50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ backgroundColor: "#EBF2FA" }}>
             {messages.map((msg) => {
               const isBot = msg.sender === "bot";
               return (

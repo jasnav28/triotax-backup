@@ -567,27 +567,23 @@ function NavBar({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const isDarkMode = theme === "dark";
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled ? "shadow-md" : ""
       }`}
-      style={{ backgroundColor: "rgba(255,255,255,0.97)", backdropFilter: "blur(12px)" }}
+      style={{ backgroundColor: isDarkMode ? "rgba(0,0,0,0.97)" : "rgba(255,255,255,0.97)", backdropFilter: "blur(12px)" }}
     >
       <div className="max-w-[1440px] mx-auto px-6 lg:px-12 relative">
         <div className="flex items-center justify-between" style={{ height: "72px" }}>
-          <button onClick={() => navigate("home")} className="flex items-center gap-3">
+          <button onClick={() => navigate("home")} className="flex items-center">
             <img
-              src="/logo.png"
+              src={isDarkMode ? "/Artboard.png" : "/Artboard 3.png"}
               alt="TRIOTAX Logo"
-              className="w-10 h-10 object-contain"
+              className="h-[67px] object-contain"
             />
-            <div className="text-left">
-              <div className="font-bold text-lg leading-tight" style={{ fontFamily: "'Poppins', sans-serif", color: "#121212" }}>
-                TRIO<span style={{ color: "#0F4C81" }}>TAX</span>
-              </div>
-              <div className="text-xs text-gray-400">Advisory & Legal Services</div>
-            </div>
           </button>
 
           <div className="hidden lg:flex items-center gap-7">
@@ -605,7 +601,7 @@ function NavBar({
                       className={`text-sm font-medium transition-colors pb-0.5 flex items-center gap-1.5 ${
                         activePage === page
                           ? "border-b-2"
-                          : "text-gray-500 hover:text-gray-900"
+                          : isDarkMode ? "text-gray-300 hover:text-white" : "text-gray-500 hover:text-gray-900"
                       }`}
                       style={
                         activePage === page
@@ -626,7 +622,7 @@ function NavBar({
                   className={`text-sm font-medium transition-colors pb-0.5 ${
                     activePage === page
                       ? "border-b-2"
-                      : "text-gray-500 hover:text-gray-900"
+                      : isDarkMode ? "text-gray-300 hover:text-white" : "text-gray-500 hover:text-gray-900"
                   }`}
                   style={
                     activePage === page
@@ -646,8 +642,8 @@ function NavBar({
 
             <button
               onClick={() => navigate("contact")}
-              className="text-sm font-medium px-4 py-2 rounded-lg border transition-all hover:bg-blue-50"
-              style={{ borderColor: "#0F4C81", color: "#0F4C81" }}
+              className={`text-sm font-medium px-4 py-2 rounded-lg border transition-all ${isDarkMode ? "hover:bg-white/10" : "hover:bg-blue-50"}`}
+              style={{ borderColor: isDarkMode ? "#60A5FA" : "#0F4C81", color: isDarkMode ? "#60A5FA" : "#0F4C81" }}
             >
               Contact Us
             </button>
@@ -670,19 +666,19 @@ function NavBar({
             {/* Mobile Theme Toggle Button */}
             <ThemeToggle size="md" />
             <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 rounded-lg">
-              {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {menuOpen ? <X className={`w-6 h-6 ${isDarkMode ? "text-white" : ""}`} /> : <Menu className={`w-6 h-6 ${isDarkMode ? "text-white" : ""}`} />}
             </button>
           </div>
         </div>
 
         {menuOpen && (
-          <div className="lg:hidden bg-white border-t border-gray-100 py-4">
+          <div className={`lg:hidden border-t py-4 ${isDarkMode ? "bg-black border-zinc-800" : "bg-white border-gray-100"}`}>
             {navLinks.map(({ label, page }) => (
               <button
                 key={page}
                 onClick={() => navigate(page)}
-                className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 rounded-lg mx-2"
-                style={{ width: "calc(100% - 16px)", color: activePage === page ? "#0F4C81" : undefined, fontWeight: activePage === page ? 600 : undefined }}
+                className={`block w-full text-left px-4 py-3 text-sm rounded-lg mx-2 ${isDarkMode ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-blue-50"}`}
+                style={{ width: "calc(100% - 16px)", color: activePage === page ? (isDarkMode ? "#60A5FA" : "#0F4C81") : undefined, fontWeight: activePage === page ? 600 : undefined }}
               >
                 {label}
               </button>
@@ -706,11 +702,18 @@ function NavBar({
           </div>
         )}
 
-        {/* Megamenu backdrop overlay */}
+
+        {/* Blur backdrop overlay when megamenu is open */}
         {megaOpen && (
           <div
-            className="fixed inset-0 z-40 bg-[#060e1d]/50 backdrop-blur-sm transition-all duration-300 pointer-events-none"
-            style={{ top: "72px" }}
+            className="fixed inset-0 z-40 animate-in fade-in duration-200"
+            style={{
+              top: "72px",
+              backdropFilter: "blur(6px)",
+              WebkitBackdropFilter: "blur(6px)",
+              backgroundColor: "rgba(0,0,0,0.45)",
+            }}
+            onClick={() => setMegaOpen(false)}
           />
         )}
 
@@ -774,17 +777,24 @@ function NavBar({
             </div>
 
             {/* Right Panel: Overview (col-span-3) */}
-            <div className="col-span-3 bg-[#F8FAFC] rounded-2xl p-5 flex flex-col justify-between border border-gray-50">
+            <div className="col-span-3 bg-[#F8FAFC] dark:bg-zinc-900/50 rounded-2xl p-5 flex flex-col border border-gray-50 dark:border-zinc-800 overflow-hidden">
               <div>
                 <span className="text-[10px] font-bold text-gray-400 tracking-wider block mb-2 uppercase">Category Overview</span>
-                <h4 className="font-bold text-xs text-gray-900 mb-2">{activeCategory.title}</h4>
-                <p className="text-[11px] text-gray-500 leading-relaxed mb-4">{activeCategory.desc}</p>
+                <h4 className="font-bold text-xs text-gray-900 dark:text-white mb-2">{activeCategory.title}</h4>
+                <p className="text-[11px] text-gray-500 dark:text-zinc-400 leading-relaxed mb-3">{activeCategory.desc}</p>
               </div>
-              <div className="border-t border-gray-100 pt-4">
+              <div className="rounded-xl overflow-hidden mb-3 border border-gray-100 dark:border-zinc-700 flex-shrink-0">
+                <img
+                  src={`/mega-menu/${activeCategory.id}.jpg`}
+                  alt={activeCategory.title}
+                  className="w-full h-[120px] object-cover transition-transform duration-500 hover:scale-105"
+                />
+              </div>
+              <div className="border-t border-gray-100 dark:border-zinc-700 pt-3 mt-auto">
                 <span className="text-[10px] font-bold text-gray-400 tracking-wider block mb-3 uppercase">Category Features</span>
                 <ul className="space-y-2">
                   {activeCategory.features.map((feature, i) => (
-                    <li key={i} className="flex items-center gap-2 text-[10px] font-medium text-gray-600">
+                    <li key={i} className="flex items-center gap-2 text-[10px] font-medium text-gray-600 dark:text-zinc-300">
                       <div className="w-1.5 h-1.5 rounded-full bg-[#0F4C81] shrink-0" />
                       <span>{feature}</span>
                     </li>
@@ -808,112 +818,177 @@ function Footer({ setActivePage, setSelectedServiceId }: { setActivePage: (p: Pa
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const goToService = (id: string) => {
+    setSelectedServiceId(id);
+    setActivePage("service-detail");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <footer style={{ backgroundColor: "#0a1628" }} className="text-white">
       <div className="max-w-[1440px] mx-auto px-6 lg:px-12 pt-16 pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
-          <div className="lg:col-span-2">
+
+        {/* Top Row: Company Info + Contact */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mb-12">
+
+          {/* Company Info - Left */}
+          <div className="lg:col-span-4">
             <div className="flex items-center gap-3 mb-5">
               <img
-                src="/logo.png"
+                src="/Artboard.png"
                 alt="TRIOTAX Logo"
-                className="w-10 h-10 object-contain"
+                className="h-10 object-contain"
               />
-              <div>
-                <div className="font-bold text-lg" style={{ fontFamily: "'Poppins', sans-serif" }}>
-                  TRIO<span style={{ color: "#60A5FA" }}>TAX</span>
-                </div>
-                <div className="text-xs text-gray-400">Advisory & Legal Services</div>
-              </div>
             </div>
             <p className="text-gray-400 text-sm leading-relaxed mb-6">
-              India's trusted partner for business compliance, tax registration, and legal advisory services since 2022. Serving 5,000+ clients across all sectors.
+              TRIOTAX is a modern financial and business support services platform offering company registration, tax filing, and compliance management solutions.
             </p>
-            <div className="flex gap-3">
-              {[Facebook, Twitter, Linkedin, Instagram].map((Icon, i) => (
+
+            <h4 className="font-bold text-sm mb-4" style={{ fontFamily: "'Poppins', sans-serif" }}>Follow us on</h4>
+            <div className="flex gap-3 mb-8">
+              {[Facebook, Instagram, Twitter, Linkedin, Globe].map((Icon, i) => (
                 <div
                   key={i}
-                  className="w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer transition-colors hover:bg-blue-600"
+                  className="w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-colors hover:bg-blue-600"
                   style={{ backgroundColor: "#1a2d4a" }}
                 >
                   <Icon className="w-4 h-4 text-gray-300" />
                 </div>
               ))}
             </div>
-          </div>
 
-          <div>
-            <h4 className="font-bold text-sm mb-5" style={{ fontFamily: "'Poppins', sans-serif" }}>Quick Links</h4>
-            <ul className="space-y-3">
-              {(["home", "about", "pricing", "blog", "contact", "faq", "career"] as Page[]).map((p) => (
-                <li key={p}>
-                  <button
-                    onClick={() => navigate(p)}
-                    className="text-gray-400 text-sm hover:text-white transition-colors capitalize"
-                  >
-                    {p === "faq" ? "FAQ" : p === "home" ? "Home" : p.charAt(0).toUpperCase() + p.slice(1)}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-bold text-sm mb-5" style={{ fontFamily: "'Poppins', sans-serif" }}>Our Services</h4>
-            <ul className="space-y-3">
-              {SERVICES.slice(0, 8).map((s) => (
-                <li key={s.id}>
-                  <button
-                    onClick={() => { setSelectedServiceId(s.id); setActivePage("service-detail"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="text-gray-400 text-sm hover:text-white transition-colors text-left font-medium"
-                  >
-                    {s.title}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-bold text-sm mb-5" style={{ fontFamily: "'Poppins', sans-serif" }}>Contact</h4>
-            <div className="space-y-4 mb-7">
-              <div className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                <span className="text-gray-400 text-sm">#27, Sriranga complex, 2nd Floor, Dr.MC Modi Hospital Road, 2nd Stage, Bengaluru-560086</span>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <Phone className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                <span className="text-gray-400 text-sm">
-                  +91 9591578333<br />
-                  +91 6361556801
-                </span>
-              </div>
+            <h4 className="font-bold text-sm mb-4" style={{ fontFamily: "'Poppins', sans-serif" }}>Contact Us</h4>
+            <div className="space-y-3">
               <div className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-blue-400" />
+                <Mail className="w-4 h-4 text-blue-400 flex-shrink-0" />
                 <span className="text-gray-400 text-sm">support@triotax.in</span>
               </div>
+              <div className="flex items-center gap-2.5">
+                <Phone className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                <span className="text-gray-400 text-sm">+91 9591578333</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <Phone className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                <span className="text-gray-400 text-sm">+91 6361556801</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <MapPin className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                <span className="text-gray-400 text-sm">Corp Office: #27, Sriranga Complex, 2nd Floor, 2nd Main Rd, Dr.MC Modi Hospital Rd, West of Chord Rd, 2nd Stage, Bengaluru-560086</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <MapPin className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                <span className="text-gray-400 text-sm">Branch Office: #02, Venkateshwara Sawmill Complex, Court Rd, Vinayakanagara, Doddballapura, Bengaluru Rural-561203</span>
+              </div>
             </div>
-            <h4 className="font-bold text-sm mb-3" style={{ fontFamily: "'Poppins', sans-serif" }}>Newsletter</h4>
-            <div className="flex gap-2">
-              <input
-                type="email"
-                placeholder="Your email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 px-3 py-2.5 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none"
-                style={{ backgroundColor: "#1a2d4a", border: "1px solid #2d4a6b" }}
-              />
-              <button
-                className="px-3 py-2.5 rounded-lg transition-opacity hover:opacity-80"
-                style={{ backgroundColor: "#0F4C81" }}
-              >
-                <Send className="w-4 h-4 text-white" />
-              </button>
+          </div>
+
+          {/* Services Grid - Right */}
+          <div className="lg:col-span-8">
+            <h3 className="text-xs font-bold tracking-widest text-blue-400 uppercase mb-6">Our Products & Services</h3>
+
+            {/* Row 1: First 4 categories — Licensing spans 2 cols */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-8 mb-8">
+
+              {/* Col 1: Business Startup Setup */}
+              <div>
+                <h4 className="font-bold text-[11px] text-white mb-3 leading-tight" style={{ fontFamily: "'Poppins', sans-serif" }}>{SERVICE_CATEGORIES[0].title}</h4>
+                <ul className="space-y-1.5">
+                  {SERVICE_CATEGORIES[0].offerings.map((offering) => (
+                    <li key={offering.id}>
+                      <button onClick={() => goToService(offering.id)} className="text-gray-400 text-[11px] hover:text-white transition-colors text-left leading-snug">
+                        {offering.title}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Col 2: Licensing & Registration — Column 1 of 2 */}
+              <div>
+                <h4 className="font-bold text-[11px] text-white mb-3 leading-tight" style={{ fontFamily: "'Poppins', sans-serif" }}>Licensing &amp; Registration Services</h4>
+                <ul className="space-y-1.5">
+                  {SERVICE_CATEGORIES[1].offerings.slice(0, 10).map((offering) => (
+                    <li key={offering.id}>
+                      <button onClick={() => goToService(offering.id)} className="text-gray-400 text-[11px] hover:text-white transition-colors text-left leading-snug">
+                        {offering.title}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Col 3: Licensing & Registration — Column 2 of 2 (continuation, no heading) */}
+              <div>
+                <h4 className="font-bold text-[11px] text-transparent mb-3 leading-tight select-none" style={{ fontFamily: "'Poppins', sans-serif" }}>–</h4>
+                <ul className="space-y-1.5">
+                  {SERVICE_CATEGORIES[1].offerings.slice(10).map((offering) => (
+                    <li key={offering.id}>
+                      <button onClick={() => goToService(offering.id)} className="text-gray-400 text-[11px] hover:text-white transition-colors text-left leading-snug">
+                        {offering.title}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Col 4: Digital Essentials & Creative Services */}
+              <div>
+                <h4 className="font-bold text-[11px] text-white mb-3 leading-tight" style={{ fontFamily: "'Poppins', sans-serif" }}>{SERVICE_CATEGORIES[2].title}</h4>
+                <ul className="space-y-1.5">
+                  {SERVICE_CATEGORIES[2].offerings.map((offering) => (
+                    <li key={offering.id}>
+                      <button onClick={() => goToService(offering.id)} className="text-gray-400 text-[11px] hover:text-white transition-colors text-left leading-snug">
+                        {offering.title}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Col 5: Labour Compliance & Law Advisory */}
+              <div>
+                <h4 className="font-bold text-[11px] text-white mb-3 leading-tight" style={{ fontFamily: "'Poppins', sans-serif" }}>{SERVICE_CATEGORIES[3].title}</h4>
+                <ul className="space-y-1.5">
+                  {SERVICE_CATEGORIES[3].offerings.map((offering) => (
+                    <li key={offering.id}>
+                      <button onClick={() => goToService(offering.id)} className="text-gray-400 text-[11px] hover:text-white transition-colors text-left leading-snug">
+                        {offering.title}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+            </div>
+
+            {/* Row 2: Last 3 categories */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-8">
+              {SERVICE_CATEGORIES.slice(4).map((cat) => (
+                <div key={cat.id}>
+                  <h4 className="font-bold text-[11px] text-white mb-3 leading-tight" style={{ fontFamily: "'Poppins', sans-serif" }}>{cat.title}</h4>
+                  <ul className="space-y-1.5">
+                    {cat.offerings.map((offering) => (
+                      <li key={offering.id}>
+                        <button
+                          onClick={() => goToService(offering.id)}
+                          className="text-gray-400 text-[11px] hover:text-white transition-colors text-left leading-snug"
+                        >
+                          {offering.title}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        {/* Divider line */}
+        <div className="w-full h-[2px] mb-6" style={{ background: "linear-gradient(90deg, #0F4C81, #2563EB, #0F4C81)" }} />
+
+        {/* Bottom Bar */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-gray-500 text-sm">
             © 2024 TRIOTAX Compliance Advisory Pvt Ltd. All rights reserved.
           </p>
@@ -997,8 +1072,8 @@ function HomePage({ setActivePage, setSelectedServiceId }: { setActivePage: (p: 
         className="relative overflow-hidden"
         style={{
           background: "linear-gradient(135deg, #0d3d6b 0%, #0F4C81 60%, #1565c0 100%)",
-          paddingTop: "96px",
-          paddingBottom: "80px",
+          paddingTop: "56px",
+          paddingBottom: "56px",
         }}
       >
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -4195,6 +4270,19 @@ function CareerPage({ setActivePage }: { setActivePage: (p: Page) => void }) {
 export default function App() {
   const [activePage, setActivePage] = useState<Page>("home");
   const [selectedServiceId, setSelectedServiceId] = useState<string>("gst-registration");
+  const [theme, setTheme] = useState<"light" | "dark">(
+    () => (document.documentElement.classList.contains("dark") ? "dark" : "light")
+  );
+
+  // Watch for dark mode changes on <html> element
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const isDark = document.documentElement.classList.contains("dark");
+      setTheme(isDark ? "dark" : "light");
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
 
   // Sync state with URL pathname on initial load and handle back/forward actions
   useEffect(() => {
@@ -4245,7 +4333,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#F5F8FC] dark:bg-[#060e1d] text-gray-900 dark:text-white transition-colors duration-300">
-      <NavBar activePage={activePage} setActivePage={navigateToPage} setSelectedServiceId={setSelectedServiceId} />
+      <NavBar activePage={activePage} setActivePage={navigateToPage} setSelectedServiceId={setSelectedServiceId} theme={theme} setTheme={setTheme} />
       <main style={{ paddingTop: "72px" }}>
         {renderPage()}
       </main>
