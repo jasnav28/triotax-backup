@@ -577,12 +577,11 @@ function NavBar({
       <div className="max-w-[1440px] mx-auto px-6 lg:px-12 relative">
         <div className="flex items-center justify-between" style={{ height: "72px" }}>
           <button onClick={() => navigate("home")} className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: "#0F4C81" }}
-            >
-              <Scale className="w-5 h-5 text-white" />
-            </div>
+            <img
+              src="/logo.png"
+              alt="TRIOTAX Logo"
+              className="w-10 h-10 object-contain"
+            />
             <div className="text-left">
               <div className="font-bold text-lg leading-tight" style={{ fontFamily: "'Poppins', sans-serif", color: "#121212" }}>
                 TRIO<span style={{ color: "#0F4C81" }}>TAX</span>
@@ -815,9 +814,11 @@ function Footer({ setActivePage, setSelectedServiceId }: { setActivePage: (p: Pa
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#0F4C81" }}>
-                <Scale className="w-5 h-5 text-white" />
-              </div>
+              <img
+                src="/logo.png"
+                alt="TRIOTAX Logo"
+                className="w-10 h-10 object-contain"
+              />
               <div>
                 <div className="font-bold text-lg" style={{ fontFamily: "'Poppins', sans-serif" }}>
                   TRIO<span style={{ color: "#60A5FA" }}>TAX</span>
