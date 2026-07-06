@@ -10,7 +10,6 @@ import {
   ChevronRight, Building, Users2, Lightbulb, Sun, Moon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/app/components/ui/theme-toggle";
 import { Chatbot } from "@/app/components/ui/chatbot";
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
@@ -381,9 +380,7 @@ const PRICING_PLANS = [
 ];
 
 const CAREERS = [
-  { title: "Senior CA / Compliance Manager", dept: "Finance & Compliance", type: "Full-time", location: "Mumbai / Remote", exp: "5+ Years" },
   { title: "GST & Tax Consultant", dept: "Taxation", type: "Full-time", location: "Delhi NCR", exp: "3+ Years" },
-  { title: "Company Secretary (CS)", dept: "Corporate Law", type: "Full-time", location: "Bangalore", exp: "2+ Years" },
   { title: "Business Development Executive", dept: "Sales", type: "Full-time", location: "Mumbai", exp: "1–3 Years" },
   { title: "Digital Marketing Specialist", dept: "Marketing", type: "Full-time", location: "Remote", exp: "2+ Years" },
   { title: "Legal Research Intern", dept: "Legal", type: "Internship", location: "Mumbai", exp: "0–1 Year" },
@@ -636,9 +633,6 @@ function NavBar({
           </div>
 
           <div className="hidden lg:flex items-center gap-3">
-            {/* Theme Toggle Button */}
-            <ThemeToggle size="md" />
-
             <button
               onClick={() => navigate("contact")}
               className={`text-sm font-medium px-4 py-2 rounded-lg border transition-all ${isDarkMode ? "hover:bg-white/10" : "hover:bg-blue-50"}`}
@@ -662,8 +656,6 @@ function NavBar({
           </div>
 
           <div className="flex lg:hidden items-center gap-2">
-            {/* Mobile Theme Toggle Button */}
-            <ThemeToggle size="md" />
             <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 rounded-lg">
               {menuOpen ? <X className={`w-6 h-6 ${isDarkMode ? "text-white" : ""}`} /> : <Menu className={`w-6 h-6 ${isDarkMode ? "text-white" : ""}`} />}
             </button>
@@ -2015,42 +2007,7 @@ function AboutPage({ setActivePage }: { setActivePage: (p: Page) => void }) {
         </div>
       </section>
 
-      {/* Team */}
-      <section className="py-20 bg-white">
-        <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
-          <div className="text-center mb-14">
-            <SectionBadge>Leadership Team</SectionBadge>
-            <h2 className="text-3xl font-bold text-gray-900">Meet the Experts Behind TRIOTAX</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {TEAM.map(({ name, role, image, bio }) => (
-              <div
-                key={name}
-                className="bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 group"
-                style={{ boxShadow: "0 2px 12px rgba(15,76,129,0.06)" }}
-              >
-                <div className="relative overflow-hidden" style={{ height: "240px" }}>
-                  <img
-                    src={`https://images.unsplash.com/${image}?w=400&h=240&fit=crop&auto=format`}
-                    alt={name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end"
-                    style={{ background: "linear-gradient(to top, rgba(15,76,129,0.9) 0%, transparent 60%)" }}>
-                    <div className="p-4">
-                      <p className="text-white text-xs leading-relaxed">{bio}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-5">
-                  <h3 className="font-bold text-sm text-gray-900">{name}</h3>
-                  <p className="text-xs text-gray-500 mt-1">{role}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+
     </div>
   );
 }
@@ -6371,33 +6328,39 @@ function PricingPage({ setActivePage }: { setActivePage: (p: Page) => void }) {
               <table className="w-full">
                 <thead>
                   <tr style={{ backgroundColor: "#F5F8FC" }}>
-                    <th className="text-left p-4 text-sm font-semibold text-gray-700">Feature</th>
-                    {PRICING_PLANS.map((p) => (
-                      <th key={p.name} className="p-4 text-sm font-semibold text-center" style={{ color: p.popular ? "#0F4C81" : "#374151" }}>
-                        {p.name}
+                    <th className="text-left p-4 text-sm font-semibold text-gray-900">Feature</th>
+                    {["Business Setup", "Business Compliance", "Tax & Accounting"].map((name) => (
+                      <th key={name} className="p-4 text-sm font-semibold text-center text-gray-900">
+                        {name}
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {[
-                    ["GST Registration", true, true, true],
-                    ["Company / LLP Registration", false, true, true],
-                    ["Trademark Registration", false, true, true],
-                    ["Annual ROC Compliance", false, false, true],
-                    ["Monthly Bookkeeping", false, false, true],
-                    ["Dedicated Manager", false, true, true],
-                    ["Income Tax Filing", false, false, true],
-                    ["24/7 Priority Access", false, false, true],
+                    ["Entity Registration", true, false, false],
+                    ["GST Registration", true, true, false],
+                    ["FSSAI / Trade License", true, true, false],
+                    ["Trademark Registration", "Optional", true, false],
+                    ["ROC Compliance", false, true, false],
+                    ["GST Return Filing", false, true, true],
+                    ["Income Tax Return Filing", false, true, true],
+                    ["Monthly Bookkeeping", false, true, true],
+                    ["Dedicated Relationship Manager", true, true, true],
+                    ["Priority Support", true, true, true],
                   ].map(([feature, s, b, e]) => (
-                    <tr key={feature as string} className="border-t border-gray-50">
+                    <tr key={feature as string} className="border-b border-gray-50 bg-white">
                       <td className="p-4 text-sm text-gray-600">{feature as string}</td>
                       {[s, b, e].map((has, i) => (
                         <td key={i} className="p-4 text-center">
-                          {has ? (
-                            <CheckCircle2 className="w-5 h-5 mx-auto" style={{ color: "#0F4C81" }} />
+                          {has === true ? (
+                            <div className="w-5 h-5 mx-auto bg-[#75C88F] rounded flex items-center justify-center">
+                              <Check className="w-3.5 h-3.5 text-white stroke-[3]" />
+                            </div>
+                          ) : has === false ? (
+                            <X className="w-5 h-5 mx-auto text-[#F36B6B] stroke-[3]" />
                           ) : (
-                            <div className="w-5 h-0.5 bg-gray-200 mx-auto" />
+                            <span className="text-gray-600 text-sm font-medium">{has as string}</span>
                           )}
                         </td>
                       ))}
@@ -7096,6 +7059,48 @@ export default function App() {
     window.addEventListener("popstate", handleUrlChange);
     return () => window.removeEventListener("popstate", handleUrlChange);
   }, []);
+
+  // Dynamic SEO Metadata based on active page
+  useEffect(() => {
+    const seoData: Record<string, { title: string, desc: string }> = {
+      home: { title: "TrioTax | End-to-End Business Compliance & Registration in India", desc: "TrioTax offers premium financial consulting, GST filing, company registration, and compliance services with expert guidance in India." },
+      about: { title: "About TrioTax | India's Most Trusted Compliance Partner", desc: "Learn about TrioTax, founded by industry experts to make business compliance accessible, affordable, and stress-free for Indian entrepreneurs." },
+      services: { title: "Our Services | TrioTax Registration & Compliance", desc: "Explore our comprehensive suite of services including company incorporation, GST filing, trademark registration, and monthly compliance." },
+      "service-detail": { title: "Service Details | TrioTax", desc: "Detailed information about TrioTax business compliance and registration services tailored to your needs." },
+      pricing: { title: "Pricing & Plans | TrioTax", desc: "Transparent and affordable pricing for business registration, licensing, and compliance services in India." },
+      industries: { title: "Industries We Serve | TrioTax", desc: "Discover how TrioTax provides specialized compliance and registration services across various industries and sectors." },
+      blog: { title: "Blog & Insights | TrioTax", desc: "Read the latest news, insights, and updates on taxation, compliance, and business growth from TrioTax experts." },
+      contact: { title: "Contact Us | TrioTax", desc: "Get in touch with TrioTax for expert advice on business registration, GST, tax filing, and compliance in India." },
+      faq: { title: "Frequently Asked Questions | TrioTax", desc: "Find answers to common questions about company registration, GST, trademarks, and more with TrioTax." },
+      career: { title: "Careers at TrioTax | Join Our Team", desc: "Build your career with TrioTax. We foster a culture of continuous learning and professional excellence." }
+    };
+    const currentSeo = seoData[activePage] || seoData.home;
+    document.title = currentSeo.title;
+    
+    // Update meta description
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute("content", currentSeo.desc);
+    } else {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      metaDesc.setAttribute('content', currentSeo.desc);
+      document.head.appendChild(metaDesc);
+    }
+
+    // Update Open Graph and Twitter tags dynamically
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.setAttribute("content", currentSeo.title);
+    
+    const ogDesc = document.querySelector('meta[property="og:description"]');
+    if (ogDesc) ogDesc.setAttribute("content", currentSeo.desc);
+    
+    const twTitle = document.querySelector('meta[property="twitter:title"]');
+    if (twTitle) twTitle.setAttribute("content", currentSeo.title);
+    
+    const twDesc = document.querySelector('meta[property="twitter:description"]');
+    if (twDesc) twDesc.setAttribute("content", currentSeo.desc);
+  }, [activePage]);
 
   const navigateToPage = (page: Page) => {
     setActivePage(page);
