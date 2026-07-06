@@ -3711,7 +3711,7 @@ function ServiceDetailPage({
                   {/* Who needs it / Eligibility Criteria */}
                   <div className="bg-white dark:bg-[#0c1a30] rounded-2xl p-8 border border-gray-100 dark:border-zinc-800 shadow-sm">
                 <h2 className="text-xl font-bold text-gray-905 dark:text-white mb-4">
-                  {(isItr || isTds || isGstFiling) ? "Form Classifications" : (isAssessment || isRevisedItr || isGstNew || isGstAnnual || isGstCancel) ? "Assessment Framework" : (isNotice || isGstNotice) ? "Key Classifications" : (isContractDrafting || isEmploymentContract || isFranchise || isShareholder) ? "Strategic Protective Clauses" : isDocumentReview ? "Core Target Framework" : (isLegalNotices || isBondDrafting || isNda || isMou) ? "Operational Structure & Types" : (isShopAct || isTradeLicense || isClra || isBocw || isFssai || isDsc || isIec || isDrug || isIcegate || isIso || isPf || isPsara || isEsic || isPt || isLwf || isPosh || isRegisters || isAdvisor || isNotice || isTds || isRevisedItr || isGstNew || isGstFiling || isGstAnnual || isGstCancel || isGstNotice || isMcaCompliance || isMcaName || isMcaAddress || isMcaShares || isMcaMoa || isMcaDirectors || isMcaWinding || isMcaRevival || isMcaRegisters || isCopyright || isStartup || isTrademark || isUdyam || isDarpan) ? "Eligibility Criteria" : `Who Needs ${service.title}?`}
+                  {(isItr || isTds || isGstFiling) ? "Form Classifications" : (isAssessment || isRevisedItr || isGstNew || isGstAnnual || isGstCancel) ? "Assessment Framework" : (isNotice || isGstNotice) ? "Key Classifications" : (isContractDrafting || isEmploymentContract || isFranchise || isShareholder) ? "Strategic Protective Clauses" : isDocumentReview ? "Core Target Framework" : (isLegalNotices || isBondDrafting || isNda || isMou) ? "Operational Structure & Types" : (isLLP || isPvtLtd || isPublicLtd || isOPC || isSubsidiary || isSection8 || isTrust || isProprietorship || isPartnership || isShopAct || isTradeLicense || isClra || isBocw || isFssai || isDsc || isIec || isDrug || isIcegate || isIso || isPf || isPsara || isEsic || isPt || isLwf || isPosh || isRegisters || isAdvisor || isNotice || isTds || isRevisedItr || isGstNew || isGstFiling || isGstAnnual || isGstCancel || isGstNotice || isMcaCompliance || isMcaName || isMcaAddress || isMcaShares || isMcaMoa || isMcaDirectors || isMcaWinding || isMcaRevival || isMcaRegisters || isCopyright || isStartup || isTrademark || isUdyam || isDarpan) ? "Eligibility Criteria" : `Who Needs ${service.title}?`}
                 </h2>
                 <div className="space-y-3">
                   {whoNeeds.map((item) => (
@@ -4438,6 +4438,260 @@ function ServiceDetailPage({
                               <li>Accurate business name, commercial address proof, and total active employee headcount</li>
                               <li>Core bank account number along with valid IFSC codes to facilitate transfers</li>
                             </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isPublicLtd ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Business Details</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Proposed Corporate Names (Must be unique, distinct, and must end with the suffix 'Limited')<br/>
+                            Exhaustive description of core business domains
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Identity Proof (All Directors/Shareholders)</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Self-attested PAN Card (Mandatory for Indian Citizens)<br/>
+                            Aadhaar Card, Recent Passport-size Photograph<br/>
+                            Active Mobile Number & Verified Email ID
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Address Proof (All Directors/Shareholders)</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Any one (Not older than 2 months): Bank Account Statement, Electricity Bill, Telephone Bill, or Gas Bill (Name must precisely match PAN)
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Business Address Proof</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            If Owned: Registered Sale Deed / Property Tax Receipt & Latest Utility Bill<br/>
+                            If Rented/Leased: Notarized Rent Agreement, Latest Utility Bill (Electricity/Water), and a signed No Objection Certificate (NOC) from the property owner
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isLLP ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Business Details</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Proposed LLP Names (1 or 2 unique names for verification)<br/>
+                            Detailed description of the business activities/services
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Identity Proof (All Partners)</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Self-attested PAN Card (Mandatory for Indian Citizens)<br/>
+                            Aadhaar Card, Recent Passport-size Photograph<br/>
+                            Active Mobile Number & Email ID
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Address Proof (All Partners)</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Any one (Not older than 2 months): Bank Statement, Electricity Bill, Telephone Bill, or Gas Bill (Name must match PAN perfectly)
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Business Address Proof</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            If Owned: Sale Deed & Latest Utility Bill (Electricity/Water)<br/>
+                            If Rented: Notarized Rent Agreement, Latest Utility Bill, and a No Objection Certificate (NOC) from the property owner
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isTrust ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Business/Trust Details</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Proposed Trust Name (Must be unique and not conflict with existing well-known institutions)<br/>
+                            Clearly defined objectives of the trust
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Identity Proof (Settlor & Trustees)</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Self-attested PAN Card (Mandatory)<br/>
+                            Aadhaar Card, Recent Passport-size Photograph<br/>
+                            Active Mobile Number & Email ID
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Address Proof (Settlor & Trustees)</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Voter ID, Valid Passport, or Driving License
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Trust Office Address Proof</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            If Owned: Sale Deed / Property Tax Receipt & Latest Utility Bill<br/>
+                            If Rented: Notarized Rent Agreement, Latest Utility Bill (Electricity/Water), and a signed No Objection Certificate (NOC) from the landlord
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Witnesses</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Identity proofs of two (2) independent witnesses who will sign the deed during registration
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isSubsidiary ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">From the Foreign Parent Company</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Certificate of Incorporation / Business Charter<br/>
+                            Memorandum & Articles of Association (MOA/AOA)<br/>
+                            Certified Board Resolution authorizing the India expansion and nominating an authorized representative
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">From Foreign Directors / Signatories</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Valid, high-resolution color copy of Passport (Identity Proof)<br/>
+                            Overseas Address Proof (Utility Bill or Bank Statement not older than 2 months)<br/>
+                            Passport-size photographs, Email ID, and active contact numbers
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">From Indian Resident Director</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Self-attested PAN Card (Mandatory)<br/>
+                            Aadhaar Card<br/>
+                            Bank Statement or Utility Bill reflecting the current residential address
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Indian Registered Office Proof</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            If Rented/Leased: Notarized Lease/Rent Agreement, Latest Utility Bill (Electricity/Water), and a signed No Objection Certificate (NOC) from the property owner
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isSection8 ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Business Details</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Proposed NGO Names (Must include words like Foundation, Forum, Association, Council, or Federation)<br/>
+                            A detailed 3-year projection of future social activities and estimated income/expenditure
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Identity Proof (All Directors & Members)</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Self-attested PAN Card (Mandatory for Indian Nationals)<br/>
+                            Aadhaar Card, Recent Passport-size Photograph<br/>
+                            Active Mobile Number & Verified Email ID
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Address Proof (All Directors & Members)</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Any one (Not older than 2 months): Bank Statement, Electricity Bill, Mobile Bill, or Gas Bill (Name must match PAN card exactly)
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Business Address Proof</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            If Owned: Sale Deed / Property Tax Receipt & Latest Utility Bill<br/>
+                            If Rented: Notarized Rent Agreement, Latest Utility Bill (Electricity/Water), and a signed No Objection Certificate (NOC) from the landlord
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isOPC ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Business Details</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Proposed OPC Names (1 or 2 unique name preferences ending with the suffix 'OPC Private Limited')<br/>
+                            Main business objectives / Industry category
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Identity Proof (Owner & Nominee)</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Self-attested PAN Card (Mandatory)<br/>
+                            Aadhaar Card, Recent Passport-size Photograph<br/>
+                            Active Mobile Number & Email ID
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Address Proof (Owner & Nominee)</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Any one (Not older than 2 months): Bank Statement, Electricity Bill, Mobile Bill, or Gas Bill (Name must match PAN card exactly)
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Business Address Proof</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            If Owned: Sale Deed / Property Tax Receipt & Latest Utility Bill<br/>
+                            If Rented: Notarized Rent Agreement, Latest Utility Bill (Electricity/Water), and a signed No Objection Certificate (NOC) from the landlord
                           </td>
                         </tr>
                       </tbody>
