@@ -2207,6 +2207,17 @@ function ServiceDetailPage({
   const isMcaMoa = service.id === "mca-alteration-moa";
   const isMcaDirectors = service.id === "mca-appointment-directors";
   const isMcaWinding = service.id === "mca-winding-up";
+  const isMcaRevival = service.id === "mca-revival";
+  const isMcaRegisters = service.id === "mca-maintenance-registers";
+  const isContractDrafting = service.id === "legal-contract-drafting";
+  const isLegalNotices = service.id === "legal-notices";
+  const isBondDrafting = service.id === "legal-bond-drafting";
+  const isEmploymentContract = service.id === "legal-employment-contract";
+  const isNda = service.id === "legal-nda";
+  const isMou = service.id === "legal-mou";
+  const isFranchise = service.id === "legal-franchise";
+  const isShareholder = service.id === "legal-shareholder";
+  const isDocumentReview = service.id === "legal-document-review";
   const isCopyright = service.id === "copyright";
   const isStartup = service.id === "startup-india";
   const isTrademark = service.id === "trademark-reg";
@@ -2338,6 +2349,28 @@ function ServiceDetailPage({
     ? "The Board of Directors forms the core leadership team responsible for steering your company's strategy, managing executive operations, and ensuring strict statutory compliance. If you are bringing on fresh industry experts to guide your scaling strategy, onboarding institutional investor representatives, or managing a director's resignation or removal, completing a formal Appointment or Removal of Directors via the Ministry of Corporate Affairs (MCA) portal is an absolute legal mandate."
     : isMcaWinding
     ? "If your registered company has accomplished its original commercial goals, faced irreversible business losses, has zero active operations, or the promoters prefer to close down the business structure, keeping it alive can create unnecessary annual compliance tracking costs and legal liabilities. Executing a formal Winding Up of a Company (specifically via the Fast Track Exit - STK-2 mechanism managed by the MCA) is the clean legal pathway."
+    : isMcaRevival
+    ? "Has the Registrar of Companies (RoC) struck off your company's name from the official register due to a failure to file annual statutory returns (AOC-4 and MGT-7) for two consecutive financial years? Having your company struck off can freeze your business bank accounts, disqualify your active directors from serving on other boards, and put a halt to your day-to-day operations. Undertaking a formal Revival of a Company by filing an appeal with the National Company Law Tribunal (NCLT) is the only legal avenue."
+    : isMcaRegisters
+    ? "Are you running an active registered company looking to maintain strong corporate governance standards and stay fully prepared for sudden statutory inspections? Organizing the Maintenance of Secretarial Registers is a strict statutory requirement under Section 88 of the Companies Act, 2013. These registers serve as your company's official master records, providing clear evidence of your internal management."
+    : isContractDrafting
+    ? "In modern commercial operations, a clear, legally binding contract is the single most important tool used to protect your business interests, secure high-value transactions, define partner roles, and prevent costly commercial litigation. Our Contract Drafting Service designs customized, robust contracts tailored to your exact operational goals."
+    : isLegalNotices
+    ? "When a commercial partner breaches a signed contract, a client defaults on payment milestones, or an intellectual property infringement occurs, taking immediate and formal action is essential. Issuing a professionally drafted Legal Notice or Demand Letter is your primary legal tool used to formally notify the defaulting party."
+    : isBondDrafting
+    ? "Whether you are protecting your company's investments in specialized employee training, securing financial commitments during commercial leases, or setting up performance guarantees for long-term vendor relationships, a formal Indemnity or Performance Bond is an essential tool used to manage corporate risk."
+    : isEmploymentContract
+    ? "Your workforce is the engine that drives your business growth, but an un-structured onboarding workflow can leave your company exposed to major intellectual property leaks, data theft, and expensive labor court disputes. Securing a professionally written Employment Contract is an essential step to protect your business."
+    : isNda
+    ? "Data has become a highly valuable corporate asset, and protecting your proprietary source codes, financial secrets, and product roadmaps is essential to maintaining your market edge. Securing a customized, legally binding Non-Disclosure Agreement (NDA) is your absolute primary defense line."
+    : isMou
+    ? "Before corporate entities commit to long-term commercial contracts or invest heavy capital into asset acquisitions, they often need to lay out primary business terms and mutual expectations. Drafting a formal Memorandum of Understanding (MOU) is the professional way to establish this initial blueprint."
+    : isFranchise
+    ? "Expanding your successful business model across new territories via franchising or monetizing your proprietary software and trademarks through licensing is an excellent scaling strategy. However, an unstructured expansion can expose your brand to severe quality dilutions and identity theft."
+    : isShareholder
+    ? "Inviting external angel investors into your company, closing institutional venture capital rounds, or partnering with another corporation to execute a joint venture are major business milestones. However, entering these without a professionally written agreement can leave founders exposed to deadlock and hostile takeovers."
+    : isDocumentReview
+    ? "Entering into agreements using a client’s custom contract, reviewing an international vendor’s standard service agreement, or reusing an old corporate template can expose your business to significant hidden risks. Our professional Legal Document Review and Modification service acts as your ultimate safety filter."
     : isDarpan
     ? "Are you operating a non-profit organization, managing a registered public charitable trust, running a welfare society, or executing a Section 8 social impact company? Securing a DARPAN Registration (often called an NGO Darpan ID) is your absolute mandatory requirement. Managed directly by the NITI Aayog, this links you to ministries."
     : `${service.title} is the official registration and licensing required to operate legally. ${service.desc}`;
@@ -2552,6 +2585,58 @@ function ServiceDetailPage({
     "Operational Inactivity: The company must have completely ceased all commercial business operations for a continuous period of at least one (1) or two (2) years before filing.",
     "Zero Asset & Liability Profile: The company's balance sheet must reflect absolute zero assets and zero outstanding financial liabilities or dues toward third parties.",
     "No Pending Litigation: The company must not have any active, unresolved lawsuits or pending investigations from tax or labor departments."
+  ] : isMcaRevival ? [
+    "Proved Active Status: You must present clear evidence proving the company was actively conducting business operations or owning real estate assets at the time it was struck off.",
+    "Locus Standi Base: The petition for revival must be filed by an eligible person, such as an active shareholder, a director, or a creditor of the struck-off entity.",
+    "Commitment to Compliance: The promoters must give a clear commitment to compile, sign, and file all historically overdue financial statements and returns immediately upon activation."
+  ] : isMcaRegisters ? [
+    "Register of Members (Form MGT-1): Tracks the complete list of shareholders, their exact equity allocations, dates of share acquisition, and distinct folio details.",
+    "Register of Directors & KMP: Records personal identification metrics, DIN numbers, joining dates, and exit timelines for all directors and key managers.",
+    "Register of Charges (Form CHG-7): Logs comprehensive details regarding any bank loans, corporate mortgages, or assets hypothecated against financial credit lines.",
+    "Register of MBP-1 Disclosures: Compiles annual conflict-of-interest declarations filed by directors regarding their shareholdings and positions in other external business entities."
+  ] : isContractDrafting ? [
+    "Scope of Deliverables: Clear definitions outlining the exact operational performance targets, service standards, and product metrics required from both parties.",
+    "Financial & Payment Milestones: Structured breakdowns detailing pricing models, invoicing frequencies, late payment interest terms, and tax allocation splits (such as GST responsibilities).",
+    "Limitation of Liability & Indemnity: Protective caps that limit your business's financial liability if a breach occurs, paired with strong indemnity clauses to shield your firm.",
+    "Dispute Resolution & Jurisdiction: Setting up multi-stage dispute resolution systems, prioritizing fast-track mediation/arbitration and defining clear geographic court jurisdictions."
+  ] : isLegalNotices ? [
+    "Payment Default & Debt Recovery: Formally demanding immediate settlement of unpaid invoices, past-due contractual milestones, or outstanding commercial balances.",
+    "Breach of Contract Performance: Notifying a service provider, vendor, or contractor of a failure to meet their agreed operational targets or service standards.",
+    "Trademark & Copyright Infringement: Issuing an immediate Cease and Desist Notice to block copycats from misusing your brand assets, logo layouts, or copyrighted materials.",
+    "Employer-Employee Disputes: Issued to address violations of active employment agreements, non-compete clauses, or a failure to return corporate property upon exit."
+  ] : isBondDrafting ? [
+    "Employee Training Bonds: Used to recover specialized training costs, travel expenses, and certifications if an employee exits before completing a specified minimum service period.",
+    "Performance Bonds: Guarantees issued by contractors or vendors ensuring they will execute a project according to your agreed design standards and timelines.",
+    "Indemnity Bonds: Unilateral legal commitments ensuring a party will compensate your business for any financial losses, tax pass-through liabilities, or legal damages arising from a specific transaction."
+  ] : isEmploymentContract ? [
+    "IP Assignment / Work-for-Hire: A critical protective clause ensuring that all source codes, product designs, customer databases, and innovations created belong 100% to your company.",
+    "Confidentiality & Data Protection: Strong non-disclosure restrictions that block employees from leaking or misusing your trade secrets, pricing models, or client lists.",
+    "Non-Compete & Non-Solicitation: Restrictive covenants that prevent exiting employees from joining direct competitors or poaching your active clients within reasonable geographic limits.",
+    "Termination & Notice Layout: Clear parameters outlining mandatory notice periods, garden leave choices, severance terms, and summary dismissal triggers for gross misconduct."
+  ] : isNda ? [
+    "Unilateral NDA (One-Way): Used when only one party is disclosing highly sensitive proprietary data (such as a company sharing source code with an external software developer).",
+    "Mutual NDA (Two-Way): Used during joint venture discussions, merger evaluations, or deep strategic partnerships where both organizations share confidential data.",
+    "Multilateral NDA: A specialized agreement used when three or more independent organizations are coordinating on a complex commercial project, keeping all shared data secure."
+  ] : isMou ? [
+    "Statement of Common Purpose: A clear summary detailing the primary goals, target milestones, and commercial scope of the partnership.",
+    "Roles & Contribution Splits: Clear definitions detailing the exact capital, technology, infrastructure, or human resources each party must bring to the table.",
+    "Exclusivity & Non-Disclosure: Legally binding clauses that prevent your partner from negotiating with direct competitors during the discussion window, keeping shared data secure.",
+    "Termination & Transition Layout: Clear rules mapping out how a party can safely exit the discussions if the arrangement faces terminal bottlenecks, including rules for sharing early project costs."
+  ] : isFranchise ? [
+    "IP Grant & Territory Limits: Explicitly defining the exact trademarks, proprietary technologies, or software systems being shared, paired with strict geographic boundary lines.",
+    "Quality Control & Operations Audit: Legally binding clauses granting your company the absolute power to perform unannounced site audits and monitor operational standards.",
+    "Royalty & Financial Fee Architecture: Clear breakdowns detailing initial upfront franchise fees, ongoing monthly royalty percentages, marketing fund contributions, and late penalties.",
+    "De-Branding & Termination Protocols: Strict rules mapping out how to immediately revoke brand permissions if a material breach occurs, forcing the partner to completely remove your signage within 48 hours."
+  ] : isShareholder ? [
+    "Board Composition & Veto Rights: Defining the exact process used to assign board seats, paired with clear lists of critical corporate actions that require absolute founder or majority consent.",
+    "Pre-Emption Rights & Anti-Dilution: Protective clauses giving existing shareholders the primary option to purchase fresh stock issuances, protecting your team from being unfairly diluted.",
+    "Tag-Along & Drag-Along Clauses: Tag-Along rights protect minority shareholders by allowing them to join in a majority stock sale, while Drag-Along clauses empower majority owners to compel minority partners to join in a total sale.",
+    "Deadlock Resolution Mechanisms: Clear, multi-stage resolution paths designed to break management logjams instantly and prevent operational shutdowns."
+  ] : isDocumentReview ? [
+    "Identifying Hidden Liabilities: We catch and remove vague indemnity clauses, uncapped liability traps, or unfair warranty waivers that expose your business to un-backed third-party damages.",
+    "Balancing Termination Terms: We eliminate one-sided termination triggers, ensuring your company enjoys fair exit options, reasonable notice periods, and full payment for services delivered.",
+    "Verifying Compliance Alignment: We ensure your contracts match all current Indian statutory codes, including the Information Technology Act, GST rules, labor regulations, and specific sector guidelines.",
+    "Optimizing Dispute Formulations: We rewrite weak dispute clauses into strong, multi-stage systems that prioritize cost-effective mediation and fast-track arbitration, while securing clear local jurisdictions."
   ] : isDarpan ? [
     "Non-Profit Legal Structure: The applicant body must be legally registered as a Public Charitable Trust, a registered Welfare Society, or a Section 8 Non-Profit Company.",
     "Detailed Board Blueprint: The entity must maintain an active, fully functional executive committee or board consisting of a minimum of three distinct non-profit members.",
@@ -3050,6 +3135,61 @@ function ServiceDetailPage({
     { step: "02", title: "Compiling Financial Statements & Affidavits", desc: "Our compliance experts work with practicing CAs to draft your final Statement of Accounts. Simultaneously, we prepare the required STK-3 Affidavits and STK-4 Indemnity Bonds on appropriate stamp papers." },
     { step: "03", title: "Filing Form STK-2 with the MCA", desc: "We bundle the financial statements, director indemnities, closure approvals, and board resolutions to file Form STK-2 on the MCA portal along with the flat government closure fees." },
     { step: "04", title: "Public Notice & Final Dissolution", desc: "The RoC reviews your application and publishes a public notice for 30 days to invite any potential objections from the public or tax departments. If no objections are raised, the RoC officially strikes off your company name." }
+  ] : isMcaRevival ? [
+    { step: "01", title: "Drafting and Serving the NCLT Petition", desc: "We draft a comprehensive legal petition (Form NCLT-1) outlining the business's active operations. Copies of the petition are formally served to the regional Registrar of Companies (RoC) and the Income Tax department for their review." },
+    { step: "02", title: "NCLT Hearings & Representation", desc: "Our experienced corporate advocates represent your business interests during the formal NCLT bench hearings, answering questions from the tribunal and presenting evidence of active operations." },
+    { step: "03", title: "Securing the NCLT Restoration Order", desc: "Upon review of the evidence, the NCLT bench issues a formal order directing the RoC to restore the company's status from \"Struck Off\" to \"Active,\" subject to processing fees and outstanding penalties." },
+    { step: "04", title: "Filing Form INC-28 & Overdue Returns", desc: "We file the physical NCLT Restoration Order with the RoC using Form INC-28 within 30 days to officially reactivate your company code. Once active, we upload all your pending annual financial returns to ensure full compliance." }
+  ] : isMcaRegisters ? [
+    { step: "01", title: "Corporate Structure Audit", desc: "We execute a detailed audit of your historical incorporation papers, filing receipts, and meeting minutes to ensure your current registers accurately match the official records on the MCA portal." },
+    { step: "02", title: "Digital Register Configuration", desc: "Our corporate secretarial team designs and configures your digital secretarial registers, organizing them into the mandated statutory formats (MGT-1, MGT-2, CHG-7, etc.)." },
+    { step: "03", title: "Real-Time Event Maintenance", desc: "Whenever your business undergoes a change—such as a director shift, equity issuance, or securing a bank loan—we update the corresponding registers within the state-mandated timelines (typically within 7 days)." },
+    { step: "04", title: "Annual Certification & Audit Support", desc: "At the close of the financial year, we audit your complete register stack, extract clean verification files, and prepare your compliance folders to easily pass your annual statutory audits." }
+  ] : isContractDrafting ? [
+    { step: "01", title: "Initial Strategic Consultation", desc: "We meet with your leadership team to understand your business goals, identify industry-specific operational risks, and lay out the core architecture of the agreement." },
+    { step: "02", title: "First Draft Formulation", desc: "Our corporate lawyers draft the contract from scratch, carefully structuring all commercial definitions, operational milestones, and protective indemnity clauses." },
+    { step: "03", title: "Collaborative Review & Revision", desc: "We present the initial draft to your team, walk you through the protective clauses, and execute necessary revisions to match your feedback." },
+    { step: "04", title: "Final Delivery & Execution Support", desc: "We deliver the finalized, print-ready contract complete with clear signing templates and signature guidelines. We also advise on appropriate stamp duties." }
+  ] : isLegalNotices ? [
+    { step: "01", title: "Case Review & Strategy Mapping", desc: "We review your signed agreements, invoice logs, and communication histories to evaluate the strength of your claim and map out a notification strategy." },
+    { step: "02", title: "Drafting the Legal Notice", desc: "Our experienced dispute resolution lawyers draft a precise, highly impactful legal notice, detailing the facts of the breach and referencing contractual terms." },
+    { step: "03", title: "Formal Dispatch", desc: "We print the notice on our formal legal letterhead and dispatch it via Registered Post with Acknowledgement Due (AD) and secure electronic email channels." },
+    { step: "04", title: "Tracking & Negotiation Support", desc: "We monitor the delivery status and manage the mandatory response window. If the defaulting party reaches out to settle, we guide you through the negotiations." }
+  ] : isBondDrafting ? [
+    { step: "01", title: "Risk Assessment & Slab Structuring", desc: "We meet with your HR or project operations teams to assess your investments, identify potential breach risks, and determine a reasonable, legally enforceable penalty value." },
+    { step: "02", title: "Drafting the Legal Framework", desc: "Our corporate lawyers draft the bond document from scratch, incorporating strong, absolute indemnity structures and clear definitions of what constitutes a default." },
+    { step: "03", title: "Guarantor Integration Setup", desc: "If your risk strategy requires an external guarantor, we incorporate strong joint-and-several liability clauses that allow direct recovery from the guarantor." },
+    { step: "04", title: "Execution & Stamp Duty Advice", desc: "We deliver the print-ready bond file accompanied by explicit guidelines regarding appropriate state-specific non-judicial stamp papers and notarization requirements." }
+  ] : isEmploymentContract ? [
+    { step: "01", title: "Onboarding Risk Consultation", desc: "We review your company's HR workflows and operational structure to identify your key data protection priorities and compliance needs." },
+    { step: "02", title: "Formulating the Employment Framework", desc: "Our labor lawyers draft the agreement from scratch, balancing clear operational instructions with strong data protection and IP ownership clauses." },
+    { step: "03", title: "Tiered Template Customization", desc: "We revise the drafts to align with different levels of management, delivering distinct, optimized agreements for entry-level staff, core developers, and C-suite executives." },
+    { step: "04", title: "Delivery & Onboarding Integration", desc: "We deliver your finalized, print-ready employment templates accompanied by clear signing guidelines, helping you integrate these legal protections seamlessly." }
+  ] : isNda ? [
+    { step: "01", title: "Data Risk Assessment", desc: "We analyze your data sharing workflows to identify your most vulnerable proprietary assets and understand the exact context of your business discussions." },
+    { step: "02", title: "Drafting the NDA Framework", desc: "Our corporate lawyers build the agreement from scratch, incorporating broad yet precise definitions of what constitutes confidential information and setting out handling protocols." },
+    { step: "03", title: "Incorporating Enforcement Clauses", desc: "We embed strong, absolute injunctive relief clauses, data return requirements, and clear financial penalty frameworks to ensure immediate damages if a leak occurs." },
+    { step: "04", title: "Final Delivery", desc: "We deliver the finalized, print-ready NDA file complete with clear signing templates and signature guidelines. We also advise on appropriate state stamp duties." }
+  ] : isMou ? [
+    { step: "01", title: "Deal Structuring Consultation", desc: "We meet with your business development team to review the commercial deal, identify potential operational bottlenecks, and outline core goals." },
+    { step: "02", title: "Formulating the MOU Draft", desc: "Our corporate lawyers draft the agreement from scratch, carefully separating non-binding statements of intent from legally binding exclusivity and non-disclosure clauses." },
+    { step: "03", title: "Collaborative Review & Revision", desc: "We present the initial draft to your team, walk you through the protective clauses, and execute necessary revisions to match your feedback and negotiation strategy." },
+    { step: "04", title: "Final Delivery", desc: "We deliver the finalized, print-ready MOU file complete with clear signing templates and signature guidelines, helping you move forward with complete confidence." }
+  ] : isFranchise ? [
+    { step: "01", title: "Expansion Model Consultation", desc: "We analyze your business model, operational risks, and expansion goals to determine the safest legal structure for your franchise or licensing network." },
+    { step: "02", title: "Formulating the Agreement Framework", desc: "Our corporate lawyers draft the agreement from scratch, balancing clear operational guidelines with strong intellectual property and brand protection clauses." },
+    { step: "03", title: "Customizing Commercial Clauses", desc: "We adjust the agreement to match your unique financial model, incorporating custom territory limits, marketing contribution rules, and dispute resolution systems." },
+    { step: "04", title: "Delivery & Network Onboarding Integration", desc: "We deliver your finalized, print-ready agreement templates complete with clear signature guidelines, helping you scale your business network safely." }
+  ] : isShareholder ? [
+    { step: "01", title: "Term Sheet Audit & Risk Review", desc: "We perform a thorough audit of your term sheet or commercial joint venture brief to identify potential operational risks and layout a clear structural strategy." },
+    { step: "02", title: "Formulating the Contract Blueprint", desc: "Our corporate lawyers draft the agreement from scratch, translating complex financial terms into clear, enforceable clauses covering board control and voting weights." },
+    { step: "03", title: "Collaborative Review & Revision", desc: "We present the initial draft to your leadership team, walk you through the protective clauses, and execute necessary revisions to match your feedback." },
+    { step: "04", title: "Final Delivery & Execution Support", desc: "We deliver the finalized, print-ready agreement complete with clear signature templates. We also handle subsequent updates to your company's internal Articles of Association (AOA)." }
+  ] : isDocumentReview ? [
+    { step: "01", title: "Initial Risk Briefing", desc: "We meet with your business operations team to review the background of the transaction and identify your key commercial goals and non-negotiable terms." },
+    { step: "02", title: "Comprehensive Redline Audit", desc: "Our corporate lawyers perform a thorough line-by-line review of the document, inserting detailed comments to explain hidden risks and highlighting clauses requiring modification." },
+    { step: "03", title: "Active Clause Modification", desc: "We directly rewrite problematic text, inserting strong liability caps, clean payment terms, and balanced termination rules to shift the contract into a fair, secure legal balance." },
+    { step: "04", title: "Final Delivery & Consultation", desc: "We deliver a fully redlined version showing all tracked changes alongside a clean, execution-ready copy. We review updates with your team to ensure you are fully prepared." }
   ] : isDarpan ? [
     { step: "01", title: "NITI Aayog Portal Configuration", desc: "We access the centralized NGO Darpan portal, building a fresh organizational identity profile directly linked to your business PAN card." },
     { step: "02", title: "Executive Mapping Sequence", desc: "Our compliance experts accurately input the individual identity profiles, Aadhaar numbers, and dynamic contact credentials of all active board members to ensure complete transparency." },
@@ -3246,6 +3386,28 @@ function ServiceDetailPage({
                     ? "An appointment requires checking eligibility criteria, securing a unique Director Identification Number (DIN), and ensuring your onboarding director completes their annual DIR-3 KYC verifications. Conversely, removing a director requires strict adherence to corporate governance rules under Section 169 of the Companies Act, 2013, including providing a reasonable opportunity for the director to be heard before shareholders pass an ordinary resolution."
                     : isMcaWinding
                     ? "The STK-2 Fast Track Exit process is ideal for defunct private limited companies looking for a low-cost, hassle-free closure mechanism. It requires closing all active business bank accounts, completely settling all outstanding corporate liabilities, securing clear affidavits from directors, and compiling a clean Statement of Accounts reflecting zero assets and zero liabilities."
+                    : isMcaRevival
+                    ? "Under Section 252 of the Companies Act, 2013, an appeal for revival can be filed before the NCLT within a statutory limit of 20 years from the publication date of the striking-off notice. The revival process requires drafting detailed legal petitions, presenting your case at formal NCLT hearings, paying structural government costs or penalties, and filing all your historically pending annual financial returns with the RoC."
+                    : isMcaRegisters
+                    ? "Maintaining accurate secretarial records is no longer an afterthought or a manual task handled on loose sheets of paper. Our corporate secretarial team establishes and maintains a secure, centralized digital register system for your company, ensuring every share transfer, director appointment, board meeting, and financial interest disclosure is tracked in precise compliance with Indian corporate law."
+                    : isContractDrafting
+                    ? "Moving away from generic templates that leave your business exposed to legal gaps, our corporate lawyers structure every contract from scratch. We ensure complete clarity regarding asset allocations, payment milestones, intellectual property rights, indemnification limits, termination triggers, and modern dispute resolution pathways."
+                    : isLegalNotices
+                    ? "A legal notice serves as an official warning printed on a registered advocate's letterhead. It establishes a formal legal record of the dispute, prevents the other party from claiming ignorance in future court proceedings, and encourage fast out-of-court settlements to avoid heavy reputational damage."
+                    : isBondDrafting
+                    ? "A bond operates as an unconditional commitment where one party (the Obligor) promises to pay a specified financial penalty to your business if they fail to fulfill an agreed operational milestone. Our corporate lawyers carefully structure these documents to ensure they meet all conditions for enforceability."
+                    : isEmploymentContract
+                    ? "Our employment drafting service designs customized onboarding agreements for every level of your organization—ranging from standard executive offer letters to complex C-suite employment agreements. We ensure complete protection for your business by incorporating clear, robust clauses."
+                    : isNda
+                    ? "Generic, internet-sourced templates often fail to provide real protection because they lack precise definitions of what information is confidential. Our corporate lawyers draft customized NDAs from scratch, ensuring your business is fully protected with clear definitions of data boundaries."
+                    : isMou
+                    ? "While an MOU can be structured as a flexible, non-binding expression of mutual intent, specific sections—such as confidentiality protections, exclusivity terms, cost-sharing allocations, and court jurisdictions—must be explicitly written as legally binding clauses to shield your business from early-stage risks."
+                    : isFranchise
+                    ? "Our legal secretarial team designs customized agreements that protect your intellectual property assets while setting out clear, enforceable operational rules for your franchisees or licensees. We ensure complete protection for your brand by incorporating strict, legally binding guardrails."
+                    : isShareholder
+                    ? "Our corporate legal team drafts customized, robust agreements from scratch to protect your business interests. We ensure complete clarity and security for founders and corporations by incorporating clear clauses covering board seats, specialized voting controls, and structured exit pathways."
+                    : isDocumentReview
+                    ? "Our corporate lawyers systematically review your documents to identify legal traps, eliminate vague language, and rewrite clauses to align with your business goals. We ensure your agreements are legally sound, match current statutory codes, and provide a fair balance of rights and protections for your business."
                     : isDarpan
                     ? "The DARPAN platform enhances the transparency, credibility, and institutional accountability of NGOs across India. Possessing a valid Darpan ID is an essential prerequisite for any non-profit aiming to participate in high-value central government funding projects."
                     : isGst
@@ -3549,7 +3711,7 @@ function ServiceDetailPage({
                   {/* Who needs it / Eligibility Criteria */}
                   <div className="bg-white dark:bg-[#0c1a30] rounded-2xl p-8 border border-gray-100 dark:border-zinc-800 shadow-sm">
                 <h2 className="text-xl font-bold text-gray-905 dark:text-white mb-4">
-                  {(isItr || isTds || isGstFiling) ? "Form Classifications" : (isAssessment || isRevisedItr || isGstNew || isGstAnnual || isGstCancel) ? "Assessment Framework" : (isNotice || isGstNotice) ? "Key Classifications" : (isShopAct || isTradeLicense || isClra || isBocw || isFssai || isDsc || isIec || isDrug || isIcegate || isIso || isPf || isPsara || isEsic || isPt || isLwf || isPosh || isRegisters || isAdvisor || isNotice || isTds || isRevisedItr || isGstNew || isGstFiling || isGstAnnual || isGstCancel || isGstNotice || isMcaCompliance || isMcaName || isMcaAddress || isMcaShares || isMcaMoa || isMcaDirectors || isMcaWinding || isCopyright || isStartup || isTrademark || isUdyam || isDarpan) ? "Eligibility Criteria" : `Who Needs ${service.title}?`}
+                  {(isItr || isTds || isGstFiling) ? "Form Classifications" : (isAssessment || isRevisedItr || isGstNew || isGstAnnual || isGstCancel) ? "Assessment Framework" : (isNotice || isGstNotice) ? "Key Classifications" : (isContractDrafting || isEmploymentContract || isFranchise || isShareholder) ? "Strategic Protective Clauses" : isDocumentReview ? "Core Target Framework" : (isLegalNotices || isBondDrafting || isNda || isMou) ? "Operational Structure & Types" : (isShopAct || isTradeLicense || isClra || isBocw || isFssai || isDsc || isIec || isDrug || isIcegate || isIso || isPf || isPsara || isEsic || isPt || isLwf || isPosh || isRegisters || isAdvisor || isNotice || isTds || isRevisedItr || isGstNew || isGstFiling || isGstAnnual || isGstCancel || isGstNotice || isMcaCompliance || isMcaName || isMcaAddress || isMcaShares || isMcaMoa || isMcaDirectors || isMcaWinding || isMcaRevival || isMcaRegisters || isCopyright || isStartup || isTrademark || isUdyam || isDarpan) ? "Eligibility Criteria" : `Who Needs ${service.title}?`}
                 </h2>
                 <div className="space-y-3">
                   {whoNeeds.map((item) => (
@@ -5247,6 +5409,418 @@ function ServiceDetailPage({
                       </tbody>
                     </table>
                   </div>
+                ) : isMcaRevival ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Evidence of Active Operations</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Up-to-date bank account statements (reflecting active transaction histories prior to freezing)</li>
+                              <li>Copies of sales invoices, commercial contracts, purchase orders, or active GST returns</li>
+                              <li>Property lease deeds or utility bills proving the active maintenance of the registered office</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">NCLT Petition Stack</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Comprehensive Revival Petition (Form NCLT-1) with detailed explanatory statements</li>
+                              <li>Certified copies of the official RoC strike-off notice (Form STK-7)</li>
+                              <li>Up-to-date compiled copies of all pending financial returns (AOC-4 & MGT-7)</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Identity Verification</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Self-attested PAN and Aadhaar copies of the petitioning shareholder or director</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isMcaRegisters ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Equity & Share Data</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Allocation ledgers, share application forms, and complete histories of share transfers</li>
+                              <li>Up-to-date share capitalization tables matching your authorized and paid-up limits</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Meeting & Leadership Records</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Signed minutes of all past Board of Directors meetings, AGM proceedings, and EGMs</li>
+                              <li>Signed copies of director consent letters (DIR-2) and interest disclosures (MBP-1)</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Loan & Charge Instruments</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Sanction letters from commercial banks and verified Form CHG-1/CHG-4 filing sheets</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isContractDrafting ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Party Onboarding Profiles</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Complete legal names, registered office addresses, and corporate identifiers (CIN/PAN) of all entering parties</li>
+                              <li>Valid identification copies of the authorized individuals signing the agreement</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Commercial Intent Summary</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Detailed summary of the business arrangement, project milestones, and delivery timelines</li>
+                              <li>Complete financial details, fee structures, profit-sharing models, or royalty calculations</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Special Protective Targets</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Specific details regarding non-disclosure restrictions, intellectual property ownership transfers, or non-compete geographic bounds</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isLegalNotices ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Defaulter Profile</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Complete legal name, active physical residential or corporate office address, and contact details of the defaulting party</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Evidence Foundation</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Copies of original signed agreements, purchase orders, or work orders establishing the relationship</li>
+                              <li>Outstanding unpaid invoices, statement ledgers, email strings, or chat receipts proving default</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Claim Matrix</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Exact financial amount to be recovered, applicable interest calculations, or specific actions required from the defaulting party</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isBondDrafting ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Obligor & Surety Profiles</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Complete legal names, identity proofs, and residential or business addresses of the person signing the bond</li>
+                              <li>Co-signatory or Guarantor profiles (if an external surety is backing the bond)</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Investment Details</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Detailed description of the specific training program, corporate project, or asset being secured</li>
+                              <li>Itemized breakdown proving the actual costs or expenses incurred by your business</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Penalty Matrix</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Exact financial penalty amount (Liquidated Damages) to be paid if a breach occurs, along with the specified tenure limits</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isEmploymentContract ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Company & Employee Basics</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Registered corporate name, brand identifiers, and corporate office address details</li>
+                              <li>Full legal name, permanent address, and academic/professional background data of the employee</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Operational & Compensation Profiles</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Specific job designation, core duties, reporting hierarchy, and office location mapping</li>
+                              <li>Comprehensive cost-to-company (CTC) salary breakdown, bonus metrics, and provident fund allocations</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Special Restrictions</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Predefined lengths for probation periods, required notice periods, and specific non-compete restrictions</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isNda ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Entering Parties Info</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Complete legal names, corporate office addresses, and entity types of all signing parties</li>
+                              <li>Names and titles of the authorized executives signing the agreement</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Data Scope Definitions</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Detailed summary of the specific project, commercial transaction, or technology discussion taking place</li>
+                              <li>Exhaustive list of what information must be protected (Source codes, client lists, financial records)</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Protection Tenure Limits</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Predefined length of the protection period (e.g., 3 years, 5 years, or permanent lifetime limits for core trade secrets)</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isMou ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Partner Identity Profiles</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Complete legal corporate names, registered business addresses, and corporate identifiers (CIN/PAN) of all entering organizations</li>
+                              <li>Names and titles of the authorized executives signing the agreement</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Operational Blueprint</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Detailed summary of the proposed project, joint service model, or asset development venture</li>
+                              <li>Expected contribution timelines, budget guidelines, and management responsibility splits</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isFranchise ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Brand Owner & Partner Basics</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Registered corporate names, brand identifiers, and corporate office address details of both parties</li>
+                              <li>Valid identification copies of the authorized individuals signing the agreement</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Operational & Financial Profiles</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Detailed list of trademarks, software patents, or operations manuals being licensed</li>
+                              <li>Comprehensive financial details, upfront fee structures, ongoing royalty percentages, and payment schedules</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Territory & Performance Metrics</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Predefined geographic boundaries, exclusivity rights, and minimum performance targets</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isShareholder ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Corporate Identity Info</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Copy of the current Certificate of Incorporation (COI), PAN Card, and active MOA & AOA</li>
+                              <li>Up-to-date share capitalization table highlighting authorized capital, paid-up limits, and current investor splits</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Deal & Investment Terms</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Complete Term Sheet summarizing the total investment value, share pricing models, and equity class definitions</li>
+                              <li>Detailed summary of the proposed joint venture's management structure, operational roles, and profit-sharing models</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isDocumentReview ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Target Document Stack</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Editable digital copy (MS Word format preferred) of the target contract, lease deed, or vendor agreement to be audited</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Commercial Context Brief</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Brief summary explaining your position in the deal (e.g., Supplier vs. Buyer), key commercial goals, and critical deal-breaker terms</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Historical Precedents</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Copies of any past addendums, initial term sheets, or corporate guidelines that must be incorporated into the final contract</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 ) : isDarpan ? (
                   <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-855">
                     <table className="w-full text-sm text-left border-collapse">
@@ -5304,7 +5878,7 @@ function ServiceDetailPage({
               {/* Process */}
               <div className="bg-white dark:bg-[#0c1a30] rounded-2xl p-8 border border-gray-100 dark:border-zinc-800 shadow-sm">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
-                  {(isWebDev || isBilling) ? "The Technical Engineering Process" : (isLogoDesign || isMarketing) ? "The Creative Production Process" : (isPf || isEsic || isPt || isLwf || isPosh || isRegisters || isAdvisor) ? "The Compliance & Filing Process" : (isItr || isTds || isRevisedItr || isGstFiling || isGstAnnual) ? "The Operational Filing Process" : (isAssessment || isNotice || isGstCancel || isGstNotice) ? "The Compliance & Resolution Process" : isGstNew ? "The Filing & Onboarding Process" : (isMcaName || isMcaAddress || isMcaShares || isMcaMoa || isMcaDirectors) ? "The Amendment & Filing Process" : (isMcaCompliance || isMcaWinding) ? "The Corporate Process" : "Our Registration Process"}
+                  {(isWebDev || isBilling) ? "The Technical Engineering Process" : (isLogoDesign || isMarketing) ? "The Creative Production Process" : (isPf || isEsic || isPt || isLwf || isPosh || isRegisters || isAdvisor) ? "The Compliance & Filing Process" : (isItr || isTds || isRevisedItr || isGstFiling || isGstAnnual) ? "The Operational Filing Process" : (isAssessment || isNotice || isGstCancel || isGstNotice) ? "The Compliance & Resolution Process" : isGstNew ? "The Filing & Onboarding Process" : isDocumentReview ? "The Review & Redlining Process" : isLegalNotices ? "The Legal Dispatch & Resolution Process" : (isContractDrafting || isBondDrafting || isEmploymentContract || isNda || isMou || isFranchise || isShareholder) ? "The Legal Formulation & Advisory Process" : (isMcaName || isMcaAddress || isMcaShares || isMcaMoa || isMcaDirectors) ? "The Amendment & Filing Process" : (isMcaCompliance || isMcaWinding || isMcaRevival || isMcaRegisters) ? "The Corporate Process" : "Our Registration Process"}
                 </h2>
                 <div className="space-y-4">
                   {process.map(({ step, title, desc }) => (
