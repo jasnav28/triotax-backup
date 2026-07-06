@@ -1947,13 +1947,16 @@ function AboutPage({ setActivePage }: { setActivePage: (p: Page) => void }) {
                 Built on Trust, Driven by Excellence
               </h2>
               <p className="text-gray-500 leading-relaxed mb-5">
-                TRIOTAX Compliance was founded by Arvind Kapoor, a seasoned Chartered Accountant with a vision to make business compliance accessible, affordable, and stress-free for every Indian entrepreneur.
+                TRIOTAX Compliance was founded by Mr. Prem and Mr. Dhananjay K. R., two young entrepreneurs with a shared vision of simplifying business compliance and branding for Indian businesses. Their goal was to create a one-stop solution where entrepreneurs could access reliable, affordable, and hassle-free business registration, compliance, taxation, and branding services under one roof.
               </p>
               <p className="text-gray-500 leading-relaxed mb-5">
-                What began as a small GST advisory firm in Mumbai quickly expanded across states, driven by word-of-mouth and an unwavering commitment to client satisfaction. Today, our team of 80+ professionals handles everything from startup registrations to enterprise-level compliance.
+                What started as a small consultancy in Bengaluru, primarily offering GST advisory services through client referrals and a strong commitment to quality, has evolved into a trusted business consultancy serving startups, SMEs, and growing enterprises across India.
+              </p>
+              <p className="text-gray-500 leading-relaxed mb-5">
+                Today, TRIOTAX provides comprehensive solutions, including business registrations, statutory licenses, taxation, accounting, regulatory compliance, intellectual property services, and digital branding, enabling entrepreneurs to focus on growing their businesses while we take care of the legal and compliance requirements.
               </p>
               <p className="text-gray-500 leading-relaxed mb-8">
-                We believe every business deserves expert compliance support — not just the large corporates. That philosophy shapes every service we offer and every client relationship we build.
+                At TRIOTAX, we believe that every business—whether a startup, small business, or established enterprise—deserves access to expert guidance and professional compliance support. This belief drives our commitment to delivering transparent, timely, and customer-centric services that build long-term relationships based on trust and excellence.
               </p>
               <button
                 onClick={() => navigate("contact")}
