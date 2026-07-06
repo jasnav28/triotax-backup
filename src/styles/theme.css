@@ -270,3 +270,21 @@
   animation: flow-right 4s linear infinite;
 }
 
+/* Vertical Marquee (Bottom to Top) */
+@keyframes marquee-up {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(calc(-50% - 0.75rem));
+  }
+}
+
+.animate-marquee-up {
+  animation: marquee-up 20s linear infinite;
+}
+
+.animate-marquee-up:hover {
+  animation-play-state: paused;
+}
+

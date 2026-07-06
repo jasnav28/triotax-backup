@@ -203,7 +203,6 @@ const SERVICES = SERVICE_CATEGORIES.flatMap((category) => {
 
 
 const WHY_US = [
-  { icon: GraduationCap, title: "Experienced Professionals", desc: "CAs, CSs, and legal experts with 12+ years of hands-on industry experience." },
   { icon: Zap, title: "Fast Processing", desc: "We prioritize speed without compromising accuracy — most registrations done in record time." },
   { icon: IndianRupee, title: "Affordable Pricing", desc: "Transparent, competitive pricing with no hidden charges. Premium services at fair rates." },
   { icon: Headphones, title: "Dedicated Support", desc: "A dedicated relationship manager for every client, available Mon–Sat, 9 AM to 7 PM." },
@@ -990,7 +989,7 @@ function Footer({ setActivePage, setSelectedServiceId }: { setActivePage: (p: Pa
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-gray-500 text-sm">
-            © 2024 TRIOTAX Compliance Advisory Pvt Ltd. All rights reserved.
+            © 2024 TRIOTAX ADVISORS PRIVATE LIMITED. All rights reserved.
           </p>
           <div className="flex gap-6">
             {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((link) => (
@@ -1376,7 +1375,7 @@ function HomePage({ setActivePage, setSelectedServiceId }: { setActivePage: (p: 
                 We combine deep regulatory expertise with technology-driven processes to deliver compliance services that are fast, accurate, and completely hassle-free.
               </p>
               <div className="space-y-4 mb-8">
-                {["ISO 9001:2015 Certified Firm", "MCA Authorized Partner", "GSTN Approved Service Provider", "Registered with ICAI & ICSI"].map((badge) => (
+                {["ISO 9001:2015 Certified Firm"].map((badge) => (
                   <div key={badge} className="flex items-center gap-3">
                     <CheckCircle2 className="w-5 h-5 flex-shrink-0" style={{ color: "#0F4C81" }} />
                     <span className="text-sm font-medium text-gray-700">{badge}</span>
@@ -1391,20 +1390,37 @@ function HomePage({ setActivePage, setSelectedServiceId }: { setActivePage: (p: 
                 Learn About Us <ArrowRight className="w-4 h-4" />
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-5">
-              {WHY_US.map(({ icon: Icon, title, desc }) => (
-                <div
-                  key={title}
-                  className="bg-white rounded-2xl p-5 border border-gray-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-                  style={{ boxShadow: "0 2px 12px rgba(15,76,129,0.06)" }}
-                >
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ backgroundColor: "#EEF4FB" }}>
-                    <Icon className="w-5 h-5" style={{ color: "#0F4C81" }} />
+            <div className="relative overflow-hidden" style={{ height: "400px" }}>
+              <div className="flex flex-col gap-3 animate-marquee-up">
+                {/* First set of items */}
+                {WHY_US.map(({ icon: Icon, title, desc }) => (
+                  <div
+                    key={`${title}-1`}
+                    className="bg-white rounded-lg p-5 border border-gray-100 hover:shadow-lg transition-all duration-300"
+                    style={{ boxShadow: "0 2px 12px rgba(15,76,129,0.06)" }}
+                  >
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4" style={{ backgroundColor: "#EEF4FB" }}>
+                      <Icon className="w-5 h-5" style={{ color: "#0F4C81" }} />
+                    </div>
+                    <h3 className="font-bold text-sm text-gray-900 mb-2">{title}</h3>
+                    <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
                   </div>
-                  <h3 className="font-bold text-sm text-gray-900 mb-2">{title}</h3>
-                  <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
-                </div>
-              ))}
+                ))}
+                {/* Duplicate set for continuous loop */}
+                {WHY_US.map(({ icon: Icon, title, desc }) => (
+                  <div
+                    key={`${title}-2`}
+                    className="bg-white rounded-lg p-5 border border-gray-100 hover:shadow-lg transition-all duration-300"
+                    style={{ boxShadow: "0 2px 12px rgba(15,76,129,0.06)" }}
+                  >
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4" style={{ backgroundColor: "#EEF4FB" }}>
+                      <Icon className="w-5 h-5" style={{ color: "#0F4C81" }} />
+                    </div>
+                    <h3 className="font-bold text-sm text-gray-900 mb-2">{title}</h3>
+                    <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -1537,41 +1553,7 @@ function HomePage({ setActivePage, setSelectedServiceId }: { setActivePage: (p: 
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section className="py-20" style={{ backgroundColor: "#F5F8FC" }}>
-        <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
-          <div className="text-center mb-14">
-            <SectionBadge>Client Stories</SectionBadge>
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
-              What Our Clients Say
-            </h2>
-            <p className="text-gray-500">Trusted by thousands of businesses across India.</p>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {TESTIMONIALS.map(({ name, role, image, rating, text }) => (
-              <div
-                key={name}
-                className="bg-white rounded-2xl p-8 border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                style={{ boxShadow: "0 2px 12px rgba(15,76,129,0.06)" }}
-              >
-                <div className="flex items-center gap-1 mb-5">
-                  {Array.from({ length: rating }).map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <blockquote className="text-gray-600 text-sm leading-relaxed mb-7 italic">
-                  &ldquo;{text}&rdquo;
-                </blockquote>
-                <div className="flex items-center gap-3">
-                  <div>
-                    <div className="font-bold text-sm text-gray-900 dark:text-white">{name}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+
 
       {/* BLOG PREVIEW */}
       <section className="py-20 bg-white dark:bg-[#060e1d] overflow-hidden">
@@ -2185,6 +2167,10 @@ function ServiceDetailPage({
   const Icon = service.icon;
 
   const isGst = service.id === "gst-registration" || service.title.toLowerCase().includes("gst");
+  const isWebDev = service.id === "web-dev";
+  const isLogoDesign = service.id === "logo-design";
+  const isBilling = service.id === "billing-software";
+  const isMarketing = service.id === "marketing-posters";
   const isCompany = service.title.toLowerCase().includes("company") || service.title.toLowerCase().includes("registration") || service.title.toLowerCase().includes("setup") || service.title.toLowerCase().includes("incorporation");
   const isShopAct = service.id === "shop-establishment";
   const isTradeLicense = service.id === "trade-license";
@@ -2196,17 +2182,85 @@ function ServiceDetailPage({
   const isDrug = service.id === "drug-license";
   const isIcegate = service.id === "icegate";
   const isIso = service.id === "iso-cert";
-  const isPf = service.id === "pf-reg";
+  const isPf = service.id === "pf-reg" || service.id === "pf-filings";
   const isPsara = service.id === "psara";
-  const isEsic = service.id === "esic-reg";
+  const isEsic = service.id === "esic-reg" || service.id === "esi-filings";
+  const isPt = service.id === "pt-registration";
+  const isLwf = service.id === "lwf-filings";
+  const isPosh = service.id === "posh";
+  const isRegisters = service.id === "statutory-registers";
+  const isAdvisor = service.id === "labour-advisor";
+  const isItr = service.id === "itr-filing";
+  const isAssessment = service.id === "tax-assessment";
+  const isNotice = service.id === "tax-notice";
+  const isTds = service.id === "tds-tcs";
+  const isRevisedItr = service.id === "revised-itr";
+  const isGstNew = service.id === "gst-new";
+  const isGstFiling = service.id === "gst-filing";
+  const isGstAnnual = service.id === "gst-annual";
+  const isGstCancel = service.id === "gst-cancel";
+  const isGstNotice = service.id === "gst-notice";
+  const isMcaCompliance = service.id === "mca-compliance";
+  const isMcaName = service.id === "mca-change-name";
+  const isMcaAddress = service.id === "mca-change-address";
+  const isMcaShares = service.id === "mca-transfer-shares";
+  const isMcaMoa = service.id === "mca-alteration-moa";
+  const isMcaDirectors = service.id === "mca-appointment-directors";
+  const isMcaWinding = service.id === "mca-winding-up";
   const isCopyright = service.id === "copyright";
   const isStartup = service.id === "startup-india";
   const isTrademark = service.id === "trademark-reg";
   const isUdyam = service.id === "udyam-msme";
   const isDarpan = service.id === "darpan-reg";
+  const isProprietorship = service.id === "proprietorship";
+  const isPartnership = service.id === "partnership";
+  const isPvtLtd = service.id === "pvt-ltd";
+  const isLLP = service.id === "llp";
+  const isPublicLtd = service.id === "public-ltd";
+  const isOPC = service.id === "opc";
+  const isSubsidiary = service.id === "subsidiary";
+  const isSection8 = service.id === "section-8";
+  const isTrust = service.id === "trust-reg";
 
-  const whatIsTitle = `What is ${service.title}?`;
-  const whatIsDesc = isShopAct 
+  const whatIsTitle = isGst 
+    ? "What is GST Registration?" 
+    : isWebDev
+    ? "Website Design & Development"
+    : isLogoDesign
+    ? "Logo & Brand Design"
+    : isBilling
+    ? "Billing & Enterprise Software"
+    : isMarketing
+    ? "Marketing Posters & Videos"
+    : `What is ${service.title}?`;
+
+  const whatIsDesc = isProprietorship
+    ? "Dreaming of launching your own business with absolute control, minimal compliance, and low startup costs? A Sole Proprietorship Registration is the perfect launchpad for freelancers, local retailers, consultants, and small business owners looking to establish their market identity quickly. Under this framework, there is no legal distinction between the owner (proprietor) and the business entity. The business operates under the personal legal identity of the owner, meaning all profits belong entirely to you — and similarly, all financial liabilities are yours to fulfill. In India, it is not governed by a singular dedicated act; rather, its legal recognition is established through various tax and government registrations like GST, Udyam (MSME), and state-specific licenses."
+    : isWebDev
+    ? "In the modern digital marketplace, your website serves as your company's virtual corporate headquarters, the anchor of your brand identity, and your primary customer acquisition engine. Our professional Website Design & Development service moves beyond basic web templates to build high-performance, responsive, and secure digital platforms.\n\nWe blend clean user experience (UX) architecture with scalable engineering to maximize conversions, ensure lightning-fast page speeds, and turn casual web traffic into long-term enterprise value."
+    : isLogoDesign
+    ? "Your logo is the visual signature of your corporation, the face of your enterprise, and the foundation of your entire market identity. A professionally crafted Logo & Brand Design moves beyond standard graphic illustrations to establish an immediate, memorable psychological connection with your target audience.\n\nWe combine strategic color psychology, timeless typography, and clean minimalist layouts to communicate your core values instantly, set you apart from competitors, and build deep brand authority."
+    : isBilling
+    ? "In modern business, running your operations on un-synchronized spreadsheets or manual paper invoice systems can lead to processing delays, missing balances, tracking errors, and serious tax compliance gaps. Implementing a custom Billing & Enterprise Software Solution is your ultimate path to digital efficiency.\n\nIt automates your daily workflows, tracks your revenue streams in real time, and handles your data safely, giving you complete visibility over your cash flow and operations."
+    : isMarketing
+    ? "In today's fast-moving digital world, your target audience scrolls past thousands of pieces of content every single day. Grabbing their attention and keeping them engaged requires a powerful mix of eye-catching design and dynamic storytelling.\n\nOur professional Marketing Posters & Videos creation service builds high-converting visual assets and short-form video content designed to cut through the digital noise, maximize your click-through rates, and drive sales."
+    : isPartnership
+    ? "Planning to co-found a business venture with a trusted partner while keeping regulatory compliance simple and dynamic? A Partnership Firm Registration is the ideal framework for co-founders, joint consultants, agency owners, and family-run businesses looking to formally pool their skills, capital, and resources under a shared brand identity. Governed by the Indian Partnership Act, 1932, a partnership combines the financial strength and expertise of multiple owners. While the firm is legally recognized as an association of individuals rather than a separate corporate legal entity, registering it with the state's Registrar of Firms (RoF) grants it legal enforceability — ensuring that the business can execute contracts, resolve internal disputes smoothly, and establish credibility with banks and vendors."
+    : isPvtLtd
+    ? "Ready to transform your vision into a globally recognized, highly credible corporate structure? A Private Limited Company (Pvt Ltd) Registration is the gold standard for ambitious entrepreneurs, tech startups, and growing enterprises. It is the preferred choice for founders who want to raise external venture capital, limit personal financial risks, and build a lasting brand legacy. A Private Limited Company is a separate legal entity incorporated under the Companies Act, 2013 (and managed by the Ministry of Corporate Affairs – MCA). Unlike a proprietorship or partnership, a Pvt Ltd company exists independently of its shareholders and directors. It features 'Perpetual Succession', meaning the company continues to legally exist even if shareholders change, pass away, or exit. The most powerful attribute of this structure is Limited Liability – the personal assets of the directors and shareholders are completely safe and insulated if the business faces financial losses or debts."
+    : isLLP
+    ? "Looking for a business structure that offers the operational flexibility of a traditional partnership but shields your personal assets like a Private Limited company? A Limited Liability Partnership (LLP) Registration is the ultimate hybrid model. It is highly favored by professional consultants, service providers, and bootstrapped startups who want low compliance costs without compromising on legal security. A Limited Liability Partnership (LLP) is a distinct corporate business structure introduced in India under the Limited Liability Partnership Act, 2008. It is recognized as a separate legal entity from its partners, meaning the LLP can own property, take loans, and enter contracts in its own name. The defining benefit of an LLP is that the liability of each partner is strictly limited to their agreed capital contribution. Unlike a standard partnership, no partner can be held liable for the independent acts, negligence, or misconduct of another partner."
+    : isPublicLtd
+    ? "Are you preparing to execute a massive business expansion, invite large-scale public investments, or chart a clear path toward an Initial Public Offering (IPO)? A Public Limited Company (PLC) Registration is the ultimate corporate structure for high-growth enterprises. It offers unmatched capital-raising power, institutional credibility, and seamless share transferability to position your brand alongside India's industry leaders. A Public Limited Company is a premium corporate entity registered and regulated strictly under the Companies Act, 2013, via the Ministry of Corporate Affairs (MCA). Unlike private limited structures, a Public Limited Company is legally permitted to offer its shares to the general public, allowing it to pool immense capital from institutional and retail investors alike. It operates as a separate legal entity with independent financial standing. It maintains Perpetual Succession and provides Limited Liability, securing the personal assets of its shareholders against corporate losses."
+    : isOPC
+    ? "Are you a solo entrepreneur looking to build a powerful corporate brand without the need for co-founders or partners? A One Person Company (OPC) Registration is the perfect legal structure for individual founders, consultants, and e-commerce sellers. It allows you to enjoy all the premium privileges of a Private Limited company while maintaining 100% ownership and absolute decision-making power. Introduced under the Companies Act, 2013, a One Person Company (OPC) is a revolutionary business structure that allows a single individual to form a corporate entity. Unlike a traditional sole proprietorship — where the owner and business are legally treated as the same — an OPC is a separate legal entity. This means the company can own assets, sign contracts, and sue or be sued in its own name. Most importantly, it introduces Limited Liability to solo business owners, ensuring that your personal savings, home, and assets are completely protected against business losses and debts."
+    : isSubsidiary
+    ? "Is your international enterprise ready to tap into one of the world's fastest-growing economies and access a massive pool of world-class talent? Establishing an Indian Subsidiary is the ultimate gateway for foreign companies looking to operate dynamically in India. By launching a Wholly Owned Subsidiary (WOS) or a Joint Venture (JV), your parent company gains a fully operational, independent legal entity to drive revenue, execute local contracts, and scale without boundaries. An Indian Subsidiary is a corporate entity incorporated in India under the Companies Act, 2013, where a foreign parent company controls more than 50% of the share capital or dominates the composition of its Board of Directors. When the foreign parent company holds 100% of the shares, it is recognized as a Wholly Owned Subsidiary (WOS). Operatively, the Indian subsidiary is treated as a separate legal entity and an independent domestic corporate body. This structure strictly insulates the parent organization by providing Limited Liability, meaning the global parent company's assets are completely protected from any operational or financial liabilities incurred by the Indian entity."
+    : isSection8
+    ? "Are you looking to launch a non-profit organization, charitable foundation, or social venture with the highest level of corporate governance and institutional trust? A Section 8 Company Registration is the most trusted and globally recognized framework for NGOs in India. It is the premier choice for social entrepreneurs, philanthropists, and corporate CSR wings who want to drive meaningful change while enjoying limited liability protection and access to corporate funding. A Section 8 Company is a specialized corporate entity registered under Section 8 of the Companies Act, 2013, via the Ministry of Corporate Affairs (MCA). It is incorporated strictly for promoting non-profit objectives such as commerce, art, science, sports, education, research, social welfare, religion, charity, or environmental protection. Unlike a regular commercial firm, all profits, donations, and incomes generated by a Section 8 company must be used exclusively to further its core social mission. No dividends or profits can be paid or distributed to its members or directors."
+    : isTrust
+    ? "Whether you are planning to channel your personal wealth toward a specific charitable cause or looking to protect and manage family assets for future generations, a Trust Registration provides a timeless and deeply respected legal framework. It is the preferred choice for family estates, community schools, religious institutions, and traditional philanthropists who want a dedicated structure to fulfill a lasting, defined purpose. A Trust is a legal arrangement where an individual (known as the Settlor or Author) transfers the ownership of a specific property or asset to a trusted individual or group (known as the Trustee) for the absolute benefit of another individual or group (known as the Beneficiary). Governed broadly by the Indian Trusts Act, 1882 for private trusts, and specific state public trust acts or common law for public trusts, a Trust ensures that assets are strictly managed according to the rules set out in a legal contract called the Trust Deed."
+    : isShopAct 
     ? "Are you preparing to open a retail storefront, launch a commercial corporate office, set up a local warehouse, or open a restaurant? Securing a Shops & Establishment Registration (often called a Shop Act License or Gumasta) is your mandatory first step. It officially registers your physical place of business with the state labor department, shielding you from heavy legal compliance penalties and establishing your business as a recognized legal entity."
     : isTradeLicense
     ? "Are you preparing to launch a retail outlet, a food business, a manufacturing plant, or a commercial establishment that interacts directly with the public or environment? Securing a Trade License Registration is an absolute legal prerequisite. Issued by your local municipal corporation, this vital document grants you the formal authorization to carry out your specific trade safely and legally within municipal limits, ensuring full compliance with health, safety, and environmental standards."
@@ -2227,11 +2281,11 @@ function ServiceDetailPage({
     : isIso
     ? "Are you looking to scale your business operations, participate in high-value government tenders, or build trust with global international corporate clients? Obtaining an ISO Certification (such as ISO 9001, 14001, or 27001) is your ultimate operational milestone. Serving as a globally recognized symbol of corporate excellence, this certification verifies your standards."
     : isPf
-    ? "Are you expanding your corporate team, onboarding permanent employees, or aiming to establish high human resource standards within your business? Securing an EPFO (Employees' Provident Fund Organisation) Registration is a mandatory legal milestone under the EPF Act. It provides a long-term social security and retirement savings framework."
+    ? "Are you expanding your corporate team, onboarding permanent employees, or aiming to establish benchmark human resource standards within your business? Securing an EPFO (Employees' Provident Fund Organisation) Registration and Filing ecosystem is a critical statutory milestone. It provides a long-term social security and retirement savings framework for your team, keeping your company fully compliant with Indian labor codes and enhancing workforce retention."
     : isPsara
     ? "Are you planning to launch a private security agency, provide manned guarding services to corporate parks, or deploy cash logistics bouncers to banking networks? Securing a PSARA (Private Security Agencies Regulation Act) License is your mandatory legal requirement. It serves as a strict regulatory shield."
     : isEsic
-    ? "Are you building an operational workforce, managing manufacturing plants, or running an office with multiple entry-level employees? Securing an ESIC (Employees' State Insurance Corporation) Registration is a mandatory statutory obligation under Indian social security laws. It provides a robust, state-backed health insurance framework."
+    ? "Are you building an operational workforce, managing manufacturing plants, or running an office with multiple entry-level employees? Securing an ESIC (Employees' State Insurance Corporation) Registration and Filing framework is a mandatory statutory obligation under Indian social security laws. It provides a robust, state-backed health insurance and medical benefit framework for your team, protecting your business from immense workplace accident liabilities."
     : isCopyright
     ? "Are you a software developer writing proprietary source code, an author publishing a book, a musician composing original tracks, or an artist designing unique branding graphics? Securing a Copyright Registration is your ultimate legal shield. Governed under the Copyright Act, 1957, this intellectual property right grants you ownership."
     : isStartup
@@ -2240,23 +2294,113 @@ function ServiceDetailPage({
     ? "Are you launching a brand name, creating a distinct logo, or designing a unique corporate slogan? Securing a Trademark Registration (™) is your most vital step to protect your brand identity. It grants you exclusive legal ownership over your brand elements across India, shielding your business from copycats."
     : isUdyam
     ? "Are you operating a small business, managing a local retail shop, running a consulting agency, or setting up a manufacturing unit? Getting an Udyam Aadhaar (MSME) Registration is a highly valuable step for your business. This free, state-backed registration formally recognizes your business under the MSME Development Act, 2006."
+    : isPt
+    ? "Are you expanding your business operations across multiple Indian states, opening regional branches, or employing professionals earning a salary? Securing a Professional Tax (PT) Registration and Filing infrastructure is an absolute statutory prerequisite. Regulated at the state government level under Article 276 of the Constitution of India, this tax is levied on professions, trades, callings, and employments."
+    : isLwf
+    ? "Are you managing an enterprise with a growing employee base, running retail chains, or operating a manufacturing unit across implemented states? Maintaining active Labour Welfare Fund (LWF) Filings is an essential statutory labor law compliance metric. Operating under state-specific boards, this fund provides financial aid, health amenities, and welfare schemes to workers."
+    : isPosh
+    ? "Are you looking to build a secure, progressive, and highly respected workspace for your corporate team while satisfying strict statutory mandates? Setting up full POSH Compliance (Prevention of Sexual Harassment of Women at Workplace Act, 2013) is a non-negotiable legal requirement for every modern business entity in India."
+    : isRegisters
+    ? "Are you running a registered company, managing factories, or operating corporate offices that face regular labor department audits? Systematically organizing the Maintenance of Statutory Registers is an absolute operational necessity under Indian labor laws."
+    : isAdvisor
+    ? "Are you managing a rapidly growing corporate enterprise, executing complex restructuring, or handling tricky employee relations? Appointing a dedicated Labour Law Advisor is your ultimate strategic asset to prevent major legal issues."
+    : isItr
+    ? "Every individual, Hindu Undivided Family (HUF), corporate firm, and legal entity earning an income in India is required to report their earnings annually to the Income Tax Department. Income Tax Filing involves submitting the correct form—ranging from ITR-1 to ITR-7—based on the nature of your income, financial volume, and legal structure, ensuring absolute compliance with the Income Tax Act, 1961."
+    : isAssessment
+    ? "An Income Tax Assessment is the formal process by which the Income Tax Department reviews and verifies the validity of the return filed by a taxpayer. Governed under various sections of the Income Tax Act, 1961, an assessment checks for completeness, catches under-reported income or excessive deduction claims, and determines the final tax liability or refund due."
+    : isNotice
+    ? "Receiving an official communication from the Income Tax Department can feel stressful, but most Income Tax Notices are simply standard requests for clarification driven by automated data matching. Handling the notification properly and within state-mandated timelines is critical to preventing severe financial penalties, asset freezes, or prosecution."
+    : isTds
+    ? "To ensure steady, continuous tax collection throughout the financial year, the government leverages two regulatory mechanisms: Tax Deducted at Source (TDS) and Tax Collected at Source (TCS). Entities making specific payments must deduct a percentage of tax at the source and remit it to the government. Similarly, sellers of specified high-value goods must collect tax from buyers."
+    : isRevisedItr
+    ? "What happens if you accidentally leave out an active source of income, claim an incorrect deduction, or discover an error after your Income Tax Return has already been filed and processed? The Income Tax Act provides two distinct pathways to correct your tax records: filing a Revised Return (Section 139(5)) for recent errors, or filing an Updated Return (ITR-U under Section 139(8A)) to correct errors in returns up to two years old."
+    : isGstNew
+    ? "Are you looking to expand your business horizons, sell your products across state lines, onboard onto e-commerce platforms, or have your business turnover cross national limits? Securing a GST (Goods and Services Tax) Registration is your mandatory structural step. This single, unified 15-digit registration number integrates your business into India's national value chain."
+    : isGstFiling
+    ? "Securing your GSTIN is just the first step; maintaining regular, timely GST Filings is an ongoing operational requirement for every registered business in India. Under the dual GST framework, businesses must regularly declare their outward sales distributions, record inbound purchases eligible for tax credits, and remit collected indirect taxes."
+    : isGstAnnual
+    ? "At the close of every financial year, the GST department requires registered taxpayers to file a comprehensive summary statement known as the GST Annual Return (GSTR-9), often accompanied by a self-certified reconciliation statement (GSTR-9C). This process acts as a final year-end consolidation."
+    : isGstCancel
+    ? "If your registered business has shut down its operations, underwent a legal restructure, or no longer meets legal turnover thresholds, keeping an un-used GSTIN active can create unnecessary compliance costs. Executing a formal GST Cancellation is the clean legal mechanism used to close out your tax profile safely."
+    : isGstNotice
+    ? "As the GST department increasingly leverages automated machine learning algorithms to audit tax compliance, businesses face a growing number of automated GST Notices. Handling these communications quickly and accurately is essential to protecting your business from heavy fines, asset freezes, and disruptions."
+    : isMcaCompliance
+    ? "Running a registered corporate entity in India requires strict adherence to annual statutory timelines managed by the Ministry of Corporate Affairs (MCA). Annual Compliance Management is a comprehensive service designed to ensure your Private Limited Company, Limited Liability Partnership (LLP), or One Person Company (OPC) remains active, highly credible, and completely free from heavy late-filing penalties or threat of striking-off by the Registrar of Companies (RoC)."
+    : isMcaName
+    ? "As your business grows, alters its core market offerings, executes a corporate rebrand, or shifts into an entirely new sector, your original legal identity may no longer represent your brand. Executing a formal Change of Company Name is a structured statutory mechanism governed under Section 13 of the Companies Act, 2013, enabling your business to adopt a fresh corporate identity safely and legally."
+    : isMcaAddress
+    ? "Every registered company in India must maintain a functional, physical place of business known as its Registered Office Address to receive official communications from government departments, court systems, and shareholders. If your business is expanding to larger office facilities, consolidating operations, or relocating across city or state boundaries, you must legally update your official corporate address with the Ministry of Corporate Affairs (MCA)."
+    : isMcaShares
+    ? "Are you inviting fresh equity investors into your company, onboarding strategic co-founders, or executing an exit strategy for an existing shareholder? A formal Transfer of Shares is the legal process used to reallocate stock ownership in a Private Limited Company from an existing shareholder (Transferor) to an onboarding buyer (Transferee), strictly following the rules outlined in the Companies Act, 2013, and your company's internal Articles of Association (AOA)."
+    : isMcaMoa
+    ? "The Memorandum of Association (MOA) and Articles of Association (AOA) serve as the twin pillars of your company's legal constitution. The MOA defines the boundary lines of your corporate powers, capital limits, and business scope, while the AOA dictates internal governance, voting dynamics, and management structures. If you are scaling operations into new industries, expanding your equity base, or reshaping your board's powers, an Alteration of MOA & AOA is a mandatory statutory requirement."
+    : isMcaDirectors
+    ? "The Board of Directors forms the core leadership team responsible for steering your company's strategy, managing executive operations, and ensuring strict statutory compliance. If you are bringing on fresh industry experts to guide your scaling strategy, onboarding institutional investor representatives, or managing a director's resignation or removal, completing a formal Appointment or Removal of Directors via the Ministry of Corporate Affairs (MCA) portal is an absolute legal mandate."
+    : isMcaWinding
+    ? "If your registered company has accomplished its original commercial goals, faced irreversible business losses, has zero active operations, or the promoters prefer to close down the business structure, keeping it alive can create unnecessary annual compliance tracking costs and legal liabilities. Executing a formal Winding Up of a Company (specifically via the Fast Track Exit - STK-2 mechanism managed by the MCA) is the clean legal pathway."
     : isDarpan
     ? "Are you operating a non-profit organization, managing a registered public charitable trust, running a welfare society, or executing a Section 8 social impact company? Securing a DARPAN Registration (often called an NGO Darpan ID) is your absolute mandatory requirement. Managed directly by the NITI Aayog, this links you to ministries."
     : `${service.title} is the official registration and licensing required to operate legally. ${service.desc}`;
 
-  const whoNeeds = isShopAct ? [
+  const whoNeeds = isProprietorship ? [
+    "Nationality: The applicant must be a citizen and legal resident of India.",
+    "Age Limit: The applicant must be at least 18 years old.",
+    "Lawful Objective: The intended business activities must be legal and compliant with Indian local and central government regulations."
+  ] : isPartnership ? [
+    "Minimum & Maximum Partners: There must be at least two (2) partners to form the business. The maximum limit is capped at fifty (50) partners.",
+    "Age Limit: All participating partners must be at least 18 years old. Minors cannot become core partners but may be admitted strictly to the benefits of an already existing partnership.",
+    "Competence: Every partner must be of sound mind and legally capable of entering into a binding commercial contract.",
+    "Lawful Objective: The shared business activities must be entirely legal and compliant with both Indian central and state-specific regulations."
+  ] : isPvtLtd ? [
+    "Minimum & Maximum Members: The company must have at least two (2) shareholders and a maximum of two hundred (200) members.",
+    "Director Requirements: A minimum of two (2) directors is required (the shareholders can also be the directors). At least one director must be an Indian resident.",
+    "No Minimum Capital: There is no minimum paid-up capital requirement to start. You can launch your company with as little as ₹1,000.",
+    "Lawful Objective: The business activities must be legally permissible and structured within the predefined framework of the Memorandum of Association (MOA)."
+  ] : isLLP ? [
+    "Minimum Partners: A minimum of two (2) partners is required. There is no upper limit on the maximum number of partners.",
+    "Designated Partners: At least two (2) individuals must act as 'Designated Partners' (similar to company directors) to handle statutory filings. At least one of them must be a resident of India.",
+    "Age Limit: All partners must be at least 18 years old at the time of incorporation.",
+    "Lawful Objective: The partners must have a shared intent to carry out a lawful business with a profit-making motive."
+  ] : isPublicLtd ? [
+    "Minimum Shareholders: There must be a minimum of seven (7) shareholders or subscribers to initiate the company. There is no upper limit.",
+    "Minimum Directors: The board must consist of at least three (3) directors (maximum of 15, which can be extended via a special resolution).",
+    "Resident Director: At least one (1) director must be an Indian resident (stayed in India for 182+ days in the previous calendar year).",
+    "No Capital Barriers: The statutory minimum paid-up capital requirement has been removed by the MCA, enabling dynamic structuring of authorized capital."
+  ] : isOPC ? [
+    "Single Promoter Only: Only one (1) natural person can act as the sole shareholder/member.",
+    "Indian Residency: The founder and the chosen nominee must be citizens of India and legal residents.",
+    "Nominee Requirement: The sole owner must nominate a secondary individual during incorporation who will take charge of the company in the event of the owner's death or incapacity.",
+    "One OPC Per Person: An individual is legally restricted to incorporating or being a nominee for only one (1) OPC at any given time."
+  ] : isSubsidiary ? [
+    "Minimum Shareholders: There must be at least two (2) shareholders or corporate subscribers. For a WOS, the parent company holds 99.9% of the shares, while a nominee holds the remaining nominal fraction.",
+    "Minimum Directors: The company must have at least two (2) directors.",
+    "Mandatory Resident Director: At least one (1) director must be an Indian resident (having stayed in India for 182 days or more in the previous calendar year) to manage local statutory accountability.",
+    "Physical Registered Address: The subsidiary must maintain a physical, legitimate commercial office address located within India.",
+    "FEMA & RBI Compliance: The inflows of foreign capital must completely comply with the pricing and reporting parameters set by the Foreign Exchange Management Act (FEMA)."
+  ] : isSection8 ? [
+    "Minimum Members & Directors: There must be at least two (2) shareholders/members and a minimum of two (2) directors (the same individuals can fulfill both roles).",
+    "Non-Profit Mandate: The primary objective of the entity must be entirely non-profit, aimed solely at social development or charitable initiatives.",
+    "No Profit Diversion: The internal charter must explicitly state that no profit, dividend, or financial benefit will be transferred directly or indirectly to its members.",
+    "Competent Founders: All promoters must be at least 18 years old, mentally sound, and legally qualified to enter into commercial agreements."
+  ] : isTrust ? [
+    "The Settlor: Must be a competent individual who is at least 18 years old, mentally sound, and owns the property being dedicated to the trust.",
+    "The Trustees: A minimum of two (2) trustees is required. There is no upper limit. They must agree to actively manage the trust property according to the deed.",
+    "The Beneficiary: There must be a clearly defined beneficiary or target group (e.g., 'underprivileged students' for a public trust, or 'named family members' for a private trust).",
+    "Trust Property: There must be an identifiable asset or property (even a small nominal cash amount like ₹1,000) dedicated as the initial 'Trust Fund'.",
+    "Lawful Objective: The core purpose of the trust must be entirely legal and cannot oppose public policy."
+  ] : isShopAct ? [
     "Commercial Premises: The business must operate out of a real, physical commercial property, shop, or designated office space located within state boundaries.",
     "Timeline Constraint: The application must ideally be filed with the state labor department within 30 days of starting your commercial activities.",
     "Nature of Business: The premises must be classified as a commercial establishment, retail shop, theater, restaurant, or service-oriented office."
+  ] : isClra ? [
+    "Principal Employer Registration: Before a contractor can apply for a license, the principal employer must possess a valid CLRA Registration Certificate.",
+    "Worker Count Threshold: Applicable to any establishment or contractor engaging twenty (20) or more contract workers on any given day.",
+    "Valid Work Contract: Contractors must have an authentic work order or agreement issued by the principal employer specifying the nature and duration of the contract assignment."
   ] : isTradeLicense ? [
     "Age Limit: The applicant or business owner must be at least 18 years old.",
     "Clean Legal Standing: The applicant must have a clean legal record with no history of serious criminal activities or severe environmental violations.",
     "Commercial Zone: The physical premises where the business operates must be located within a commercially approved zone or an area permitted by the local urban planning authority.",
     "Lawful and Safe Activity: The specific trade or business category must be entirely legal and safe for the surrounding public community."
-  ] : isClra ? [
-    "Principal Employer Registration: Before a contractor can apply for a license, the principal employer must possess a valid CLRA Registration Certificate.",
-    "Worker Count Threshold: Applicable to any establishment or contractor engaging twenty (20) or more contract workers on any given day.",
-    "Valid Work Contract: Contractors must have an authentic work order or agreement issued by the principal employer specifying the nature and duration of the contract assignment."
   ] : isBocw ? [
     "Workforce Threshold: Every construction establishment that employs ten (10) or more workers on any single day over the preceding 12-month window must register.",
     "Site Operations: The business must be actively executing structural building or other construction activities within regional state boundaries.",
@@ -2286,17 +2430,17 @@ function ServiceDetailPage({
     "ISO 14001:2015 (EMS): Focuses on Environmental Management Systems for businesses looking to optimize sustainability and minimize waste.",
     "ISO 27001:2022 (ISMS): Governs Information Security Management Systems. A mandatory asset for IT firms, cloud platforms, and tech startups."
   ] : isPf ? [
-    "Mandatory Workforce Limit: Every business establishment that employs twenty (20) or more employees on any single day must register within 15 days.",
-    "Voluntary Option: Small businesses with less than 20 employees can opt for a voluntary PF registration to provide retirement benefits to their team.",
-    "Universal Application: Applies to all business structures, including factories, retail establishments, IT offices, startups, and consulting firms."
+    "Mandatory Workforce Limit: Every factory or business establishment that employs twenty (20) or more individuals on any single day must register within 15 days of reaching this headcount.",
+    "Voluntary Option: Small businesses with less than 20 employees can opt for a voluntary PF registration to provide retirement benefits to their team and elevate corporate prestige.",
+    "Salary Ceiling: While registration applies to the whole entity, PF deductions are structurally mandatory for employees earning a basic salary of up to ₹15,000 per month."
   ] : isPsara ? [
     "Indian Citizenship Base: The principal promoter, CEO, or managing director must be a citizen of India and maintain a clean criminal history.",
     "Financial Credibility: The business must possess clean financial records, and the promoters must have a solid credit history without any bankruptcy marks.",
     "Mandatory Training Tie-Up: The applicant agency must execute a formal Memorandum of Understanding (MoU) with a state-recognized security training institute to train guards."
   ] : isEsic ? [
-    "Mandatory Employee Baseline: Applicable to any commercial establishment, factory, or office that employs ten (10) or more individuals on any single day.",
-    "Salary Threshold: Employees whose gross monthly salary is ₹21,000 or below are covered under this scheme.",
-    "Regional Coverage: The business must be located within an ESIC-implemented geographic zone or municipal territory."
+    "Mandatory Employee Baseline: Applicable to any commercial establishment, factory, or office that employs ten (10) or more individuals on any single day (this threshold is twenty in certain states).",
+    "Salary Threshold: Employees whose gross monthly salary is ₹21,000 or below are legally covered under this scheme.",
+    "Physical Coverage: The business premises must be located within an ESIC-implemented geographic zone or municipal territory."
   ] : isCopyright ? [
     "Literary Works: Book manuscripts, research articles, website text contents, and proprietary computer software source codes.",
     "Artistic Works: Brand logos, commercial graphic designs, architectural blue drawings, and unique paintings.",
@@ -2314,6 +2458,100 @@ function ServiceDetailPage({
     "Micro Enterprise: Investment in plant and machinery under ₹1 Crore, and annual turnover under ₹5 Crore.",
     "Small Enterprise: Investment in plant and machinery under ₹10 Crore, and annual turnover under ₹50 Crore.",
     "Medium Enterprise: Investment in plant and machinery under ₹50 Crore, and annual turnover under ₹250 Crore."
+  ] : isPt ? [
+    "Employer Purview (PTRC): Every business entity that employs one or more individuals earning a salary above the minimum state-exempt slab must register for PTRC.",
+    "Corporate Entity Purview (PTEC): Every corporate entity, including Private Limited companies, LLPs, registered Partnerships, and Sole Proprietorships, must register for PTEC to clear their corporate tax liabilities.",
+    "Director/Partner Mandate: Individual directors, designated partners, and independent practicing consultants are individually liable to maintain active PT compliance."
+  ] : isLwf ? [
+    "State Implementation: The business premises or branch offices must be physically located within an Indian state that has enacted the Labour Welfare Fund Act.",
+    "Workforce Count Threshold: This compliance typically kicks in for establishments employing five (5) or more, or ten (10) or more individuals depending strictly on regional state rules.",
+    "Employee Exclusion Scope: Applies broadly to manual, clerical, and technical workers; however, managerial and highly paid supervisory personnel are often excluded based on state salary caps."
+  ] : isPosh ? [
+    "Internal Committee (IC) Mandate: Every corporate office or branch with ten or more employees must form an Internal Committee to handle harassment complaints.",
+    "External Member Integration: The IC must be headed by a senior woman employee and must include an independent external member (such as an experienced NGO representative or legal expert specialized in POSH).",
+    "Annual Filing Obligation: The entity must compile and submit an annual progress report detailing the number of cases received, actions taken, and awareness workshops conducted to the District Officer."
+  ] : isRegisters ? [
+    "Register of Wages / Muster Roll: Combines daily employee attendance logs with comprehensive wage calculations, deductions, and net payouts.",
+    "Register of Fines & Deductions: Records any operational deductions made from employee salaries, ensuring they stay within legal limits.",
+    "Register of Overtime & Leave Accounts: Tracks overtime hours worked, applicable premium wages, and accurate employee leave allocations (earned, casual, and sick leaves)."
+  ] : isAdvisor ? [
+    "New Labor Codes Transition: Guiding your business through transitions into the new unified Labor Codes (Wages, Social Security, Industrial Relations, and Occupational Safety).",
+    "Compliance Health Audits: Conducting deep-dive corporate audits to identify compliance gaps in your payroll, contractor management, and onboarding workflows.",
+    "Dispute Resolution & Legal Representation: Crafting formal legal responses to show-cause notices from labor departments and representing your business interests during conciliation proceedings."
+  ] : isItr ? [
+    "ITR-1 (Sahaj): For resident individuals having income from salaries, one house property, or other sources with a total income up to ₹50 Lakhs.",
+    "ITR-2: For individuals and HUFs not having income from profits and gains of business or profession (capital gains, foreign assets, etc.).",
+    "ITR-3: For individuals and HUFs earning income from a proprietary business or carrying out a profession (consultants, freelancers, traders).",
+    "ITR-4 (Sugam): For individuals, HUFs, and firms opting for the Presumptive Taxation Scheme under Sec 44AD/44ADA/44AE with business turnover up to ₹2 Crores.",
+    "ITR-5: For partnership firms, Limited Liability Partnerships (LLPs), Association of Persons (AOPs), and Body of Individuals (BOIs).",
+    "ITR-6: For companies incorporated under the Companies Act (other than companies claiming exemption under Section 11).",
+    "ITR-7: For persons, trusts, political parties, and institutions required to file returns under Sections 139(4A) to 139(4D) (NGOs and charitable trusts)."
+  ] : isAssessment ? [
+    "Summary Assessment (Section 143(1)): An automated, electronic processing of the filed ITR. The portal checks for arithmetical errors and incorrect tax claims, sending an automated 'Intimation' sheet.",
+    "Scrutiny Assessment (Section 143(3)): A detailed, face-to-face or faceless review where the case is selected for a thorough audit. The taxpayer is required to provide complete books of accounts.",
+    "Best Judgment Assessment (Section 144): Initiated if the taxpayer fails to file their return, respond to notices, or produce books. The Assessing Officer computes the tax liability based on available data.",
+    "Income Escaping Assessment (Section 147): Initiated if the Assessing Officer has reason to believe that any taxable income has escaped assessment in previous financial years, re-opening historical cases."
+  ] : isNotice ? [
+    "Section 139(9) (Defective Return Notice): Issued if the return is filed with structural omissions, such as mismatched tax audit details, missing schedules, or unpaid self-assessment taxes.",
+    "Section 142(1) (Inquiry Notice): A formal directive asking the taxpayer to produce specific documents, accounts, or file their return if they have missed the deadline.",
+    "Section 143(1)(a) (Prima Facie Adjustments): An automated notice identifying clear variations or mismatches between the income reported in your ITR and data appearing in Form 26AS or AIS.",
+    "Section 148 (Income Escaping Assessment Notice): A serious legal notice issued when the department has solid evidence that taxable income was left un-reported in previous years."
+  ] : isTds ? [
+    "Form 24Q: Quarterly return for tax deducted at source from Salary payments made to employees.",
+    "Form 26Q: Quarterly return for tax deducted at source on Non-Salary domestic payments (professional fees, rent, etc.).",
+    "Form 27Q: Quarterly return for tax deducted at source on payments made to Non-Resident Indians (NRIs) or foreign corporations.",
+    "Form 27EQ: Quarterly return detailing Tax Collected at Source (TCS) on specified items like scrap sales, liquor sales, or car purchases above ₹10 Lakhs."
+  ] : isRevisedItr ? [
+    "Revised Return (Section 139(5)): Can be filed at any time before December 31st of the assessment year, allowing you to correct any type of error with zero additional penalty.",
+    "Updated Return (ITR-U): Can be filed within twenty-four (24) months from the end of the relevant assessment year, requiring the payment of an additional tax penalty (25% or 50% additional tax fee).",
+    "Exclusion Constraints: ITR-U cannot be filed if it results in a net loss return, increases your tax refund amount, or reduces overall tax liability. It is also unavailable during active tax audits/searches."
+  ] : isGstNew ? [
+    "Service Providers: Mandatory registration kicks in if your annual aggregate turnover crosses ₹20 Lakhs (or ₹10 Lakhs for North-Eastern states).",
+    "Goods Suppliers: Mandatory registration applies if your annual aggregate turnover crosses ₹40 Lakhs (or ₹20 Lakhs for specialized state categories).",
+    "Compulsory Registration Cases: Turnover limits are entirely waived if your business engages in inter-state sales, operates an e-commerce portal, acts as an ISD, or falls under the Reverse Charge Mechanism (RCM)."
+  ] : isGstFiling ? [
+    "GSTR-1 (Outward Supplies Return): A monthly or quarterly return detailing all your outbound business-to-business (B2B) and business-to-consumer (B2C) sales invoices, debit notes, and credit notes.",
+    "GSTR-3B (Summary Self-Assessment Return): A mandatory monthly summary return used to declare total sales value, claim available Input Tax Credit (ITC) from GSTR-2B logs, and pay net GST dues online.",
+    "Form CMP-08: A simple quarterly statement used by small traders registered under the Composition Scheme to declare total turnover and pay a flat percentage of tax."
+  ] : isGstAnnual ? [
+    "Form GSTR-9: The standard annual return form that must be filed by all regular taxpayers. Mandatory for entities with an annual aggregate turnover above ₹2 Crores in a financial year.",
+    "Form GSTR-9C: A specialized reconciliation statement matching figures in your audited annual balance sheet against values reported in your GSTR-9 return. Mandatory above ₹5 Crores turnover."
+  ] : isGstCancel ? [
+    "Cancellation by Taxpayer (Voluntary): Initiated via Form GST REG-16 when a business is closing down, changing its structure, or selling operations, requiring a final settlement of tax on remaining inventory.",
+    "Suo-Motu Cancellation (By Tax Officer): Triggered if a regular taxpayer fails to file returns for a continuous period of six months, resulting in an immediate block on business operations.",
+    "Revocation Window: A formal application to reverse a department cancellation must be filed within ninety (90) days from the date the cancellation order was served."
+  ] : isGstNotice ? [
+    "Form GST ASMT-10 (Scrutiny Notice): Issued by a tax officer to highlight variations or mismatches between your GSTR-1 sales data, GSTR-3B filings, and portal-generated GSTR-2B credit logs.",
+    "Form GST DRC-01 / SCN (Show Cause Notice): A formal legal notice outlining a proposed tax demand, interest calculations, and penalty charges, requiring a robust written legal response.",
+    "Form GST REG-03 (Registration Clarification Notice): Issued during the initial application phase if a tax officer finds defects, missing descriptions, or unverified property documents in your registration file."
+  ] : isMcaCompliance ? [
+    "Active Corporate Status: The company, LLP, or OPC must hold an \"Active\" status on the MCA portal (not currently struck off or in liquidation).",
+    "Director/Partner Verifications: All active directors must complete their annual DIR-3 KYC verification, and designated partners must maintain verified credentials.",
+    "Financial Reporting Base: The entity must compile its books of accounts, balance sheets, and profit & loss statements at the close of every financial year (ending March 31st)."
+  ] : isMcaName ? [
+    "Compliance Clean Record: The company must have up-to-date MCA annual filings (AOC-4 and MGT-7) and have cleared all due corporate taxes or structural returns.",
+    "No Default Profiles: The entity must not have defaulted on paying matured deposits, debentures, or interest payments to creditors.",
+    "Distinct Name Suitability: The new name must follow strict MCA naming guidelines—possessing a unique prefix, an appropriate objects-defining middle word, and ending with suffixes like \"Private Limited\" or \"OPC Private Limited\"."
+  ] : isMcaAddress ? [
+    "Board Approval Base: Every level of address modification must be backed by a formal resolution passed during a meeting of the Board of Directors.",
+    "Clean Real Estate Title: The new commercial space, rented office, or virtual space must possess legitimate property ownership proofs and utility link authorizations.",
+    "Compliance Continuity: The entity must maintain up-to-date structural corporate filings on the MCA platform before seeking location transfers."
+  ] : isMcaShares ? [
+    "AOA Alignment Check: The proposed share reallocation must align with all pre-emption rights, restriction clauses, and transfer conditions outlined inside the company's Articles of Association.",
+    "Consent Framework: Both the existing shareholder and the incoming buyer must execute clear, mutual financial and legal consent via a signed transfer instrument.",
+    "No Lien Status: The equity shares targeted for transfer must be fully paid up and free of any liens, pledges, or structural corporate constraints."
+  ] : isMcaMoa ? [
+    "Object Clause Alteration: Modifying or adding new primary business lines when diversifying your corporate product or service offerings.",
+    "Capital Clause Alteration: Increasing your company's Authorized Share Capital limit to issue fresh equity to angel investors or venture capital funds.",
+    "Management Realignment (AOA): Amending internal clauses to introduce specialized voting rights, change share transfer rules, or adjust director powers."
+  ] : isMcaDirectors ? [
+    "Age & Sound Mind Base: The proposed director must be an individual who is at least 18 years old, mentally sound, and free from any court-ordered bankruptcy or insolvency marks.",
+    "No Disqualification Profile: The individual must not stand disqualified under Section 164 of the Companies Act, 2013 (e.g., must not be linked to other non-compliant entities).",
+    "DIN Possession: The onboarding director must possess a valid, active Director Identification Number (DIN) allocated by the MCA."
+  ] : isMcaWinding ? [
+    "Operational Inactivity: The company must have completely ceased all commercial business operations for a continuous period of at least one (1) or two (2) years before filing.",
+    "Zero Asset & Liability Profile: The company's balance sheet must reflect absolute zero assets and zero outstanding financial liabilities or dues toward third parties.",
+    "No Pending Litigation: The company must not have any active, unresolved lawsuits or pending investigations from tax or labor departments."
   ] : isDarpan ? [
     "Non-Profit Legal Structure: The applicant body must be legally registered as a Public Charitable Trust, a registered Welfare Society, or a Section 8 Non-Profit Company.",
     "Detailed Board Blueprint: The entity must maintain an active, fully functional executive committee or board consisting of a minimum of three distinct non-profit members.",
@@ -2332,7 +2570,213 @@ function ServiceDetailPage({
     `Startups and established brands operating in India`
   ];
 
-  const docs = isGst ? [
+  const docs = isProprietorship ? [
+    "Proposed Company Name",
+    "Aadhaar, PAN, Passport-size Photograph, Mobile Number, and Email ID",
+    "If Owned: Sale Deed & Latest Utility Bill (Electricity/Water)",
+    "If Rented: Notarized Rent Agreement & Latest Utility Bill (Electricity/Water)"
+  ] : isPartnership ? [
+    "Proposed Company/Firm Name (Must be unique and not violate existing trademarks)",
+    "Core Business Activities / Nature of Trade",
+    "Self-attested PAN Card (Mandatory for all partners)",
+    "Aadhaar Card, Recent Passport-size Photograph for all partners",
+    "Active Mobile Number & Email ID for all partners",
+    "Voter ID, Driving License, or Valid Passport (address proof for all partners)",
+    "If Owned: Sale Deed / Property Tax Receipt & Latest Utility Bill (Electricity/Water)",
+    "If Rented: Notarized Rent Agreement, Latest Utility Bill (Electricity/Water), and a No Objection Certificate (NOC) from the property owner"
+  ] : isPvtLtd ? [
+    "Proposed Company Names (Provide 1 or 2 unique names in order of preference)",
+    "Main business objectives / Industry category",
+    "Self-attested PAN Card (Mandatory for Indian Nationals, all directors/shareholders)",
+    "Aadhaar Card, Recent Passport-size Photograph (all directors/shareholders)",
+    "Active Mobile Number & Email ID (all directors/shareholders)",
+    "Any one (Not older than 2 months): Bank Statement, Electricity Bill, Mobile Bill, or Gas Bill (Name must match exactly with the PAN card)",
+    "If Owned: Sale Deed & Latest Utility Bill (Electricity/Water)",
+    "If Rented: Notarized Rent Agreement, Latest Utility Bill (Electricity/Water), and a No Objection Certificate (NOC) from the property owner"
+  ] : isLLP ? [
+    "Proposed LLP Names (1 or 2 unique names for verification)",
+    "Detailed description of the business activities/services",
+    "Self-attested PAN Card (Mandatory for Indian Citizens)",
+    "Aadhaar Card and Recent Passport-size Photograph for all partners",
+    "Active Mobile Number & Email ID for all partners",
+    "Any one (Not older than 2 months): Bank Statement, Electricity Bill, Telephone Bill, or Gas Bill (Name must match PAN perfectly)",
+    "If Owned: Sale Deed & Latest Utility bill (Electricity/Water)",
+    "If Rented: Notarized Rent Agreement, Latest Utility Bill, and a No Objection Certificate (NOC) from the property owner"
+  ] : isPublicLtd ? [
+    "Proposed Corporate Names (Must be unique, distinct, and must end with the suffix 'Limited')",
+    "Exhaustive description of core business domains",
+    "Self-attested PAN Card (Mandatory for Indian Citizens)",
+    "Aadhaar Card, Recent Passport-size Photograph for all directors/shareholders",
+    "Active Mobile Number & Verified Email ID for all directors/shareholders",
+    "Any one (Not older than 2 months): Bank Account Statement, Electricity Bill, Telephone Bill, or Gas Bill (Name must precisely match PAN)",
+    "If Owned: Registered Sale Deed / Property Tax Receipt & Latest Utility Bill",
+    "If Rented/Leased: Notarized Rent Agreement, Latest Utility Bill (Electricity/Water), and a signed No Objection Certificate (NOC) from the property owner"
+  ] : isOPC ? [
+    "Proposed OPC Names (1 or 2 unique name preferences ending with the suffix 'OPC Private Limited')",
+    "Main business objectives / Industry category",
+    "Self-attested PAN Card (Mandatory) for owner and nominee",
+    "Aadhaar Card, Recent Passport-size Photograph for owner and nominee",
+    "Active Mobile Number & Email ID for owner and nominee",
+    "Any one (Not older than 2 months): Bank Statement, Electricity Bill, Mobile Bill, or Gas Bill (Name must match PAN card exactly)",
+    "If Owned: Sale Deed / Property Tax Receipt & Latest Utility Bill",
+    "If Rented: Notarized Rent Agreement, Latest Utility Bill (Electricity/Water), and a signed No Objection Certificate (NOC) from the landlord"
+  ] : isSubsidiary ? [
+    "Certificate of Incorporation / Business Charter of foreign parent company",
+    "Memorandum & Articles of Association (MOA/AOA) of foreign parent company",
+    "Certified Board Resolution authorizing the India expansion and nominating an authorized representative",
+    "Valid, high-resolution color copy of Passport (Identity Proof) for foreign directors/signatories",
+    "Overseas Address Proof (Utility Bill or Bank Statement not older than 2 months) for foreign directors/signatories",
+    "Passport-size photographs, Email ID, and active contact numbers for foreign directors/signatories",
+    "Self-attested PAN Card (Mandatory) for Indian resident director",
+    "Aadhaar Card for Indian resident director",
+    "Bank Statement or Utility Bill reflecting the current residential address for Indian resident director",
+    "If Rented/Leased: Notarized Lease/Rent Agreement, Latest Utility Bill (Electricity/Water), and a signed No Objection Certificate (NOC) from the property owner (Indian registered office proof)"
+  ] : isSection8 ? [
+    "Proposed NGO Names (Must include words like Foundation, Forum, Association, Council, or Federation)",
+    "A detailed 3-year projection of future social activities and estimated income/expenditure",
+    "Self-attested PAN Card (Mandatory for Indian Nationals) for all directors/members",
+    "Aadhaar Card, Recent Passport-size Photograph for all directors/members",
+    "Active Mobile Number & Verified Email ID for all directors/members",
+    "Any one (Not older than 2 months): Bank Statement, Electricity Bill, Mobile Bill, or Gas Bill (Name must match PAN card exactly)",
+    "If Owned: Sale Deed / Property Tax Receipt & Latest Utility Bill",
+    "If Rented: Notarized Rent Agreement, Latest Utility Bill (Electricity/Water), and a signed No Objection Certificate (NOC) from the landlord"
+  ] : isTrust ? [
+    "Proposed Trust Name (Must be unique and not conflict with existing well-known institutions)",
+    "Clearly defined objectives of the trust",
+    "Self-attested PAN Card (Mandatory) for settlor and all trustees",
+    "Aadhaar Card, Recent Passport-size Photograph for settlor and all trustees",
+    "Active Mobile Number & Email ID for settlor and all trustees",
+    "Voter ID, Valid Passport, or Driving License (address proof for settlor and all trustees)",
+    "If Owned: Sale Deed / Property Tax Receipt & Latest Utility Bill (trust office address proof)",
+    "If Rented: Notarized Rent Agreement, Latest Utility Bill (Electricity/Water), and a signed No Objection Certificate (NOC) from the landlord (trust office address proof)",
+    "Identity proofs of two (2) independent witnesses who will sign the deed during registration"
+  ] : isShopAct ? [
+    "PAN Card of the applicant / business entity",
+    "Aadhaar Card of the owners / authorized signatories",
+    "Proof of business address (electricity bill / rent agreement)",
+    "Bank statement or cancelled cheque of the active account",
+    "Digital Signature Certificate (where applicable)",
+    "Incorporation details or Partnership Deed (if applicable)"
+  ] : isClra ? [
+    "PAN Card of the applicant / business entity",
+    "Aadhaar Card of the owners / authorized signatories",
+    "Proof of business address (electricity bill / rent agreement)",
+    "Bank statement or cancelled cheque of the active account",
+    "Digital Signature Certificate (where applicable)",
+    "Incorporation details or Partnership Deed (if applicable)"
+  ] : isTradeLicense ? [
+    "PAN Card of the applicant / business entity",
+    "Aadhaar Card of the owners / authorized signatories",
+    "Proof of business address (electricity bill / rent agreement)",
+    "Bank statement or cancelled cheque of the active account",
+    "Digital Signature Certificate (where applicable)",
+    "Incorporation details or Partnership Deed (if applicable)"
+  ] : isBocw ? [
+    "PAN Card of the applicant / business entity",
+    "Aadhaar Card of the owners / authorized signatories",
+    "Proof of business address (electricity bill / rent agreement)",
+    "Bank statement or cancelled cheque of the active account",
+    "Digital Signature Certificate (where applicable)",
+    "Incorporation details or Partnership Deed (if applicable)"
+  ] : isFssai ? [
+    "PAN Card of the applicant / business entity",
+    "Aadhaar Card of the owners / authorized signatories",
+    "Proof of business address (electricity bill / rent agreement)",
+    "Bank statement or cancelled cheque of the active account",
+    "Digital Signature Certificate (where applicable)",
+    "Incorporation details or Partnership Deed (if applicable)"
+  ] : isDsc ? [
+    "PAN Card of the applicant / business entity",
+    "Aadhaar Card of the owners / authorized signatories",
+    "Proof of business address (electricity bill / rent agreement)",
+    "Bank statement or cancelled cheque of the active account",
+    "Digital Signature Certificate (where applicable)",
+    "Incorporation details or Partnership Deed (if applicable)"
+  ] : isIec ? [
+    "PAN Card of the applicant / business entity",
+    "Aadhaar Card of the owners / authorized signatories",
+    "Proof of business address (electricity bill / rent agreement)",
+    "Bank statement or cancelled cheque of the active account",
+    "Digital Signature Certificate (where applicable)",
+    "Incorporation details or Partnership Deed (if applicable)"
+  ] : isDrug ? [
+    "PAN Card of the applicant / business entity",
+    "Aadhaar Card of the owners / authorized signatories",
+    "Proof of business address (electricity bill / rent agreement)",
+    "Bank statement or cancelled cheque of the active account",
+    "Digital Signature Certificate (where applicable)",
+    "Incorporation details or Partnership Deed (if applicable)"
+  ] : isIcegate ? [
+    "PAN Card of the applicant / business entity",
+    "Aadhaar Card of the owners / authorized signatories",
+    "Proof of business address (electricity bill / rent agreement)",
+    "Bank statement or cancelled cheque of the active account",
+    "Digital Signature Certificate (where applicable)",
+    "Incorporation details or Partnership Deed (if applicable)"
+  ] : isIso ? [
+    "PAN Card of the applicant / business entity",
+    "Aadhaar Card of the owners / authorized signatories",
+    "Proof of business address (electricity bill / rent agreement)",
+    "Bank statement or cancelled cheque of the active account",
+    "Digital Signature Certificate (where applicable)",
+    "Incorporation details or Partnership Deed (if applicable)"
+  ] : isPf ? [
+    "PAN Card of the applicant / business entity",
+    "Aadhaar Card of the owners / authorized signatories",
+    "Proof of business address (electricity bill / rent agreement)",
+    "Bank statement or cancelled cheque of the active account",
+    "Digital Signature Certificate (where applicable)",
+    "Incorporation details or Partnership Deed (if applicable)"
+  ] : isPsara ? [
+    "PAN Card of the applicant / business entity",
+    "Aadhaar Card of the owners / authorized signatories",
+    "Proof of business address (electricity bill / rent agreement)",
+    "Bank statement or cancelled cheque of the active account",
+    "Digital Signature Certificate (where applicable)",
+    "Incorporation details or Partnership Deed (if applicable)"
+  ] : isEsic ? [
+    "PAN Card of the applicant / business entity",
+    "Aadhaar Card of the owners / authorized signatories",
+    "Proof of business address (electricity bill / rent agreement)",
+    "Bank statement or cancelled cheque of the active account",
+    "Digital Signature Certificate (where applicable)",
+    "Incorporation details or Partnership Deed (if applicable)"
+  ] : isCopyright ? [
+    "PAN Card of the applicant / business entity",
+    "Aadhaar Card of the owners / authorized signatories",
+    "Proof of business address (electricity bill / rent agreement)",
+    "Bank statement or cancelled cheque of the active account",
+    "Digital Signature Certificate (where applicable)",
+    "Incorporation details or Partnership Deed (if applicable)"
+  ] : isStartup ? [
+    "PAN Card of the applicant / business entity",
+    "Aadhaar Card of the owners / authorized signatories",
+    "Proof of business address (electricity bill / rent agreement)",
+    "Bank statement or cancelled cheque of the active account",
+    "Digital Signature Certificate (where applicable)",
+    "Incorporation details or Partnership Deed (if applicable)"
+  ] : isTrademark ? [
+    "PAN Card of the applicant / business entity",
+    "Aadhaar Card of the owners / authorized signatories",
+    "Proof of business address (electricity bill / rent agreement)",
+    "Bank statement or cancelled cheque of the active account",
+    "Digital Signature Certificate (where applicable)",
+    "Incorporation details or Partnership Deed (if applicable)"
+  ] : isUdyam ? [
+    "PAN Card of the applicant / business entity",
+    "Aadhaar Card of the owners / authorized signatories",
+    "Proof of business address (electricity bill / rent agreement)",
+    "Bank statement or cancelled cheque of the active account",
+    "Digital Signature Certificate (where applicable)",
+    "Incorporation details or Partnership Deed (if applicable)"
+  ] : isDarpan ? [
+    "PAN Card of the applicant / business entity",
+    "Aadhaar Card of the owners / authorized signatories",
+    "Proof of business address (electricity bill / rent agreement)",
+    "Bank statement or cancelled cheque of the active account",
+    "Digital Signature Certificate (where applicable)",
+    "Incorporation details or Partnership Deed (if applicable)"
+  ] : isGst ? [
     "PAN Card of the applicant / business entity",
     "Aadhaar Card of the authorized signatory",
     "Proof of business address (electricity bill / rent agreement)",
@@ -2348,7 +2792,72 @@ function ServiceDetailPage({
     "Incorporation details or Partnership Deed (if applicable)"
   ];
 
-  const process = isShopAct ? [
+  const process = isWebDev ? [
+    { step: "01", title: "Strategic Blueprinting & UI/UX Wireframing", desc: "We map out your target user flows, design initial information architectures, and build high-fidelity visual prototypes for your review." },
+    { step: "02", title: "Full-Stack Engineering & Mobile Optimization", desc: "Our developers write clean, modular code to transform your visual blueprints into a fast, fully responsive website that looks and runs beautifully across all devices." },
+    { step: "03", title: "Database Setup & Secure API Integrations", desc: "We connect and configure your database structures, implement robust security protocols, and set up your core analytical tools and CRM pathways." },
+    { step: "04", title: "Rigorous Quality Check & Live Launch", desc: "We execute multi-browser performance checks, optimize your loading speeds, clear your staging protocols, and manage your live server deployment." }
+  ] : isLogoDesign ? [
+    { step: "01", title: "Brand Strategy & Visual Direction Consultation", desc: "We sit down with your leadership team to define your market positioning, research competitor landscapes, and map out a clear artistic direction." },
+    { step: "02", title: "Concept Ideation & Geometric Sketching", desc: "Our design team develops multiple distinct visual directions, experimenting with unique typography weights, balances, and symbolic iconography." },
+    { step: "03", title: "Refinement & Interactive Color Iteration", desc: "We present our top design directions to your team, redline structural details based on your feedback, and finalize your core corporate color palette." },
+    { step: "04", title: "Master Asset Formatting & Delivery", desc: "We construct your complete corporate brand identity package, render your final scalable files across all necessary formats, and deliver your ready-to-use brand asset kit." }
+  ] : isBilling ? [
+    { step: "01", title: "Workflow Audit & Systems Specification", desc: "We perform a thorough review of your operational workflows, pinpoint data bottlenecks, and layout the exact architectural blueprints for your software system." },
+    { step: "02", title: "Database Architecture & Code Engineering", desc: "Our development team designs a secure database structure and engineers your custom software tool, focusing on processing speed, UI clarity, and data encryption." },
+    { step: "03", title: "API Synchronization & Multi-Platform Testing", desc: "We connect your billing platform with your active banks, existing CRMs, and tax portals, running extensive stress-testing cycles to guarantee system reliability." },
+    { step: "04", title: "Data Migration, Staff Training & Go-Live", desc: "We import your legacy ledger data into the new platform, lead comprehensive training workshops for your team, and activate your custom enterprise system safely." }
+  ] : isMarketing ? [
+    { step: "01", title: "Campaign Briefing & Script Writing", desc: "We analyze your target campaign goals, establish your core promotional messaging, and write high-impact scripts and initial storyboard layouts." },
+    { step: "02", title: "Visual Content Creation & Live Filming", desc: "Our production crew handles asset design, handles motion graphics rendering, or sets up high-definition studio filming to capture your product elements beautifully." },
+    { step: "03", title: "Premium Post-Production & Color Grading", desc: "We edit your video footage, sync background audio tracks, implement motion typography, and run color grading to give your content a pristine, cinematic look." },
+    { step: "04", title: "Platform Optimization & Asset Delivery", desc: "We render your visual media into all necessary sizes, optimize file compression settings to guarantee instant loading speeds, and deliver your campaign-ready asset folder." }
+  ] : isProprietorship ? [
+    { step: "01", title: "Strategic Consultation & Name Selection", desc: "Choosing a unique name and outlining core business objectives." },
+    { step: "02", title: "Acquiring Core Government Registrations", desc: "Applying for Udyam (MSME) and GST registration to give the business legal standing." },
+    { step: "03", title: "Tax & Local Compliance Filing", desc: "Obtaining state-specific licenses such as the Shops & Establishment Act registration." },
+    { step: "04", title: "Current Bank Account Opening", desc: "Setting up a dedicated commercial current account using government certificates." }
+  ] : isPartnership ? [
+    { step: "01", title: "Consultation & Brand Protection", desc: "Choosing a unique name and outlining core business objectives." },
+    { step: "02", title: "Drafting the Partnership Deed", desc: "Preparing the legal partnership agreement." },
+    { step: "03", title: "Filing with the Registrar of Firms (RoF)", desc: "Submitting the deed and documents for registration." },
+    { step: "04", title: "Post-Registration Tax & Bank Setup", desc: "Applying for PAN, TAN, and current account once incorporated." }
+  ] : isPvtLtd ? [
+    { step: "01", title: "Name Approval (RUN – Reserve Unique Name)", desc: "Submission of preferred names to the Ministry of Corporate Affairs (MCA) to ensure uniqueness and eliminate trademark conflicts." },
+    { step: "02", title: "Digital Signature Certificate (DSC) & DIN Allocation", desc: "Procuring Class 3 Digital Signature Certificates (DSC) for paperless electronic execution alongside Director Identification Number (DIN) allocation." },
+    { step: "03", title: "Drafting MOA & AOA and Filing SPICe+ Forms", desc: "Meticulously drafting the Memorandum of Association (MOA) and Articles of Association (AOA), and submitting the bundled SPICe+ form for government review." },
+    { step: "04", title: "Certificate of Incorporation, PAN, and TAN Issuance", desc: "Upon approval, the MCA issues the official Certificate of Incorporation (COI) along with corporate PAN and TAN to facilitate immediate current account setup." }
+  ] : isLLP ? [
+    { step: "01", title: "Digital Signature (DSC) & Name Approval (FiLLiP)", desc: "Securing Class 3 Digital Signatures and applying for the unique name on the centralized web system." },
+    { step: "02", title: "Filing the Incorporation Application (FiLLiP Form)", desc: "Preparing and submitting the integrated FiLLiP Form to process partner details, assign DPINs, and register the primary office address to receive the Certificate of Incorporation." },
+    { step: "03", title: "PAN & TAN Application", desc: "Government allocation of permanent PAN and TAN cards simultaneously with the incorporation approval." },
+    { step: "04", title: "Drafting & Filing the LLP Agreement (Form 3)", desc: "Customizing and filing the critical LLP Agreement defining mutual rights, duties, profit ratios, and capital guidelines with the MCA within 30 days of incorporation." }
+  ] : isPublicLtd ? [
+    { step: "01", title: "Strategic Name Reservation (RUN Portal)", desc: "Filing name applications through the RUN portal backed by intensive trademark mapping." },
+    { step: "02", title: "Digital Identity Allotment (DSC & DIN)", desc: "Procuring Class 3 Digital Signature Certificates (DSC) and handling Director Identification Number (DIN) allotment." },
+    { step: "03", title: "Framing the Corporate Constitution (SPICe+)", desc: "Drafting the foundational MOA and AOA to layout business objectives and strict internal governance systems via SPICe+ setup." },
+    { step: "04", title: "Incorporation and Statutory Activations", desc: "Receiving the official Certificate of Incorporation (COI) along with simultaneous issuance of corporate PAN, TAN, and EPFO/ESIC registrations." }
+  ] : isOPC ? [
+    { step: "01", title: "Digital Signature Certificate (DSC) Procurement", desc: "Securing Class 3 Digital Signature Certificate (DSC) for secure electronic form signing." },
+    { step: "02", title: "Name Reservation & Nominee Consent", desc: "Filing the selected business name for institutional approval and drafting Form INC-3 to record the legal consent of the Nominee." },
+    { step: "03", title: "Drafting MOA & AOA and Filing SPICe+", desc: "Structuring the custom constitutional parameters of the business through MOA & AOA filings inside SPICe+." },
+    { step: "04", title: "Issuance of Incorporation Certificate, PAN, and TAN", desc: "Issuance of the official Certificate of Incorporation (COI) complete with unique CIN, corporate PAN, and TAN." }
+  ] : isSubsidiary ? [
+    { step: "01", title: "Global Documentation & Legalization", desc: "Apostilling/legalization of foreign parent documents in the home country." },
+    { step: "02", title: "Digital Identity Allotment & Name Reservation", desc: "Procuring DSCs for directors and submitting preferred corporate names through the MCA portal (SPICe+ Part A)." },
+    { step: "03", title: "Integrated Corporate Filing", desc: "Filing the intensive integration forms covering core business objectives, MOA, AOA, and local identity verifications (SPICe+ Part B)." },
+    { step: "04", title: "Certificate of Incorporation & RBI FEMA Reporting", desc: "Receipt of the formal Certificate of Incorporation alongside mandated compliance declarations and filings to the Reserve Bank of India (RBI) under FEMA rules." }
+  ] : isSection8 ? [
+    { step: "01", title: "Digital Security Setup & Name Approval", desc: "Setting up digital certificates (DSC) and reserving the organizational name via the MCA registry." },
+    { step: "02", title: "Applying for the Section 8 Central License", desc: "Filing an explicit petition to the central government outlining social goals to obtain a specialized Section 8 License." },
+    { step: "03", title: "Framing the Constitutional Charters (MOA & AOA)", desc: "Drafting the strict non-profit guidelines and asset lock-in rules within the MOA and AOA charters." },
+    { step: "04", title: "Final SPICe+ Incorporation & Tax Registration", desc: "Submitting the final integrated SPICe+ form for corporate incorporation, tax registrations, and PAN/TAN cards." }
+  ] : isTrust ? [
+    { step: "01", title: "Consultation & Drafting the Trust Deed", desc: "Formulating trust guidelines, rules for trustees, and beneficiary privileges inside a custom Trust Deed." },
+    { step: "02", title: "Stamp Duty & Non-Judicial Stamp Paper Setup", desc: "Paying the applicable state-specific stamp duty and printing the deed on non-judicial stamp papers." },
+    { step: "03", title: "Formal Filing at the Sub-Registrar Office", desc: "The Settlor, Trustees, and Witnesses present themselves at the local Sub-Registrar Office for formal deed execution." },
+    { step: "04", title: "Certificate Issuance & Post-Registration Tax Setup", desc: "Issuance of the registered Trust Deed followed by applying for a dedicated permanent PAN and TAN for the trust." }
+  ] : isShopAct ? [
     { step: "01", title: "State-Specific Application Preparation", desc: "We analyze your business location and map it to your state's specific labor department portal. We compile your employee data, business hours, and location proof to draft your localized application form carefully." },
     { step: "02", title: "Documentation Upload & Fee Settlement", desc: "We upload your identity proofs, rent agreements, and mandatory storefront photographs onto the state government portal. We then calculate and process the required statutory government fees." },
     { step: "03", title: "Government Review & Certificate Issuance", desc: "The local labor inspector reviews your application online. Once approved, the state labor department issues your official, digital Shops & Establishment Registration Certificate." }
@@ -2397,10 +2906,10 @@ function ServiceDetailPage({
     { step: "03", title: "Internal Quality Audit", desc: "We coordinate an initial internal audit review to verify that your workflows match the chosen ISO framework and correct any operational anomalies." },
     { step: "04", title: "External Audit & ISO Issuance", desc: "An accredited external Certification Body (CB) executes a formal audit of your systems. Once satisfied, they formally issue your international ISO Certification." }
   ] : isPf ? [
-    { step: "01", title: "Shram Suvidha Integration", desc: "We access the centralized Shram Suvidha unified labor portal, setting up your corporate account using an authorized signatory's Class 3 DSC or Aadhaar profile." },
-    { step: "02", title: "Form Drafting & Employer Profile Setup", desc: "Our corporate HR team drafts the application form, entering specific setup details, main business activities, and your active current bank details." },
-    { step: "03", title: "Document Verification & Electronic Filing", desc: "All supporting business deeds, PAN files, and payroll metrics are attached to the portal, and the application is signed using digital security keys." },
-    { step: "04", title: "UAN Generation & Portal Activation", desc: "The EPFO system reviews and verifies the application data. Once cleared, your formal EPF Registration Number is issued." }
+    { step: "01", title: "Shram Suvidha Registration", desc: "We access the centralized Shram Suvidha unified labor portal, setting up your corporate account using an authorized signatory's Class 3 DSC or Aadhaar profile." },
+    { step: "02", title: "Profile Setup & Code Allocation", desc: "Our corporate HR compliance team drafts the application, entering specific setup details, primary industrial classifications (NIC codes), and your active current bank details to obtain your unique 15-digit PF Establishment Code." },
+    { step: "03", title: "Monthly ECR Generation & Filing", desc: "Every month, our team processes your payroll data, drafts the Electronic Challan-cum-Return (ECR), calculates the mandatory employer-employee contributions, and generates the online payment challan." },
+    { step: "04", title: "Annual & Event-Based Compliances", desc: "We manage structural event-based updates, including generating Universal Account Numbers (UAN) for new hires, processing employee KYC verifications, handling online transfers, and executing exit regularizations." }
   ] : isPsara ? [
     { step: "01", title: "Antecedent Verification Filing", desc: "We assist you in filing an intense background check application with the local police department to verify the clean legal records of all promoters." },
     { step: "02", title: "Training MoU Execution", desc: "We coordinate with a state-certified security academy to secure your mandatory guard training partnership agreement, ensuring compliance with state regulations." },
@@ -2408,9 +2917,9 @@ function ServiceDetailPage({
     { step: "04", title: "Department Inspection & License Grant", desc: "A Controlling Officer or senior police inspector performs a physical audit of your office space and training logs. Once cleared, your official PSARA License is generated." }
   ] : isEsic ? [
     { step: "01", title: "Labor Portal Account Integration", desc: "We set up your corporate account on the unified Shram Suvidha / ESIC portal using your digital security keys or Aadhaar profiles." },
-    { step: "02", title: "Employer Form Filing", desc: "We carefully draft the employer enrollment application, filling in precise operational details, business category classifications, and your current bank details." },
-    { step: "03", title: "Document Stack Attachment", desc: "All self-attested payroll sheets, director identity proofs, and property titles are securely uploaded to the system." },
-    { step: "04", title: "TIC Generation & Registration Activation", desc: "The automated ESIC framework processes the application data. Once cleared, your formal 17-digit ESIC Registration Number is issued." }
+    { step: "02", title: "Employer Code Generation", desc: "We carefully draft the employer enrollment application, filling in precise operational details, business category classifications, and your current bank details to secure your permanent ESIC registration code." },
+    { step: "03", title: "Monthly Workforce Filing & Challans", desc: "Every month, we upload your employee attendance and wage sheets to the portal, compute the dynamic monthly contributions, and generate the mandatory online payment challans before the monthly deadlines." },
+    { step: "04", title: "Employee Onboarding & Temporary Cards", desc: "Our team manages the online registration of new employees, updates nomadic family health records, and generates their Temporary Identification Cards (TIC) so your team can access medical care instantly." }
   ] : isCopyright ? [
     { step: "01", title: "Classification & Application Filing", desc: "We review your creative work and file Form XIV on the centralized Indian Copyright Office portal, meticulously cataloging the author and owner details." },
     { step: "02", title: "Filing Fee & Diary Number Generation", desc: "We process the official government copyright vetting fees. Once submitted, the system generates a unique Diary Number to track your application." },
@@ -2431,11 +2940,136 @@ function ServiceDetailPage({
     { step: "02", title: "Corporate Profile Structuring", desc: "We enter your precise business layout parameters, primary industrial classifications (NIC codes), and matching employee headcounts." },
     { step: "03", title: "Tax & Turnover Integration", desc: "The Udyam system securely synchronizes your tax metrics and financial turnover data directly from the Income Tax and GST systems automatically." },
     { step: "04", title: "Instant Certificate Generation", desc: "All data points are validated by the online system. Once processed, your official lifetime-valid Udyam Registration Certificate is instantly generated." }
+  ] : isPt ? [
+    { step: "01", title: "State-Specific Portal Configuration", desc: "We register your business on the respective state's commercial tax department portal based on your operational address." },
+    { step: "02", title: "PTEC & PTRC Code Procurement", desc: "Our tax compliance experts draft and submit the localized application forms along with required property proofs to secure your PTEC and PTRC identification numbers." },
+    { step: "03", title: "Salary Deduction & Monthly Retainer Filing", desc: "We audit your monthly payroll to execute accurate slab deductions and handle your monthly or annual PTRC returns." },
+    { step: "04", title: "Annual PTEC Payment Settlement", desc: "We calculate your business's structural corporate PT liabilities and ensure the timely online payment of your annual PTEC fees to protect you from heavy late-filing interest penalties." }
+  ] : isLwf ? [
+    { step: "01", title: "State LWF Board Mapping", desc: "We analyze your regional office locations and map your business to the correct state-specific Labour Welfare Fund Board portal." },
+    { step: "02", title: "Slab Evaluation & Deduction Management", desc: "Our labor compliance experts review your payroll data during the respective state's contribution periods to extract the precise employee deductions and match them with the required employer share." },
+    { step: "03", title: "Online Return Filing & Challans", desc: "We compile the required statutory data sheets, file the localized LWF returns online, and generate the electronic payment receipts before the state-mandated due dates." },
+    { step: "04", title: "Statutory Audit Maintenance", desc: "We ensure that all historical LWF payment vouchers and employee deduction logs are systematically formatted, keeping your business ready for routine labor department inspection reviews." }
+  ] : isPosh ? [
+    { step: "01", title: "POSH Policy Drafting & IC Setup", desc: "Our corporate lawyers draft a comprehensive, compliant POSH policy for your company and assist you in selecting and appointing the required members for your Internal Committee." },
+    { step: "02", title: "External Member Tie-Up", desc: "We connect your business with certified, experienced external POSH experts to fulfill your statutory IC composition mandates." },
+    { step: "03", title: "Employee Sensitization & Training Workshops", desc: "We organize mandatory, interactive awareness and sensitization training modules for your employees and leadership team to ensure widespread workplace alignment." },
+    { step: "04", title: "Annual Reporting & External Filing", desc: "Every calendar year, we audit your IC's activities, draft the mandatory Annual POSH Report, and assist in filing it with the local District Officer to keep your entity fully compliant." }
+  ] : isRegisters ? [
+    { step: "01", title: "Labor Law Mapping & Framework Setup", desc: "We review your business category, headcount, and state location to map the exact set of statutory registers your entity is legally required to maintain." },
+    { step: "02", title: "Digital Register Configuration", desc: "Our compliance team designs and configures your digital statutory registers, linking them with your active HRMS or payroll tools to ensure seamless tracking." },
+    { step: "03", title: "Periodic Maintenance & Verification", desc: "We execute continuous monthly reviews of your muster rolls, wage registers, leave trackers, and overtime records to eliminate compliance mismatches." },
+    { step: "04", title: "Audit Readiness & Inspector Facing", desc: "We ensure your entire historical register stack is up to date, accurately signed, and formatted to easily pass unexpected labor department audits and inspections." }
+  ] : isAdvisor ? [
+    { step: "01", title: "Initial Compliance Health Check", desc: "We execute a comprehensive compliance audit across all your operational branches, identifying areas of high regulatory or financial risk." },
+    { step: "02", title: "Policy Realignment & Standard Drafting", desc: "Our labor lawyers update your internal employment policies, contractor agreements, and salary structures to ensure complete legal alignment." },
+    { step: "03", title: "Daily Consultation & Notice Management", desc: "We provide your management team with immediate access to expert legal counsel for daily operational questions, employee issues, and handling official government communications." },
+    { step: "04", title: "Strategic Audit Reports & Continuous Updates", desc: "We conduct periodic compliance reviews and provide your executive board with detailed risk reports and strategies to protect your business as labor laws evolve." }
+  ] : isItr ? [
+    { step: "01", title: "Data Gathering & Tax Profile Mapping", desc: "We compile your financial data from bank statements, investment receipts, and asset purchase files. We then cross-verify this data against your official AIS, TIS, and Form 26AS profiles." },
+    { step: "02", title: "Tax Liability Computation", desc: "Our tax consultants compute your total gross income, apply available deductions under the appropriate tax regime, and calculate your exact net tax liability or tax refund." },
+    { step: "03", title: "Form Selection & Schema Preparation", desc: "We select the correct ITR form matching your entity type and draft the digital return schema, ensuring complete disclosure of domestic and foreign assets." },
+    { step: "04", title: "Filing & e-Verification", desc: "The prepared return is uploaded directly onto the centralized Income Tax e-filing portal. We complete the mandatory electronic verification via Aadhaar OTP or Digital Signature Certificate (DSC)." }
+  ] : isAssessment ? [
+    { step: "01", title: "Notice Analysis & Scope Mapping", desc: "We review the formal assessment notice to identify the exact transactional variations or risk parameters flagged by the department's algorithms." },
+    { step: "02", title: "Reconciliation & Evidence Compilation", desc: "Our tax defense experts reconcile your internal ledgers, banking lines, and invoicing registers, preparing a robust file of supporting evidence." },
+    { step: "03", title: "Drafting Submissions & Legal Backing", desc: "We draft professional, comprehensive written responses to the Assessing Officer, backing our explanations with relevant case laws and past CBDT circulars." },
+    { step: "04", title: "Portal Upload & Order Tracking", desc: "We submit the entire evidence file through the government's online portal. We track your case through subsequent queries until the final Assessment Order is issued." }
+  ] : isNotice ? [
+    { step: "01", title: "DIN Authentication & Classification", desc: "We verify the authenticity of the notice via the e-filing portal using its unique Document Identification Number (DIN) and assess the level of legal risk involved." },
+    { step: "02", title: "Data Gaps Auditing", desc: "Our tax experts analyze the variations between your filed return and the data flagged by the department's systems." },
+    { step: "03", title: "Drafting Legal Explanations", desc: "We write a formal, structured response providing a clear explanation for each flagged transaction, backing our response with relevant banking logs and property records." },
+    { step: "04", title: "Portal Submission & Resolution Tracking", desc: "We upload the legal response and supporting files onto the income tax portal within the mandated response window. We monitor your case status until the department accepts the explanation." }
+  ] : isTds ? [
+    { step: "01", title: "Challan Mapping & Verification", desc: "We extract and verify all your monthly ITNS 281 challans from the databases, ensuring the tax deposited matches your internal accounts perfectly." },
+    { step: "02", title: "PAN Validation & Slab Extraction", desc: "Our data engines run automated validations against the deductees' PAN cards to confirm active status and check that correct deduction rates were applied." },
+    { step: "03", title: "Drafting the Return via FVU Engine", desc: "We compile your transaction data into the standard electronic format, run it through the government's File Validation Utility (FVU) tool, and resolve any structural errors." },
+    { step: "04", title: "Filing Submission & Certificate Generation", desc: "We submit your validated TDS/TCS file to the central registry. Once processed, we generate your official Form 16 / 16A / 27D Certificates to distribute to your team." }
+  ] : isRevisedItr ? [
+    { step: "01", title: "Error Analysis & Eligibility Review", desc: "We review your original ITR filing against your financial statements to identify omissions and ensure your case meets the legal conditions for a Revised Return or an Updated ITR-U return." },
+    { step: "02", title: "Recalculating Tax Liabilities", desc: "We update your financial model, calculate your new gross total income, incorporate the missing revenue elements, and determine your final tax balance along with interest." },
+    { step: "03", title: "Processing Additional Tax Payments", desc: "We help you generate the correct payment challans to clear any additional tax dues and statutory penalties via the online portal." },
+    { step: "04", title: "Filing the Updated Return Scheme", desc: "We draft the corrected return file, choose the appropriate revision/update section codes, and upload the return onto the Income Tax portal, validating with a Class 3 DSC." }
+  ] : isGstNew ? [
+    { step: "01", title: "TRN Generation & Profile Setup", desc: "We access the centralized GST portal to complete Part-A of the registration, validating your business PAN, email address, and mobile numbers to secure a Temporary Reference Number (TRN)." },
+    { step: "02", title: "Compiling Part-B Application", desc: "We log in using the TRN to draft the comprehensive Part-B application, mapping your precise HSN codes or SAC codes and uploading all property deeds." },
+    { step: "03", title: "Aadhaar Authentication Linkage", desc: "We initiate the mandatory online Aadhaar Authentication link for the primary promoters, allowing for fast-track verification and bypassing initial physical site inspections." },
+    { step: "04", title: "Clarification Resolution & GSTIN Issuance", desc: "We track your application. If the tax officer raises an inquiry (Form GST REG-03), we draft and file a prompt response (REG-04) to secure your official GST Registration Certificate." }
+  ] : isGstFiling ? [
+    { step: "01", title: "Invoice Formatting & Data Check", desc: "Every month or quarter, our compliance team reviews your sales registers, formats the data into standard schemas, and cross-checks details to eliminate layout errors." },
+    { step: "02", title: "ITC Reconciliations", desc: "We perform a thorough digital reconciliation, matching your inbound purchase ledgers against your official GSTR-2B statement to identify missing vendor uploads and maximize your valid ITC claims." },
+    { step: "03", title: "Form GSTR-1 Drafting & Portal Upload", desc: "We upload your outward sales data to the GST portal, map the invoices to the correct client GSTINs, and file your GSTR-1 return using secure e-verification tools." },
+    { step: "04", title: "Tax Calculation & GSTR-3B Submission", desc: "We calculate your final net GST liability by offsetting your collected sales tax against your verified input tax credits, handle payments, and file your summary GSTR-3B return." }
+  ] : isGstAnnual ? [
+    { step: "01", title: "Multi-Layered Data Reconciliation", desc: "Our indirect tax experts execute a complete, three-way data reconciliation matching your Audited Books vs. GSTR-1 vs. GSTR-3B to catch any variations." },
+    { step: "02", title: "Input Tax Credit Vetting", desc: "We perform a thorough audit of your annual input tax credits, matching purchase ledgers against portal records to identify unclaimed credits or catch ineligible ITC that needs reversal." },
+    { step: "03", title: "Drafting Form GSTR-9 & 9C", desc: "We compile your consolidated data into the annual return forms, accounting for any delayed tax payments made via Form DRC-03 during the year." },
+    { step: "04", title: "Portal Verification & Final Submission", desc: "The completed annual forms are reviewed with your financial leadership team, signed using a Class 3 DSC, and uploaded onto the GST common portal." }
+  ] : isGstCancel ? [
+    { step: "01", title: "Voluntary Cancellation Filing (REG-16)", desc: "We audit your remaining business stock, calculate input tax credit reversals on inventory, prepare final filings, and submit Form GST REG-16." },
+    { step: "02", title: "Filing Final Return Form GSTR-10", desc: "Within three months of a voluntary cancellation order, we draft and file your mandatory Final Return (GSTR-10) to formally conclude your indirect tax profile." },
+    { step: "03", title: "Suo-Motu Defense & Revocation Application", desc: "For department-cancelled profiles, we identify filing gaps, calculate outstanding late fees, and file Form GST REG-21 to request formal restoration." },
+    { step: "04", title: "Officer Clarification Resolution", desc: "We coordinate directly with the regional tax office, responding promptly to any notices (REG-23) to secure an order restoring your profile to an 'Active' status." }
+  ] : isGstNotice ? [
+    { step: "01", title: "Notice Analysis & Scope Mapping", desc: "We perform a thorough review of the notice to pinpoint the exact transaction discrepancies or input tax credit variations flagged by the systems." },
+    { step: "02", title: "Reconciling Data Discrepancies", desc: "Our indirect tax experts cross-match your internal sales registers, purchase ledgers, and portal logs to identify the root cause of the discrepancy." },
+    { step: "03", title: "Drafting Legal Explanations", desc: "We write a formal, structured response providing a clear explanation for each flagged transaction, backing arguments with relevant statutory guidelines and circulars." },
+    { step: "04", title: "Filing Form Replies & Case Closure", desc: "We file your formal response online (using forms like ASMT-11) and track your case status through subsequent hearings until the tax officer officially closes the file." }
+  ] : isMcaCompliance ? [
+    { step: "01", title: "Financial Vetting & Auditor Coordination", desc: "We assist your accounting teams in organizing raw ledger accounts, balancing sheets, and coordinating with statutory auditors to secure your formal Auditor's Report." },
+    { step: "02", title: "Secretarial Drafting & Approvals", desc: "Our corporate secretarial experts draft the mandatory Director's Report, notice of Annual General Meeting (AGM), and official board resolutions to validate your annual corporate proceedings." },
+    { step: "03", title: "Form Packaging & DSC Authentication", desc: "We compile your audited numbers into specialized MCA forms (AOC-4, MGT-7, Form 8, or Form 11), perform pre-scrutiny checks, and authenticate them using the directors' Class 3 DSC keys." },
+    { step: "04", title: "RoC Filing & Corporate Maintenance", desc: "We upload the completed form stack directly to the MCA portal, clear the required government filing fees, track processing milestones, and deliver the formal corporate approval receipts." }
+  ] : isMcaName ? [
+    { step: "01", title: "Trademark Search & Name Mapping", desc: "We run a rigorous search across the trademark registry and MCA directories to ensure your preferred corporate names are completely clear of conflict." },
+    { step: "02", title: "Name Reservation via RUN Portal", desc: "We submit your preferred business names to the MCA through the centralized web system for official name approval and reservation." },
+    { step: "03", title: "Drafting Resolutions & MOA/AOA Alteration", desc: "Once the name is approved, we assist in organizing an Extraordinary General Meeting (EGM) to pass the mandatory Special Resolution and draft the newly updated clauses inside your MOA and AOA." },
+    { step: "04", title: "Filing Form MGT-14 & INC-24", desc: "We file Form MGT-14 to register the special resolution, followed by Form INC-24 to secure formal central government approval. Upon validation, the RoC issues your fresh Certificate of Incorporation." }
+  ] : isMcaAddress ? [
+    { step: "01", title: "Board Meeting Execution", desc: "We assist you in organizing a Board Meeting to pass the resolution approving the office relocation and specifying the exact effective date of the change." },
+    { step: "02", title: "Filing Form INC-22", desc: "For standard office relocations within the same city or RoC jurisdiction, we compile the new property deeds and landlord NOCs to file Form INC-22 online within 30 days of the board resolution." },
+    { step: "03", title: "Regional Director Petitions", desc: "If you are moving between different RoC jurisdictions or crossing state lines, we handle the publication of mandatory notices in newspapers, draft formal petitions to the Regional Director, and handle the filing of Form MGT-14 and Form INC-23." },
+    { step: "04", title: "RoC Update Tracking", desc: "The MCA verifies the physical property records. Once approved, the new corporate office location is officially updated on the public master data system." }
+  ] : isMcaShares ? [
+    { step: "01", title: "AOA Review & Notice of Intention", desc: "We perform an audit of your Articles of Association to confirm your company's precise share transfer rules and help the exiting shareholder file their formal Notice of Intention to transfer equity." },
+    { step: "02", title: "Executing Form SH-4 & Stamp Duty Settlement", desc: "We draft your formal Form SH-4 transfer instrument, calculate the required state-specific stamp duty (typically 0.015% of the total market value), and ensure the physical stamp certificates are securely attached to the form." },
+    { step: "03", title: "Board Review & Resolution Passage", desc: "The completed SH-4 forms along with physical share certificates are submitted to the company board. We compile the board minutes and draft the official resolution approving the transfer." },
+    { step: "04", title: "Register Updating & Certificate Endorsement", desc: "Once approved, we update your internal Register of Transfers and Register of Members (Form MGT-1). We then endorse the reverse side of the physical share certificates to formally complete the equity allocation." }
+  ] : isMcaMoa ? [
+    { step: "01", title: "Board Authorization & EGM Notice", desc: "We assist you in organizing a Board Meeting to pass a resolution approving the proposed amendments and authorize a notice to be sent to shareholders for an EGM." },
+    { step: "02", title: "Special Resolution Passage", desc: "We draft the formal minutes and resolutions for the Extraordinary General Meeting (EGM), ensuring the mandatory 75% shareholder approval is met." },
+    { step: "03", title: "Form Packaging & Filing", desc: "For standard text amendments, we file Form MGT-14 with the RoC within 30 days of the resolution. If you are increasing your authorized capital, we also prepare and file Form SH-7." },
+    { step: "04", title: "RoC Verification & Certification", desc: "The Registrar of Companies reviews the amended clauses against the Companies Act framework. Once approved, the altered copies of your MOA and AOA are officially registered." }
+  ] : isMcaDirectors ? [
+    { step: "01", title: "Securing DIN & Verifying Consent", desc: "For new directors without an existing identity number, we apply for a fresh DIN via the MCA portal. We then assist in compiling the mandatory consent documents (DIR-2) and financial disclosures (MBP-1)." },
+    { step: "02", title: "Passing the Corporate Resolution", desc: "We organize the required Board Meeting or Extraordinary General Meeting (EGM) to pass the formal resolution approving the appointment or tracking the removal/resignation." },
+    { step: "03", title: "Filing Form DIR-12 with the RoC", desc: "Our team compiles the resolution documents, consent letters, and identity papers to file Form DIR-12 on the MCA portal within 30 days of the effective change date." },
+    { step: "04", title: "Updating Internal Statutory Registers", desc: "Once the MCA issues its electronic approval receipt, we update your internal Register of Directors and Key Managerial Personnel to ensure complete compliance." }
+  ] : isMcaWinding ? [
+    { step: "01", title: "Closing Bank Accounts & Settling Dues", desc: "We assist you in clearing out any remaining business assets, settling all pending creditor claims, and securing your formal Bank Account Closure Certificate." },
+    { step: "02", title: "Compiling Financial Statements & Affidavits", desc: "Our compliance experts work with practicing CAs to draft your final Statement of Accounts. Simultaneously, we prepare the required STK-3 Affidavits and STK-4 Indemnity Bonds on appropriate stamp papers." },
+    { step: "03", title: "Filing Form STK-2 with the MCA", desc: "We bundle the financial statements, director indemnities, closure approvals, and board resolutions to file Form STK-2 on the MCA portal along with the flat government closure fees." },
+    { step: "04", title: "Public Notice & Final Dissolution", desc: "The RoC reviews your application and publishes a public notice for 30 days to invite any potential objections from the public or tax departments. If no objections are raised, the RoC officially strikes off your company name." }
   ] : isDarpan ? [
     { step: "01", title: "NITI Aayog Portal Configuration", desc: "We access the centralized NGO Darpan portal, building a fresh organizational identity profile directly linked to your business PAN card." },
     { step: "02", title: "Executive Mapping Sequence", desc: "Our compliance experts accurately input the individual identity profiles, Aadhaar numbers, and dynamic contact credentials of all active board members to ensure complete transparency." },
     { step: "03", title: "Sectoral Activities Specification", desc: "We map your specific non-profit activities to the correct government sectors, detailing your primary geographic footprint and active project locations." },
     { step: "04", title: "Validation & Unique ID Issuance", desc: "The NITI Aayog system reviews your attached deeds and board data. Once cleared, your formal NGO DARPAN Unique ID Number is generated." }
+  ] : isProprietorship ? [
+    { step: "01", title: "Strategic Consultation & Name Selection", desc: "Choosing a unique name and outlining core business objectives to give the business legal standing." },
+    { step: "02", title: "Acquiring Core Government Registrations", desc: "Applying for Udyam (MSME) and GST registration to give the business legal standing." },
+    { step: "03", title: "Tax & Local Compliance Filing", desc: "Obtaining state-specific licenses such as the Shop & Establishment Act registration." },
+    { step: "04", title: "Current Bank Account Opening", desc: "Setting up a dedicated commercial current account using government certificates." }
+  ] : isPartnership ? [
+    { step: "01", title: "Consultation & Brand Protection", desc: "We consult with all partners to finalize the firm name, profit-sharing ratios, and business objectives. We conduct a trademark search to ensure your firm name is unique and legally protectable." },
+    { step: "02", title: "Drafting the Partnership Deed", desc: "Our legal experts draft a comprehensive Partnership Deed covering capital contributions, profit/loss ratios, partner duties, exit clauses, and dispute resolution mechanisms." },
+    { step: "03", title: "Filing with the Registrar of Firms (RoF)", desc: "We submit the partnership deed along with all supporting documents to the state's Registrar of Firms portal and pay the applicable government stamp duty and registration fees." },
+    { step: "04", title: "Post-Registration Tax & Bank Setup", desc: "Once legally incorporated, we apply for the firm's dedicated PAN and TAN, set up GST and Udyam MSME registrations, and provide the complete legal kit required for opening a current account." }
+  ] : isPvtLtd ? [
+    { step: "01", title: "Name Approval (RUN – Reserve Unique Name)", desc: "Submission of preferred names to the Ministry of Corporate Affairs (MCA) to ensure uniqueness and eliminate trademark conflicts." },
+    { step: "02", title: "Digital Signature Certificate (DSC) & DIN Allocation", desc: "Procuring Class 3 Digital Signature Certificates (DSC) for paperless electronic execution alongside Director Identification Number (DIN) allocation." },
+    { step: "03", title: "Drafting MOA & AOA and Filing SPICe+ Forms", desc: "Meticulously drafting the Memorandum of Association (MOA) and Articles of Association (AOA), and submitting the bundled SPICe+ form for government review." },
+    { step: "04", title: "Certificate of Incorporation, PAN, and TAN Issuance", desc: "Upon approval, the MCA issues the official Certificate of Incorporation (COI) along with corporate PAN and TAN to facilitate immediate current account setup." }
   ] : isGst ? [
     { step: "01", title: "Document Collection", desc: "Submit your documents via our secure portal or WhatsApp." },
     { step: "02", title: "Application Preparation", desc: "Our team prepares and verifies your GST application accurately." },
@@ -2448,7 +3082,27 @@ function ServiceDetailPage({
     { step: "04", title: "Delivery", desc: "Receive your approved certificate and registration number in 3-7 days." }
   ];
 
-  const faqs = isGst ? [
+  const faqs = isWebDev ? [
+    { q: "How long does it take to build a website?", a: "The timeline depends on the complexity of the project. A standard corporate website takes 2-4 weeks, while custom web apps or e-commerce platforms can take 6-12 weeks." },
+    { q: "Will my website be mobile-friendly?", a: "Yes, all our websites are built with a mobile-first approach, ensuring they look and function perfectly across all devices and screen sizes." },
+    { q: "Do you provide website maintenance and support?", a: "Yes, we offer ongoing maintenance and support packages to ensure your website remains secure, updated, and performs optimally." },
+    { q: "Can I update the website content myself?", a: "Absolutely! We build websites on user-friendly Content Management Systems (CMS) like WordPress, Shopify, or custom dashboards, empowering you to manage your content effortlessly." }
+  ] : isLogoDesign ? [
+    { q: "How long does the logo design process take?", a: "Typically, our initial concept presentation takes 5-7 working days. The complete process, including refinements and final file delivery, usually takes 2-3 weeks depending on the feedback cycle." },
+    { q: "What file formats will I receive?", a: "We provide a comprehensive package including vector formats (AI, EPS, SVG) for scalability and print, along with high-resolution raster formats (PNG, JPEG, WebP) for digital use." },
+    { q: "Do I own the copyright to the final design?", a: "Yes, upon final payment and project completion, the full copyright and ownership of the finalized logo design are transferred to you." },
+    { q: "Can we request revisions on the concepts?", a: "Absolutely. We encourage collaborative feedback and offer revision rounds as part of our process to ensure the final design perfectly aligns with your vision." }
+  ] : isBilling ? [
+    { q: "Is the billing software GST compliant?", a: "Yes, our billing solutions are fully compliant with current GST regulations and include automated e-invoicing features directly linked to the national tax portal." },
+    { q: "Can the software integrate with our existing CRM?", a: "Absolutely! We build with API-first architectures that allow seamless integration with your existing CRM, inventory management, and other operational tools." },
+    { q: "Is my financial data secure?", a: "We implement bank-grade encryption protocols, secure cloud hosting, and strict access controls to ensure your financial and customer data remains completely secure." },
+    { q: "Will you train our staff on the new system?", a: "Yes, comprehensive staff training and onboarding sessions are included as part of our deployment process to ensure a smooth transition." }
+  ] : isMarketing ? [
+    { q: "Do you write the scripts for the videos?", a: "Yes, our team handles end-to-end production, including campaign ideation, professional scriptwriting, and storyboarding based on your brand messaging." },
+    { q: "What platforms are the videos optimized for?", a: "We optimize and render deliverables for all major platforms, including 9:16 vertical formats for Reels/TikTok, 1:1 for social feeds, and 16:9 for YouTube or corporate presentations." },
+    { q: "Can I request edits during post-production?", a: "Absolutely. We build review milestones into our process, allowing you to request adjustments to graphics, pacing, or color grading before the final render." },
+    { q: "Do you provide source files for the posters?", a: "Depending on the package selected, we can provide editable source files (like PSD or AI) along with the finalized, ready-to-post flattened image assets." }
+  ] : isGst ? [
     { q: "Who must register for GST?", a: "Any business with annual turnover exceeding ₹20 lakhs (₹10 lakhs for special category states) is mandatorily required to register for GST." },
     { q: "Is GST registration free?", a: "Yes, GST registration with the government portal is free of charge. Our professional fee covers documentation, filing, and follow-up support." },
     { q: "Can I start a business before GST registration?", a: "You can start operations, but you cannot collect GST from customers or claim input tax credit until your registration is active." },
@@ -2502,14 +3156,21 @@ function ServiceDetailPage({
               {/* What is Service */}
               <div className="bg-white dark:bg-[#0c1a30] rounded-2xl p-8 border border-gray-100 dark:border-zinc-800 shadow-sm">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{whatIsTitle}</h2>
-                <p className="text-gray-500 dark:text-zinc-300 leading-relaxed mb-4">
+                <p className="text-gray-500 dark:text-zinc-300 leading-relaxed mb-4 whitespace-pre-wrap">
                   {isGst 
                     ? "GST (Goods and Services Tax) Registration is the process by which a business obtains a unique GSTIN (GST Identification Number) from the government. It enables businesses to collect GST from customers, claim input tax credits, and comply with India's unified indirect tax system."
                     : whatIsDesc
                   }
                 </p>
-                <p className="text-gray-500 dark:text-zinc-300 leading-relaxed">
-                  {isShopAct
+                {!(isWebDev || isLogoDesign || isBilling || isMarketing) && (
+                  <p className="text-gray-500 dark:text-zinc-300 leading-relaxed">
+                    {isProprietorship
+                     ? "Under this framework, there is no legal distinction between the owner (proprietor) and the business entity. The business operates under the personal legal identity of the owner, meaning all profits belong entirely to you—and similarly, all financial liabilities are yours to fulfil. In India, it is not governed by a singular dedicated act; rather, its legal recognition is established through various tax and government registrations like GST, Udyam (MSME), and state-specific licenses."
+                     : isPartnership
+                     ? "Governed by the Indian Partnership Act, 1932, a partnership combines the financial strength and expertise of multiple owners. While the firm is legally recognized as an association of individuals rather than a separate corporate legal entity, registering it with the state's Registrar of Firms (RoF) grants it legal enforceability—ensuring that the business can execute contracts, resolve internal disputes smoothly, and establish credibility with banks and vendors."
+                     : isPvtLtd
+                     ? "A Private Limited Company is a separate legal entity incorporated under the Companies Act, 2013 (and managed by the Ministry of Corporate Affairs – MCA). Unlike a proprietorship or partnership, a Pvt Ltd company exists independently of its shareholders and directors. It features 'Perpetual Succession,' meaning the company continues to legally exist even if shareholders change, pass away, or exit. The most powerful attribute of this structure is Limited Liability—the personal assets of the directors and shareholders are completely safe and insulated if the business faces financial losses or debts."
+                     : isShopAct
                     ? "Every commercial business entity that operates out of a physical commercial premises—including shops, restaurants, hotels, theaters, corporate offices, warehouses, and service centers—must register under this Act within 30 days of commencing operations. The license regulates working conditions, such as mandatory employee working hours, rest intervals, weekly holidays, overtime wages, safety guidelines, and leave policies, ensuring your business adheres to regional labor laws."
                     : isTradeLicense
                     ? "A Trade License is a mandatory certificate or document issued by a local municipal authority that permits an applicant to carry out a specific business or trade at a particular commercial premises. Unlike the Shops & Establishment registration—which primarily focuses on employee working conditions and labor rights—a Trade License ensures that your business activities do not cause a public nuisance, health hazard, or environmental threat to the surrounding residential or commercial locality."
@@ -2528,11 +3189,11 @@ function ServiceDetailPage({
                     : isIso
                     ? "An ISO certificate proves your organization's dedication to continuous workflow optimization, operational efficiency, and customer satisfaction. It significantly enhances your brand's competitive advantage in domestic and international markets."
                     : isPf
-                    ? "Once registered, an employer must deduct a statutory percentage (typically 12% of basic wages) from eligible employees' salaries and contribute an equal matching amount into their dedicated provident fund account monthly. Failure to register or timely deposit monthly PF contributions can lead to severe financial penalties."
+                    ? "The EPF framework mandates that once an establishment is registered, the employer must deduct a statutory percentage (typically 12% of basic wages) from eligible employees' salaries and contribute an equal matching amount into their dedicated provident fund account monthly. These collections must be filed online month-on-month through an Electronic Challan-cum-Return (ECR); failure to register or timely deposit monthly PF contributions can lead to severe financial penalties and legal action against company management."
                     : isPsara
                     ? "The PSARA framework is regulated strictly by individual state-appointed Controlling Authorities. Operating an uncertified private guarding business without a valid PSARA license is a serious, non-bailable criminal offense."
                     : isEsic
-                    ? "The ESIC ecosystem ensures that eligible employees receive comprehensive medical care, maternity benefits, sick leave pay, and disability compensation. Employers must contribute a statutory percentage of the monthly payroll, while employees contribute a fractional amount from their basic wages."
+                    ? "The ESIC ecosystem ensures that eligible employees and their dependents receive comprehensive medical care, maternity benefits, sick leave pay, and disability compensation. Employers must contribute a statutory percentage (3.25% of gross wages) of the monthly payroll, while employees contribute a fractional amount (0.75%) from their basic wages. All data, employee additions, and monthly financial contributions must be filed digitally via the ESIC portal before the 15th of every subsequent month."
                     : isCopyright
                     ? "A copyright protects the unique expression of an idea rather than the idea itself. It grants creators the exclusive legal authority to reproduce, translate, perform, and distribute their work globally. It serves as an essential protection tool against digital piracy."
                     : isStartup
@@ -2541,19 +3202,354 @@ function ServiceDetailPage({
                     ? "A trademark protects your brand's unique assets—such as your name, logo, or slogan—from being copied or misused by competitors. It ensures customers can easily identify your authentic products or services in the market."
                     : isUdyam
                     ? "The Udyam framework automatically classifies your business as Micro, Small, or Medium based strictly on your investment in plant and machinery alongside your annual financial turnover metrics. It maps your enterprise directly into the national economic database."
+                    : isPt
+                    ? "Professional Tax compliance requires a dual-structured registration based on your business dynamic: Professional Tax Enrollment Certificate (PTEC), which authorizes the business entity itself to pay its annual tax, and Professional Tax Registration Certificate (PTRC), which mandates the employer to deduct tax from employees' monthly salaries and file returns."
+                    : isLwf
+                    ? "The LWF compliance architecture requires a joint financial contribution from both the employer and the employee, with the specific contribution ratios and filing frequencies (monthly, half-yearly, or annual) varying widely across state jurisdictions. Failure to compute or remit these funds can lead to severe audits by labor inspectors, blocking your corporate clean compliance certificates."
+                    : isPosh
+                    ? "POSH compliance requires businesses to establish a formal framework to address workplace harassment. This includes drafting an explicit internal gender-neutral policy, setting up a mandatory Internal Committee (IC) to handle grievances, organizing regular employee sensitization workshops, and filing an annual compliance report with district officers."
+                    : isRegisters
+                    ? "Governed under various central acts—such as the Minimum Wages Act, Payment of Wages Act, Contract Labour Act, and state-specific Shop Act guidelines—these registers act as the primary evidence of compliance during a labor inspector's visit. Our firm transitions your compliance ecosystem into a perfectly formatted digital structure."
+                    : isAdvisor
+                    ? "Indian labor regulations are complex, and with the rolling out of the new consolidated Labour Codes, having a specialized legal advisor is essential to protect your business from major non-compliance fines, labor court disputes, and operational disruptions. Our service operates as an extension of your leadership and internal HR teams."
+                    : isItr
+                    ? "Filing your Income Tax Return (ITR) before the statutory deadlines is not just a legal obligation; it is a prerequisite for maintaining financial credibility. A clean track record of ITR filings is mandatory when applying for corporate bank loans, seeking premium credit lines, routing foreign remittances, or processing international visa applications."
+                    : isAssessment
+                    ? "Assessments can range from automated electronic processing to deep-dive manual reviews. Navigating an assessment requires an expert understanding of changing tax laws, proper accounting practices, and clear evidence mapping to satisfy the questions raised by the Assessing Officer (AO)."
+                    : isNotice
+                    ? "The department matches your ITR disclosures against third-party data reporting channels (like banks, credit card firms, and sub-registrar offices). Any variation can trigger an automated system alert. Our specialized notice resolution service steps in to draft clear, legally sound responses that resolve these disputes smoothly."
+                    : isTds
+                    ? "Every deductor and collector must file quarterly TDS/TCS returns using specialized forms (Form 24Q, 26Q, 27Q, or 27EQ) to pass tax credits to the respective beneficiaries. Failure to file on time or deducting tax at incorrect rates can lead to severe late-filing fees (₹200 per day under Section 234E), high interest penalties, and expense disallowance."
+                    : isRevisedItr
+                    ? "Filing an updated return (ITR-U) allows taxpayers to voluntarily correct their tax filings and avoid severe penalties. ITR-U can be used to report additional income, correct tax slab selections, or reduce a previously claimed refund, provided the update results in a payment of additional tax."
+                    : isGstNew
+                    ? "Operating an eligible business without an active GSTIN number can lead to severe financial penalties and operational shutdowns. Our expert onboarding service handles the entire application process on the centralized GST common portal, helping you secure your registration smoothly and avoid rejections or delays."
+                    : isGstFiling
+                    ? "Missing GST filing deadlines can lead to daily late fees, cumulative interest penalties, and the blocking of your E-Way Bill generation portal. More importantly, delayed filings can cause your clients to lose out on their Input Tax Credits (ITC), which can quickly damage your corporate reputation."
+                    : isGstAnnual
+                    ? "Filing the GST Annual Return requires careful accounting reconciliation, as it pulls data from your audited balance sheets, GSTR-1 filings, GSTR-3B submissions, and Input Tax Credit books. Failing to complete this year-end filing on time can trigger significant automatic late fees and audit risks."
+                    : isGstCancel
+                    ? "Conversely, if the GST department has unilaterally suspended or cancelled your registration due to a failure to file returns for consecutive tax periods, we initiate a fast-track Revocation of Cancellation process. This service involves filing Form GST REG-21 within the mandated timelines to restore your registration."
+                    : isGstNotice
+                    ? "Failing to respond to a GST notice within the mandated timelines can lead to a unilateral tax demand order, unexpected asset attachments, and the suspension of your GSTIN. Our dedicated notice resolution service steps in to perform a deep-dive analysis of your data and draft clear legal responses."
+                    : isMcaCompliance
+                    ? "For companies, this includes executing mandatory annual board meetings, drafting financial statements, and filing forms like AOC-4 (Financial Statements) and MGT-7 (Annual Return) every financial year. For LLPs, it involves the submission of Form 8 (Statement of Account & Solvency) and Form 11 (Annual Return). Maintaining up-to-date annual filings is an absolute prerequisite to attracting venture capital investment, securing bank credit lines, and protecting the limited liability status of your business promoters."
+                    : isMcaName
+                    ? "Altering your company's name requires complete clearance from the Ministry of Corporate Affairs (MCA) to ensure the proposed name is completely unique and does not violate any pre-existing corporate names or active trademarks. It involves passing a special resolution by shareholders, altering your Memorandum of Association (MOA) and Articles of Association (AOA), and securing a fresh Certificate of Incorporation from the Registrar of Companies (RoC)."
+                    : isMcaAddress
+                    ? "The statutory compliance process for changing your address varies based on the geographic distance of the move: shifting within the same city/municipality, moving outside local limits but under the same Registrar of Companies (RoC), relocating between different RoC jurisdictions within the same state, or executing an inter-state transfer. Moving across RoC boundaries or shifting states requires extensive public notice, newspaper advertisements, and formal approval from the Regional Director (RD)."
+                    : isMcaShares
+                    ? "Unlike public enterprises, a Private Limited Company has structural restrictions on the free transferability of its equity to protect the closely-held nature of the organization. A share transfer requires executing a formal Form SH-4 (Securities Transfer Form), paying the required state-specific stamp duties, securing explicit board approval, updating internal share registers, and issuing newly endorsed share certificates to the incoming shareholder."
+                    : isMcaMoa
+                    ? "An alteration requires a formal meeting of your board of directors, passing a special resolution by a three-fourths majority of shareholders at an Extraordinary General Meeting (EGM), and securing official electronic validation from the Ministry of Corporate Affairs (MCA). Any business activities conducted outside the scope defined in your MOA are legally considered ultra vires (beyond corporate power) and are completely invalid."
+                    : isMcaDirectors
+                    ? "An appointment requires checking eligibility criteria, securing a unique Director Identification Number (DIN), and ensuring your onboarding director completes their annual DIR-3 KYC verifications. Conversely, removing a director requires strict adherence to corporate governance rules under Section 169 of the Companies Act, 2013, including providing a reasonable opportunity for the director to be heard before shareholders pass an ordinary resolution."
+                    : isMcaWinding
+                    ? "The STK-2 Fast Track Exit process is ideal for defunct private limited companies looking for a low-cost, hassle-free closure mechanism. It requires closing all active business bank accounts, completely settling all outstanding corporate liabilities, securing clear affidavits from directors, and compiling a clean Statement of Accounts reflecting zero assets and zero liabilities."
                     : isDarpan
                     ? "The DARPAN platform enhances the transparency, credibility, and institutional accountability of NGOs across India. Possessing a valid Darpan ID is an essential prerequisite for any non-profit aiming to participate in high-value central government funding projects."
                     : isGst
                     ? "Once registered, the business is legally recognized as a supplier of goods or services under the GST regime. Registration is mandatory for businesses meeting the turnover threshold and for certain categories regardless of turnover, such as e-commerce operators and inter-state suppliers."
                     : `Obtaining this registration ensures compliance with local laws and regulations. It helps build credibility with partners, customers, and financial institutions, smoothing your business operations.`
                   }
-                </p>
+                  </p>
+                )}
               </div>
 
-              {/* Who needs it / Eligibility Criteria */}
-              <div className="bg-white dark:bg-[#0c1a30] rounded-2xl p-8 border border-gray-100 dark:border-zinc-800 shadow-sm">
+              {isWebDev && (
+                <>
+                  {/* Trending Digital Tech & Aesthetics */}
+                  <div className="bg-white dark:bg-[#0c1a30] rounded-2xl p-8 border border-gray-100 dark:border-zinc-800 shadow-sm mb-8">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Trending Digital Tech & Aesthetics</h2>
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-4 h-4 mt-1 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                        <p className="text-sm text-gray-600 dark:text-zinc-300"><strong className="text-gray-900 dark:text-white">AI-Driven Customer Workflows:</strong> Embedding intelligent automated assistants and customer routing engines to capture high-intent leads and resolve operations queries 24/7.</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-4 h-4 mt-1 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                        <p className="text-sm text-gray-600 dark:text-zinc-300"><strong className="text-gray-900 dark:text-white">Headless & JAMstack Architecture:</strong> Utilizing modern decoupled development practices to achieve extreme structural security, lower server costs, and global content delivery.</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-4 h-4 mt-1 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                        <p className="text-sm text-gray-600 dark:text-zinc-300"><strong className="text-gray-900 dark:text-white">Conversion Rate Optimization (CRO):</strong> Designing clear, data-backed landing page layouts, strategic call-to-action (CTA) arrays, and ultra-smooth payment paths.</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-4 h-4 mt-1 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                        <p className="text-sm text-gray-600 dark:text-zinc-300"><strong className="text-gray-900 dark:text-white">Next-Gen SEO Frameworks:</strong> Engineering schema markup, structured site architectures, and Core Web Vitals optimization to rank higher on search engines from day one.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Service Track & Deliverables Portfolio */}
+                  <div className="bg-white dark:bg-[#0c1a30] rounded-2xl p-8 border border-gray-100 dark:border-zinc-800 shadow-sm mb-8">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Service Track & Deliverables Portfolio</h2>
+                    <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                      <table className="w-full text-sm text-left border-collapse">
+                        <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                          <tr>
+                            <th className="px-6 py-4 border border-zinc-700/10 w-1/3">Category / Framework</th>
+                            <th className="px-6 py-4 border border-zinc-700/10">Scope of Deliverables & Requirements</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                          <tr className="bg-white dark:bg-[#0c1a30]">
+                            <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top border border-gray-100 dark:border-zinc-800">Corporate Websites</td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                              <ul className="list-disc pl-4 space-y-1">
+                                <li>Multi-page corporate platforms, service showcase portals, and dynamic content architectures.</li>
+                                <li>Tech Options: WordPress, Webflow, React, or custom HTML5/CSS3.</li>
+                              </ul>
+                            </td>
+                          </tr>
+                          <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                            <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top border border-gray-100 dark:border-zinc-800">E-Commerce Engines</td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                              <ul className="list-disc pl-4 space-y-1">
+                                <li>Secure online storefronts, inventory management dashboards, and localized multi-currency checkouts.</li>
+                                <li>Tech Options: Shopify, WooCommerce, Next.js, or Magento.</li>
+                              </ul>
+                            </td>
+                          </tr>
+                          <tr className="bg-white dark:bg-[#0c1a30]">
+                            <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top border border-gray-100 dark:border-zinc-800">Custom Web Apps</td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                              <ul className="list-disc pl-4 space-y-1">
+                                <li>Client dashboards, proprietary service portals, and custom SaaS tools.</li>
+                                <li>Tech Options: Full-stack development using Node.js, Python (Django), React, or Vue.js.</li>
+                              </ul>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {isLogoDesign && (
+                <>
+                  {/* Trending Digital Tech & Aesthetics */}
+                  <div className="bg-white dark:bg-[#0c1a30] rounded-2xl p-8 border border-gray-100 dark:border-zinc-800 shadow-sm mb-8">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Trending Digital Tech & Aesthetics</h2>
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-4 h-4 mt-1 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                        <p className="text-sm text-gray-600 dark:text-zinc-300"><strong className="text-gray-900 dark:text-white">Adaptive Variable Logo Systems:</strong> Designing flexible, responsive logo frameworks that fluidly scale and auto-adjust for pristine clarity across everything from tiny app favicons to massive outdoor billboards.</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-4 h-4 mt-1 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                        <p className="text-sm text-gray-600 dark:text-zinc-300"><strong className="text-gray-900 dark:text-white">Strategic Minimalism:</strong> Eliminating visual clutter to focus entirely on clean vector geometry and deliberate negative space, making your brand highly impactful.</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-4 h-4 mt-1 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                        <p className="text-sm text-gray-600 dark:text-zinc-300"><strong className="text-gray-900 dark:text-white">Intentional Color Archetypes:</strong> Utilizing psychological color mapping to evoke the exact right emotional responses from your target market segment (e.g., trust, innovation, premium luxury).</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-4 h-4 mt-1 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                        <p className="text-sm text-gray-600 dark:text-zinc-300"><strong className="text-gray-900 dark:text-white">Complete Brand Identity Toolkits:</strong> Delivering holistic design assets—including comprehensive brand guidelines, corporate typography hierarchies, and custom asset layouts.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Core Systems & Asset Structure */}
+                  <div className="bg-white dark:bg-[#0c1a30] rounded-2xl p-8 border border-gray-100 dark:border-zinc-800 shadow-sm mb-8">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Core Systems & Asset Structure</h2>
+                    <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                      <table className="w-full text-sm text-left border-collapse">
+                        <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                          <tr>
+                            <th className="px-6 py-4 border border-zinc-700/10 w-1/3">Category / Framework</th>
+                            <th className="px-6 py-4 border border-zinc-700/10">Scope of Deliverables & Requirements</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                          <tr className="bg-white dark:bg-[#0c1a30]">
+                            <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top border border-gray-100 dark:border-zinc-800">Primary Brand Marks</td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                              <ul className="list-disc pl-4 space-y-1">
+                                <li>Master Brand Logo, Secondary Emblem Layouts, Wordmarks, and Favicon assets.</li>
+                              </ul>
+                            </td>
+                          </tr>
+                          <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                            <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top border border-gray-100 dark:border-zinc-800">Vector Production Files</td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                              <ul className="list-disc pl-4 space-y-1">
+                                <li>Scalable, print-ready file formats for unlimited reproduction without quality loss.</li>
+                                <li>Formats: AI, EPS, SVG, and high-resolution PDF assets.</li>
+                              </ul>
+                            </td>
+                          </tr>
+                          <tr className="bg-white dark:bg-[#0c1a30]">
+                            <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top border border-gray-100 dark:border-zinc-800">Digital Asset Package</td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                              <ul className="list-disc pl-4 space-y-1">
+                                <li>Transparent web-optimized file types curated for smooth online, application, and social media display.</li>
+                                <li>Formats: High-res PNG, JPEG, and WebP.</li>
+                              </ul>
+                            </td>
+                          </tr>
+                          <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                            <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top border border-gray-100 dark:border-zinc-800">Corporate Branding Guide</td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                              <ul className="list-disc pl-4 space-y-1">
+                                <li>Core Identity Manual defining exact brand color codes (HEX/CMYK/Pantone), typefaces, and clear guidelines on logo usage rules.</li>
+                              </ul>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {isBilling && (
+                <>
+                  {/* Trending System Capabilities */}
+                  <div className="bg-white dark:bg-[#0c1a30] rounded-2xl p-8 border border-gray-100 dark:border-zinc-800 shadow-sm mb-8">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Trending System Capabilities</h2>
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-4 h-4 mt-1 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                        <p className="text-sm text-gray-600 dark:text-zinc-300"><strong className="text-gray-900 dark:text-white">Automated E-Invoicing Systems:</strong> Generating fully compliant electronic invoices that link directly to national tax systems (such as GST e-Invoicing) automatically.</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-4 h-4 mt-1 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                        <p className="text-sm text-gray-600 dark:text-zinc-300"><strong className="text-gray-900 dark:text-white">Unified Omni-Channel Payments:</strong> Integrating secure, global payment processors to accept automated recurring subscriptions, credit cards, UPI transactions, and corporate bank deposits.</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-4 h-4 mt-1 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                        <p className="text-sm text-gray-600 dark:text-zinc-300"><strong className="text-gray-900 dark:text-white">Real-Time Financial Analytics:</strong> Dynamic dashboards that track your accounts receivable, map outstanding payments, monitor aging ledgers, and export clear financial reports.</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-4 h-4 mt-1 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                        <p className="text-sm text-gray-600 dark:text-zinc-300"><strong className="text-gray-900 dark:text-white">End-to-End ERP Integrations:</strong> Syncing your invoicing tools directly with your central inventory trackers, customer relationship management (CRM) systems, and financial ledgers.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Core Systems & Asset Structure */}
+                  <div className="bg-white dark:bg-[#0c1a30] rounded-2xl p-8 border border-gray-100 dark:border-zinc-800 shadow-sm mb-8">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Core Systems & Asset Structure</h2>
+                    <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                      <table className="w-full text-sm text-left border-collapse">
+                        <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                          <tr>
+                            <th className="px-6 py-4 border border-zinc-700/10 w-1/3">Category / Framework</th>
+                            <th className="px-6 py-4 border border-zinc-700/10">Scope of Deliverables & Requirements</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                          <tr className="bg-white dark:bg-[#0c1a30]">
+                            <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top border border-gray-100 dark:border-zinc-800">Billing & Invoicing Engine</td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                              <ul className="list-disc pl-4 space-y-1">
+                                <li>Automated recurring retainers, customizable invoice design layouts, pro-forma tools, and smart payment reminders.</li>
+                              </ul>
+                            </td>
+                          </tr>
+                          <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                            <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top border border-gray-100 dark:border-zinc-800">Inventory & Asset Controls</td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                              <ul className="list-disc pl-4 space-y-1">
+                                <li>Real-time stock level monitoring, low-inventory notifications, multi-warehouse tracking, and automated supplier purchase orders.</li>
+                              </ul>
+                            </td>
+                          </tr>
+                          <tr className="bg-white dark:bg-[#0c1a30]">
+                            <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top border border-gray-100 dark:border-zinc-800">Financial Ledger Toolkits</td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                              <ul className="list-disc pl-4 space-y-1">
+                                <li>Automated cash ledger balancing, tax allocation models (GST/TDS), expense tracking, and auditing tools.</li>
+                              </ul>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {isMarketing && (
+                <>
+                  {/* Trending System Capabilities */}
+                  <div className="bg-white dark:bg-[#0c1a30] rounded-2xl p-8 border border-gray-100 dark:border-zinc-800 shadow-sm mb-8">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Trending System Capabilities</h2>
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-4 h-4 mt-1 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                        <p className="text-sm text-gray-600 dark:text-zinc-300"><strong className="text-gray-900 dark:text-white">High-Conversion Short-Form Video:</strong> Scripting and producing optimized vertical videos (such as Instagram Reels, YouTube Shorts, and TikTok style ads) built to engage audiences in the first 3 seconds.</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-4 h-4 mt-1 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                        <p className="text-sm text-gray-600 dark:text-zinc-300"><strong className="text-gray-900 dark:text-white">Interactive Dynamic Ad Assets:</strong> Creating clean carousel ad structures, thumb-stopping product posters, and engaging layouts built for target social media ad campaigns.</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-4 h-4 mt-1 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                        <p className="text-sm text-gray-600 dark:text-zinc-300"><strong className="text-gray-900 dark:text-white">Data-Driven Performance Graphics:</strong> Transforming complex case studies, business statistics, and product comparisons into highly shareable, clean infographic assets.</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-4 h-4 mt-1 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                        <p className="text-sm text-gray-600 dark:text-zinc-300"><strong className="text-gray-900 dark:text-white">Holistic Omnichannel Campaigns:</strong> Designing a unified set of visual assets cross-optimized to ensure consistent branding across your social feeds, newsletters, and landing pages.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Service Track & Deliverables Portfolio */}
+                  <div className="bg-white dark:bg-[#0c1a30] rounded-2xl p-8 border border-gray-100 dark:border-zinc-800 shadow-sm mb-8">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Service Track & Deliverables Portfolio</h2>
+                    <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                      <table className="w-full text-sm text-left border-collapse">
+                        <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                          <tr>
+                            <th className="px-6 py-4 border border-zinc-700/10 w-1/3">Category / Framework</th>
+                            <th className="px-6 py-4 border border-zinc-700/10">Scope of Deliverables & Requirements</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                          <tr className="bg-white dark:bg-[#0c1a30]">
+                            <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top border border-gray-100 dark:border-zinc-800">Social Media Ad Suite</td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                              <ul className="list-disc pl-4 space-y-1">
+                                <li>Optimized static posters, carousel ad layouts, and limited-edition product banners.</li>
+                                <li>Sizes: 1:1 Square (Feed), 9:16 Vertical (Stories/Reels), 16:9 Landscape.</li>
+                              </ul>
+                            </td>
+                          </tr>
+                          <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                            <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top border border-gray-100 dark:border-zinc-800">Video Production Suite</td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                              <ul className="list-disc pl-4 space-y-1">
+                                <li>High-resolution motion graphics, explainer product videos, customer testimonial reels, and corporate brand films.</li>
+                                <li>Render Specs: 4K UHD resolution, professionally edited audio tracks, and custom font overlays.</li>
+                              </ul>
+                            </td>
+                          </tr>
+                          <tr className="bg-white dark:bg-[#0c1a30]">
+                            <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top border border-gray-100 dark:border-zinc-800">Print Marketing Package</td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                              <ul className="list-disc pl-4 space-y-1">
+                                <li>Commercial print-ready display layouts, brochures, corporate trade show backdrops, and promotional flyers.</li>
+                                <li>Format Slabs: High-res vector PDF files embedded with CMYK color profiles.</li>
+                              </ul>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {!(isWebDev || isLogoDesign || isBilling || isMarketing) && (
+                <>
+                  {/* Who needs it / Eligibility Criteria */}
+                  <div className="bg-white dark:bg-[#0c1a30] rounded-2xl p-8 border border-gray-100 dark:border-zinc-800 shadow-sm">
                 <h2 className="text-xl font-bold text-gray-905 dark:text-white mb-4">
-                  {(isShopAct || isTradeLicense || isClra || isBocw || isFssai || isDsc || isIec || isDrug || isIcegate || isIso || isPf || isPsara || isEsic || isCopyright || isStartup || isTrademark || isUdyam || isDarpan) ? "Eligibility Criteria" : `Who Needs ${service.title}?`}
+                  {(isItr || isTds || isGstFiling) ? "Form Classifications" : (isAssessment || isRevisedItr || isGstNew || isGstAnnual || isGstCancel) ? "Assessment Framework" : (isNotice || isGstNotice) ? "Key Classifications" : (isShopAct || isTradeLicense || isClra || isBocw || isFssai || isDsc || isIec || isDrug || isIcegate || isIso || isPf || isPsara || isEsic || isPt || isLwf || isPosh || isRegisters || isAdvisor || isNotice || isTds || isRevisedItr || isGstNew || isGstFiling || isGstAnnual || isGstCancel || isGstNotice || isMcaCompliance || isMcaName || isMcaAddress || isMcaShares || isMcaMoa || isMcaDirectors || isMcaWinding || isCopyright || isStartup || isTrademark || isUdyam || isDarpan) ? "Eligibility Criteria" : `Who Needs ${service.title}?`}
                 </h2>
                 <div className="space-y-3">
                   {whoNeeds.map((item) => (
@@ -3016,16 +4012,16 @@ function ServiceDetailPage({
                           <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
                             <ul className="list-disc pl-4 space-y-1">
                               <li>Permanent Account Number (PAN) of the business entity</li>
-                              <li>Certificate of Incorporation (COI), Partnership Deed, or local Trade License</li>
-                              <li>Active GST Registration Certificate and cross-matched address proofs</li>
+                              <li>Certificate of Incorporation (COI), Registered Partnership Deed, or local Shop License</li>
+                              <li>Active GST Registration Certificate and cross-matched office address proofs</li>
                             </ul>
                           </td>
                         </tr>
                         <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
                           <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Promoter / Director Details</td>
-                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 border-gray-100 dark:border-zinc-800">
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
                             <ul className="list-disc pl-4 space-y-1">
-                              <li>PAN Card and Aadhaar Card copies of all active directors or partners</li>
+                              <li>PAN Card and Aadhaar Card copies of all active directors, partners, or proprietors</li>
                               <li>Complete contact data including active mobile numbers and email addresses</li>
                             </ul>
                           </td>
@@ -3034,9 +4030,9 @@ function ServiceDetailPage({
                           <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Workforce & Banking Details</td>
                           <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
                             <ul className="list-disc pl-4 space-y-1">
-                              <li>Exact total headcount data along with monthly payroll sheets</li>
-                              <li>Copy of a cancelled cheque or bank statement matching the entity's precise name</li>
-                              <li>Active list of employee names, Aadhaar numbers, and dates of joining</li>
+                              <li>Exact total headcount data along with monthly payroll/salary sheets</li>
+                              <li>Copy of a cancelled cheque or bank statement matching the entity's current account</li>
+                              <li>Initial list of employee names, Aadhaar numbers, and dates of joining</li>
                             </ul>
                           </td>
                         </tr>
@@ -3285,6 +4281,972 @@ function ServiceDetailPage({
                       </tbody>
                     </table>
                   </div>
+                ) : isPvtLtd ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details &amp; Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Business Details</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Proposed Company Names (Provide 1 or 2 unique names in order of preference)</li>
+                              <li>Main business objectives / Industry category</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Identity Proof (All Directors/Shareholders)</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Self-attested PAN Card (Mandatory for Indian Nationals)</li>
+                              <li>Aadhaar Card, Recent Passport-size Photograph</li>
+                              <li>Active Mobile Number &amp; Email ID</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Address Proof (All Directors/Shareholders)</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Any one (Not older than 2 months): Bank Statement, Electricity Bill, Mobile Bill, or Gas Bill (Name must match exactly with the PAN card)
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Business Address Proof</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li><strong>If Owned:</strong> Sale Deed &amp; Latest Utility Bill (Electricity/Water)</li>
+                              <li><strong>If Rented:</strong> Notarized Rent Agreement, Latest Utility Bill (Electricity/Water), and a No Objection Certificate (NOC) from the property owner</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isPartnership ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details &amp; Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Business Details</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Proposed Company/Firm Name (Must be unique and not violate existing trademarks)</li>
+                              <li>Core Business Activities / Nature of Trade</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Identity Proof (All Partners)</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Self-attested PAN Card (Mandatory)</li>
+                              <li>Aadhaar Card, Recent Passport-size Photograph</li>
+                              <li>Active Mobile Number &amp; Email ID</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Address Proof (All Partners)</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Voter ID, Driving License, or Valid Passport
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Business Address Proof</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li><strong>If Owned:</strong> Sale Deed / Property Tax Receipt &amp; Latest Utility Bill (Electricity/Water)</li>
+                              <li><strong>If Rented:</strong> Notarized Rent Agreement, Latest Utility Bill, and a No Objection Certificate (NOC) from the property owner</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isProprietorship ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Category</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details &amp; Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Business Details</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Proposed Company Name
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Identity Proof</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            Aadhaar, PAN, Passport-size Photograph, Mobile Number, and Email ID
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Business Address Proof</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li><strong>If Owned:</strong> Sale Deed &amp; Latest Utility Bill (Electricity/Water)</li>
+                              <li><strong>If Rented:</strong> Notarized Rent Agreement &amp; Latest Utility Bill (Electricity/Water)</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isPt ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Business Foundation Data</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Certificate of Incorporation, Partnership Deed, or local Shop Act License</li>
+                              <li>Permanent Account Number (PAN) card of the business entity and all directors</li>
+                              <li>Current Bank Account Statement along with valid canceled cheque copies</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Employee & Payroll Data</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Detailed list of employees along with state-specific gross salary breakdowns</li>
+                              <li>Month-on-month staff payroll logs and active employee headcount metrics</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Address Proof</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>If Owned: Sale Deed / Property Tax Receipt / Recent Corporate Utility Bill</li>
+                              <li>If Rented: Notarized Lease Contract accompanied by a recent utility bill</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isLwf ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Entity Credentials</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Copy of the main Shops & Establishment License, Factory License, or COI</li>
+                              <li>Permanent Account Number (PAN) card and active GSTIN certificate of the firm</li>
+                              <li>Registered EPF and ESIC establishment code allocations</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Payroll Records</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Detailed employee payroll sheets indicating exact headcounts and designations</li>
+                              <li>Month-on-month attendance records, gross salary metrics, and employee joining logs</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isPosh ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Policy & Committee Blueprints</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Customized POSH Workplace Policy Document tailored to your company culture</li>
+                              <li>Formal Constitution Matrix of the Internal Committee (IC) with official order letters</li>
+                              <li>Bio data and written consent forms of the designated External Member</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Training & Report Assets</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Documentation of regular employee training sessions and leadership sensitization logs</li>
+                              <li>Standardized formats for filing complaints, maintaining minutes, and case tracking</li>
+                              <li>Annual POSH Compliance Report draft prepared for submission to the local authorities</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isRegisters ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Master Employee Metadata</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Full list of workers along with employee codes, Aadhaar, PAN, and emergency contact details</li>
+                              <li>Official appointment letters, employment contracts, and exact dates of joining/exit</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Operational & Payroll Inputs</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Monthly attendance logs, shift rosters, and approved overtime records</li>
+                              <li>Comprehensive salary sheets outlining basic pay, allowances, and statutory deductions (PF/ESI)</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isAdvisor ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Corporate Foundation Files</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Active Certificate of Incorporation, Partnership Deeds, and main Trade Licenses</li>
+                              <li>Current state-specific corporate tax filings and compliance certificates (PF, ESI, PT)</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Internal HR & Vendor Blueprints</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Standard Employee Handbook, Onboarding Templates, and Non-Disclosure Agreements</li>
+                              <li>Master service agreements with third-party vendors and manpower supply contractors</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isItr ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Salary & Personal Income Data</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Form 16 (Part A & Part B) issued by the employer</li>
+                              <li>Annual Information Statement (AIS) and Taxpayer Information Summary (TIS)</li>
+                              <li>Form 26AS highlighting tax credits and advance tax payments</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Business & Banking Data</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Audited or compiled Balance Sheet and Profit & Loss Statement (for ITR-3, 5, 6)</li>
+                              <li>Comprehensive bank statements for the entire financial year for all active accounts</li>
+                              <li>Asset-liability logs, capital accounts, and major vendor ledgers</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Investment & Capital Gains</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Capital gains tax statements from stockbrokers, mutual fund houses, or property sale deeds</li>
+                              <li>Tax-saving investment receipts under Section 80C, 80D, 80G, etc.</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isAssessment ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Accounting Records</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Complete books of accounts, including general ledgers, cash books, and bank books</li>
+                              <li>Itemized sales register, purchase invoices, and business expense vouchers</li>
+                              <li>Inventory valuation certificates and physical stock-taking logs</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Tax Certificates</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Direct correlation charts linking the audited balance sheet numbers to the filed ITR fields</li>
+                              <li>Complete copies of TDS certificates (Form 16/16A) and advance tax payment receipts</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Financial Declarations</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Copy of the formal notice received from the tax department under Section 143(2) or 142(1)</li>
+                              <li>Written legal submissions and cross-matched expense explanations</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isNotice ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Notice Metadata</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Complete copy of the original notice showing the unique Document Identification Number (DIN)</li>
+                              <li>Copy of the original ITR acknowledgment receipt and ITR form schema for that year</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Financial Proofs</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Comprehensive bank account statements explaining the source of high-value deposits</li>
+                              <li>Real estate purchase/sale deeds, asset valuation reports, or loan disbursement cards</li>
+                              <li>Form 26AS, AIS, TIS, and internal accounting ledger books matching the notice period</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isTds ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Entity Setup Base</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Valid 10-digit Tax Deduction and Collection Account Number (TAN) of the deductor</li>
+                              <li>Permanent Account Number (PAN) of the business entity and the authorized signatory</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Transaction & Challan Data</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Paid ITNS 281 Challan receipts featuring unique BSR codes, challan serial numbers, and payment dates</li>
+                              <li>Consolidated monthly statement mapping deductor transactions to individual PANs</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Deductee Profiles</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Complete list of deductees with their correct PAN cards, gross transaction values, and date of payments</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isRevisedItr ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Original Filing Context</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Copy of the original ITR filing acknowledgment receipt showing the 15-digit E-filing Acknowledgement Number</li>
+                              <li>Copy of the past processed return schema along with any Section 143(1) intimation sheets</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">New Financial Data</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Corrected bank statements, revised profit & loss books, or missing capital gains statements</li>
+                              <li>Comprehensive AIS, TIS, and Form 26AS profiles matching the target financial year</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Tax Clearance Proofs</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Fresh Challan ITNS 280 payment receipts clearing the additional tax liabilities along with the mandatory 25% or 50% ITR-U statutory penalties</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isGstNew ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Entity Foundation Info</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Permanent Account Number (PAN) card of the business entity or individual proprietor</li>
+                              <li>Certificate of Incorporation (COI), registered Partnership Deed, or LLP Agreement</li>
+                              <li>Passport-size photographs and PAN/Aadhaar cards of all active promoters/directors</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Business Address Proof</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>If Owned: Registered Sale Deed / Property Tax Receipt / Recent Utility Bill</li>
+                              <li>If Rented: Notarized Rent Agreement, latest utility bill (Electricity/Water), and a signed landlord No Objection Certificate (NOC)</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Banking Data</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Copy of a pre-printed cancelled cheque or bank statement showing the exact legal name, account number, and valid IFSC details</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isGstFiling ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Outward Sales Invoices</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Itemized sales register containing tax invoices, B2B distributions, and B2C sales totals</li>
+                              <li>Detailed logs of HSN/SAC codes, applicable tax rates (5%, 12%, 18%, 28%), and total tax collected</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Inward Purchase Ledgers</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Inward purchase register detailing raw materials sourced or business assets purchased</li>
+                              <li>Reconciled GSTR-2B / 2A data logs extracted from the portal to verify valid ITC claims</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Payment Records</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Corporate bank statement history showing tax payment logs and active electronic cash ledger balances</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isGstAnnual ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Year-End Financial Books</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Audited Balance Sheet, Profit & Loss Statement, and Trial Balance for the financial year</li>
+                              <li>Complete copies of the statutory Tax Audit Report (Form 3CD) if applicable</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Consolidated Return Logs</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Full history of GSTR-1 and GSTR-3B returns filed for the targeted financial year</li>
+                              <li>Annual GSTR-2A and GSTR-2B ledger logs highlighting total available tax credits</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Reconciliation Sheets</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Internal reconciliation registers cross-matching your accounting ledger sales against your filed GST return values</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isGstCancel ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Corporate Identity Info</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Valid GSTIN registration credentials, primary PAN card, and business foundation files</li>
+                              <li>Identity and address proof documents of the primary authorized director or partner</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Financial & Inventory Logs</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Detailed list of remaining raw material stock, semi-finished goods, and capital assets held on the cancellation date</li>
+                              <li>Calculation sheet showing input tax credit reversal values</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">For Revocation Cases</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Official copy of the department's cancellation order (Form GST REG-17 / REG-19)</li>
+                              <li>Receipt copies showing payment of all past overdue taxes, late fees, and interest penalties</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isGstNotice ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Notice Metadata</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Complete copy of the original notice showing its unique Reference Number and Date</li>
+                              <li>Filed copies of the GSTR-1, GSTR-3B, and GSTR-9 returns matching the notice period</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Data Reconciliation Sheets</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Comprehensive GSTR-1 vs GSTR-3B and GSTR-3B vs GSTR-2B reconciliation registers</li>
+                              <li>Itemized sales ledgers, e-way bill transaction summaries, and matching tax invoice files</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Property & Legal Credentials</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Legitimate property deeds, updated rent agreements, and valid Class 3 DSC tokens</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isMcaCompliance ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Financial & Accounting Data</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Audited Balance Sheet and Profit & Loss Statement for the financial year</li>
+                              <li>Director's Report, Auditor's Report, and corporate cash flow statements</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Corporate Credentials</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Certificate of Incorporation (COI), active PAN card, and updated MOA & AOA</li>
+                              <li>Valid Class 3 Digital Signature Certificates (DSC) for all authorized directors/partners</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Operational Trackers</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Fixed assets registers, dynamic bank current account statements, and major loan ledgers</li>
+                              <li>Up-to-date registers of board meetings, annual general meetings (AGM), and share allocations</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isMcaName ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Corporate Identity Info</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Copy of the current Certificate of Incorporation (COI), PAN Card, and active MOA & AOA</li>
+                              <li>Copy of the company's up-to-date active client list and corporate website link</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Proposed Name Records</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Formulated nomenclature preferences (1 or 2 new name choices in order of preference)</li>
+                              <li>Comprehensive description of the exact business domain mapping to the name prefix</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Legal Authorizations</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Valid Class 3 Digital Signature Certificate (DSC) of the authorized director</li>
+                              <li>Board Resolution copy authorizing the director to file name reservation forms</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isMcaAddress ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">New Address Verification</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>If Owned: Registered Sale Deed / Property Tax Receipt / Current Utility Bill</li>
+                              <li>If Rented: Notarized Lease/Rent Agreement and a signed No Objection Certificate (NOC) from the landlord matching the utility bill exactly</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Corporate Records</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Certified copy of the Board Resolution authorizing the change in office address</li>
+                              <li>Special Resolution copy along with newspaper print proofs (for inter-RoC/inter-state moves)</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Signatory Verification</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Valid Class 3 Digital Signature Certificate (DSC) of the managing corporate director</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isMcaShares ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Transfer Instrument</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Executed Form SH-4 (Securities Transfer Form) signed by both transferor and transferee</li>
+                              <li>Physical Share Certificates matching the exact allocation numbers being transferred</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Corporate Approvals</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Certified true copy of the Board Resolution approving the transfer of shares</li>
+                              <li>Signed Notice of Transfer issued by the transferor to the company board</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Identity & Tax Proofs</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Self-attested PAN and Aadhaar copies of both the Transferor and Transferee</li>
+                              <li>Proof of payment of appropriate share transfer stamp duty (calculated on market value)</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isMcaMoa ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Current Constitutional Set</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>True copy of the active Certificate of Incorporation, current PAN, and original MOA & AOA</li>
+                              <li>Up-to-date list of shareholders along with their exact equity allocation details</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Drafted Amendments</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Copy of the newly formulated, altered clauses for the MOA or Articles of Association</li>
+                              <li>Certified true copy of the Board Minutes and formal EGM Special Resolution</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Administrative Files</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Formal notice of the Extraordinary General Meeting accompanied by the required Explanatory Statement</li>
+                              <li>Class 3 Digital Signature Certificates (DSC) of the managing corporate director</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isMcaDirectors ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">For Onboarding Director</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Form DIR-2: Consent letter to act as a corporate director of the company</li>
+                              <li>Form MBP-1 & DIR-8: Disclosure of financial interests in other entities and non-disqualification certificate</li>
+                              <li>Self-attested copies of identity and address proofs (PAN, Aadhaar, Passport, and recent utility bills)</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">For Resignation / Removal</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Signed formal Resignation Letter or official Notice of Removal with statement profiles</li>
+                              <li>Copy of special notice or proof of serving notice to the director being removed</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Corporate Approvals</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Certified true copies of the Board Resolution or EGM Ordinary Resolution</li>
+                              <li>Valid Class 3 DSC of the company's existing authorized managing director</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : isMcaWinding ? (
+                  <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-850">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#0F4C81] text-white text-xs font-semibold uppercase">
+                        <tr>
+                          <th className="px-6 py-4 border border-zinc-700/10">Section</th>
+                          <th className="px-6 py-4 border border-zinc-700/10">Required Details & Documents</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Financial Closure Assets</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Statement of Accounts: Financial snapshot certified by a practicing Chartered Accountant (CA) dated within 30 days of filing</li>
+                              <li>Official Bank Account Closure Certificate from your corporate current account managers</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-[#F5F8FC]/40 dark:bg-[#060e1d]/30">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Director Affidavits</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Form STK-4: Individual indemnity bonds executed by all active directors on stamp paper</li>
+                              <li>Form STK-3: Notarized affidavits from directors confirming zero liabilities and operations</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr className="bg-white dark:bg-[#0c1a30]">
+                          <td className="px-6 py-4 font-semibold text-gray-905 dark:text-white align-top w-1/3 border border-gray-100 dark:border-zinc-800">Corporate Resolutions</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-300 leading-relaxed border border-gray-100 dark:border-zinc-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              <li>Certified true copy of the Board Resolution or 75% Shareholder Consent special resolution</li>
+                              <li>Valid Class 3 Digital Signature Certificates (DSC) of all active directors</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 ) : isDarpan ? (
                   <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-zinc-855">
                     <table className="w-full text-sm text-left border-collapse">
@@ -3336,10 +5298,14 @@ function ServiceDetailPage({
                   </div>
                 )}
               </div>
+                </>
+              )}
 
               {/* Process */}
               <div className="bg-white dark:bg-[#0c1a30] rounded-2xl p-8 border border-gray-100 dark:border-zinc-800 shadow-sm">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Our Registration Process</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+                  {(isWebDev || isBilling) ? "The Technical Engineering Process" : (isLogoDesign || isMarketing) ? "The Creative Production Process" : (isPf || isEsic || isPt || isLwf || isPosh || isRegisters || isAdvisor) ? "The Compliance & Filing Process" : (isItr || isTds || isRevisedItr || isGstFiling || isGstAnnual) ? "The Operational Filing Process" : (isAssessment || isNotice || isGstCancel || isGstNotice) ? "The Compliance & Resolution Process" : isGstNew ? "The Filing & Onboarding Process" : (isMcaName || isMcaAddress || isMcaShares || isMcaMoa || isMcaDirectors) ? "The Amendment & Filing Process" : (isMcaCompliance || isMcaWinding) ? "The Corporate Process" : "Our Registration Process"}
+                </h2>
                 <div className="space-y-4">
                   {process.map(({ step, title, desc }) => (
                     <div key={step} className="flex items-start gap-4">
@@ -3450,16 +5416,23 @@ function ServiceDetailPage({
 // ─── PRICING PAGE ─────────────────────────────────────────────────────────────
 
 function PricingPage({ setActivePage }: { setActivePage: (p: Page) => void }) {
+  // WhatsApp link with pre-filled message
+  const openWhatsApp = (serviceName: string) => {
+    const phoneNumber = "919591578333";
+    const message = encodeURIComponent(`Hi! I'm interested in ${serviceName}. Can you provide more details?`);
+    window.open(`https://wa.me/${phoneNumber}?text=${message}`, "_blank");
+  };
+
   return (
     <div>
       <section className="py-16" style={{ background: "linear-gradient(135deg, #0d3d6b 0%, #0F4C81 100%)" }}>
         <div className="max-w-[1440px] mx-auto px-6 lg:px-12 text-center">
           <SectionBadge>Pricing</SectionBadge>
           <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">
-            Transparent, Affordable Pricing
+            Get Customized Quotes
           </h1>
           <p className="text-blue-100 text-lg max-w-xl mx-auto">
-            No hidden fees. No surprises. Just the right plan for your business stage.
+            No hidden fees. No surprises. Enquire now for the right plan for your business stage.
           </p>
         </div>
       </section>
@@ -3467,7 +5440,7 @@ function PricingPage({ setActivePage }: { setActivePage: (p: Page) => void }) {
       <section className="py-20" style={{ backgroundColor: "#F5F8FC" }}>
         <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {PRICING_PLANS.map(({ name, price, period, desc, features, cta, popular, turnaround, idealFor }) => (
+            {PRICING_PLANS.map(({ name, desc, features, popular, turnaround, idealFor }) => (
               <div
                 key={name}
                 className={`rounded-2xl p-8 flex flex-col transition-all duration-300 ${popular ? "relative" : "bg-white dark:bg-[#0c1a30] text-gray-900 dark:text-white"}`}
@@ -3489,12 +5462,6 @@ function PricingPage({ setActivePage }: { setActivePage: (p: Page) => void }) {
                 <div className="mb-6 text-left">
                   <div className="text-xs font-semibold mb-3" style={{ color: popular ? "#93C5FD" : "#0F4C81" }}>
                     {name}
-                  </div>
-                  <div className={`text-4xl font-bold mb-1 ${popular ? "text-white" : "text-gray-900 dark:text-white"}`}>
-                    {price}
-                  </div>
-                  <div className={`text-xs ${popular ? "text-blue-200" : "text-gray-400 dark:text-zinc-500"}`}>
-                    {period}
                   </div>
                   <p className={`text-sm mt-3 leading-relaxed ${popular ? "text-blue-100" : "text-gray-500 dark:text-zinc-400"}`}>
                     {desc}
@@ -3543,14 +5510,14 @@ function PricingPage({ setActivePage }: { setActivePage: (p: Page) => void }) {
                 )}
 
                 <button
-                  onClick={() => { setActivePage("contact"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  onClick={() => openWhatsApp(name)}
                   className="w-full py-3.5 rounded-xl font-semibold text-sm transition-all cursor-pointer"
                   style={{
                     backgroundColor: popular ? "#ffffff" : "#0F4C81",
                     color: popular ? "#0F4C81" : "#ffffff",
                   }}
                 >
-                  {cta}
+                  Enquire Now
                 </button>
               </div>
             ))}
@@ -3559,7 +5526,7 @@ function PricingPage({ setActivePage }: { setActivePage: (p: Page) => void }) {
           <div className="mt-16 text-center">
             <p className="text-gray-500 mb-2">Need a custom solution for your enterprise?</p>
             <button
-              onClick={() => { setActivePage("contact"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+              onClick={() => openWhatsApp("Custom Enterprise Solution")}
               className="inline-flex items-center gap-2 font-semibold text-sm"
               style={{ color: "#0F4C81" }}
             >
