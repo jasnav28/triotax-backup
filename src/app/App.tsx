@@ -604,7 +604,7 @@ function NavBar({
                       }`}
                       style={
                         activePage === page
-                          ? { color: isDarkMode ? "#60A5FA" : "#000000", borderColor: isDarkMode ? "#60A5FA" : "#000000" }
+                          ? { color: isDarkMode ? "#60A5FA" : "#0F4C81", borderColor: isDarkMode ? "#60A5FA" : "#0F4C81" }
                           : {}
                       }
                     >
@@ -625,7 +625,7 @@ function NavBar({
                   }`}
                   style={
                     activePage === page
-                      ? { color: isDarkMode ? "#60A5FA" : "#000000", borderColor: isDarkMode ? "#60A5FA" : "#000000" }
+                      ? { color: isDarkMode ? "#60A5FA" : "#0F4C81", borderColor: isDarkMode ? "#60A5FA" : "#0F4C81" }
                       : {}
                   }
                 >
@@ -672,7 +672,7 @@ function NavBar({
                 key={page}
                 onClick={() => navigate(page)}
                 className={`block w-full text-left px-4 py-3 text-sm font-bold rounded-lg mx-2 ${isDarkMode ? "text-gray-300 hover:bg-white/10" : "text-black hover:bg-gray-100"}`}
-                style={{ width: "calc(100% - 16px)", color: activePage === page ? (isDarkMode ? "#60A5FA" : "#000000") : undefined, fontWeight: 700 }}
+                style={{ width: "calc(100% - 16px)", color: activePage === page ? (isDarkMode ? "#60A5FA" : "#0F4C81") : undefined, fontWeight: 700 }}
               >
                 {label}
               </button>
