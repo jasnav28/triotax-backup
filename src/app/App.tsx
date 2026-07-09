@@ -200,6 +200,9 @@ const SERVICES = SERVICE_CATEGORIES.flatMap((category) => {
   });
 });
 
+const SERVICES_MID = Math.ceil(SERVICES.length / 2);
+const SERVICES_ROW1 = SERVICES.slice(0, SERVICES_MID);
+const SERVICES_ROW2 = SERVICES.slice(SERVICES_MID);
 
 const WHY_US = [
   { icon: Zap, title: "Fast Processing", desc: "We prioritize speed without compromising accuracy — most registrations done in record time." },
@@ -594,14 +597,14 @@ function NavBar({
                   >
                     <button
                       onClick={() => navigate(page)}
-                      className={`text-sm font-medium transition-colors pb-0.5 flex items-center gap-1.5 ${
+                      className={`text-sm font-bold transition-colors pb-0.5 flex items-center gap-1.5 ${
                         activePage === page
                           ? "border-b-2"
-                          : isDarkMode ? "text-gray-300 hover:text-white" : "text-gray-500 hover:text-gray-900"
+                          : isDarkMode ? "text-gray-300 hover:text-white" : "text-black hover:text-gray-600"
                       }`}
                       style={
                         activePage === page
-                          ? { color: "#0F4C81", borderColor: "#0F4C81" }
+                          ? { color: isDarkMode ? "#60A5FA" : "#000000", borderColor: isDarkMode ? "#60A5FA" : "#000000" }
                           : {}
                       }
                     >
@@ -615,14 +618,14 @@ function NavBar({
                 <button
                   key={page}
                   onClick={() => navigate(page)}
-                  className={`text-sm font-medium transition-colors pb-0.5 ${
+                  className={`text-sm font-bold transition-colors pb-0.5 ${
                     activePage === page
                       ? "border-b-2"
-                      : isDarkMode ? "text-gray-300 hover:text-white" : "text-gray-500 hover:text-gray-900"
+                      : isDarkMode ? "text-gray-300 hover:text-white" : "text-black hover:text-gray-600"
                   }`}
                   style={
                     activePage === page
-                      ? { color: "#0F4C81", borderColor: "#0F4C81" }
+                      ? { color: isDarkMode ? "#60A5FA" : "#000000", borderColor: isDarkMode ? "#60A5FA" : "#000000" }
                       : {}
                   }
                 >
@@ -668,8 +671,8 @@ function NavBar({
               <button
                 key={page}
                 onClick={() => navigate(page)}
-                className={`block w-full text-left px-4 py-3 text-sm rounded-lg mx-2 ${isDarkMode ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-blue-50"}`}
-                style={{ width: "calc(100% - 16px)", color: activePage === page ? (isDarkMode ? "#60A5FA" : "#0F4C81") : undefined, fontWeight: activePage === page ? 600 : undefined }}
+                className={`block w-full text-left px-4 py-3 text-sm font-bold rounded-lg mx-2 ${isDarkMode ? "text-gray-300 hover:bg-white/10" : "text-black hover:bg-gray-100"}`}
+                style={{ width: "calc(100% - 16px)", color: activePage === page ? (isDarkMode ? "#60A5FA" : "#000000") : undefined, fontWeight: 700 }}
               >
                 {label}
               </button>
@@ -999,7 +1002,23 @@ function Footer({ setActivePage, setSelectedServiceId }: { setActivePage: (p: Pa
 // ─── HOME PAGE ────────────────────────────────────────────────────────────────
 
 function HomePage({ setActivePage, setSelectedServiceId }: { setActivePage: (p: Page) => void; setSelectedServiceId: (id: string) => void }) {
-  const [bookingDate, setBookingDate] = useState<number | null>(5);
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth(); // 0-indexed
+  const currentDate = today.getDate(); // 1-indexed
+  
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  const currentMonthName = monthNames[currentMonth];
+
+  // First day of current month (0 = Sunday, 1 = Monday, etc.)
+  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+  // Number of days in current month
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  const [bookingDate, setBookingDate] = useState<number | null>(currentDate);
   const [bookingName, setBookingName] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -1296,8 +1315,8 @@ function HomePage({ setActivePage, setSelectedServiceId }: { setActivePage: (p: 
         <div className="space-y-8 overflow-hidden py-4">
           {/* Row 1: Left to Right */}
           <div className="relative w-full overflow-hidden flex gap-5 mask-gradient">
-            <div className="flex gap-5 shrink-0 animate-marquee-ltr">
-              {SERVICES.slice(0, 11).map((service) => (
+            <div className="flex gap-5 shrink-0 animate-marquee-ltr-slow">
+              {SERVICES_ROW1.map((service) => (
                 <div key={`${service.id}-row1-1`} className="w-[300px] shrink-0">
                   <ServiceCard
                     service={service}
@@ -1306,8 +1325,8 @@ function HomePage({ setActivePage, setSelectedServiceId }: { setActivePage: (p: 
                 </div>
               ))}
             </div>
-            <div className="flex gap-5 shrink-0 animate-marquee-ltr" aria-hidden="true">
-              {SERVICES.slice(0, 11).map((service) => (
+            <div className="flex gap-5 shrink-0 animate-marquee-ltr-slow" aria-hidden="true">
+              {SERVICES_ROW1.map((service) => (
                 <div key={`${service.id}-row1-2`} className="w-[300px] shrink-0">
                   <ServiceCard
                     service={service}
@@ -1320,8 +1339,8 @@ function HomePage({ setActivePage, setSelectedServiceId }: { setActivePage: (p: 
 
           {/* Row 2: Right to Left */}
           <div className="relative w-full overflow-hidden flex gap-5 mask-gradient">
-            <div className="flex gap-5 shrink-0 animate-marquee-rtl">
-              {SERVICES.slice(11).map((service) => (
+            <div className="flex gap-5 shrink-0 animate-marquee-rtl-slow">
+              {SERVICES_ROW2.map((service) => (
                 <div key={`${service.id}-row2-1`} className="w-[300px] shrink-0">
                   <ServiceCard
                     service={service}
@@ -1330,8 +1349,8 @@ function HomePage({ setActivePage, setSelectedServiceId }: { setActivePage: (p: 
                 </div>
               ))}
             </div>
-            <div className="flex gap-5 shrink-0 animate-marquee-rtl" aria-hidden="true">
-              {SERVICES.slice(11).map((service) => (
+            <div className="flex gap-5 shrink-0 animate-marquee-rtl-slow" aria-hidden="true">
+              {SERVICES_ROW2.map((service) => (
                 <div key={`${service.id}-row2-2`} className="w-[300px] shrink-0">
                   <ServiceCard
                     service={service}
@@ -1819,7 +1838,7 @@ function HomePage({ setActivePage, setSelectedServiceId }: { setActivePage: (p: 
                 {/* Header info */}
                 <div className="flex items-center justify-between pb-4 border-b border-zinc-800/80 mb-6">
                   <div>
-                    <h3 className="text-white font-semibold text-lg">July 2026</h3>
+                    <h3 className="text-white font-semibold text-lg">{currentMonthName} {currentYear}</h3>
                     <p className="text-zinc-400 text-xs">30 min consultation</p>
                   </div>
                   <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
@@ -1841,13 +1860,13 @@ function HomePage({ setActivePage, setSelectedServiceId }: { setActivePage: (p: 
 
                 {/* Calendar Days Grid */}
                 <div className="grid grid-cols-7 gap-y-2 text-center text-sm font-medium mb-6">
-                  {/* Empty offsets for Wednesday start of July 2026 */}
-                  <span />
-                  <span />
-                  <span />
+                  {/* Empty offsets for the start of the current month */}
+                  {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+                    <span key={`empty-${i}`} />
+                  ))}
                   
-                  {/* Render 31 days */}
-                  {Array.from({ length: 31 }, (_, i) => {
+                  {/* Render days in month */}
+                  {Array.from({ length: daysInMonth }, (_, i) => {
                     const day = i + 1;
                     const isSelected = bookingDate === day;
                     return (
@@ -1886,7 +1905,7 @@ function HomePage({ setActivePage, setSelectedServiceId }: { setActivePage: (p: 
                         alert("Please enter your name.");
                         return;
                       }
-                      const message = encodeURIComponent(`Hello, I am ${bookingName}. I would like to book a consultation on ${bookingDate} July 2026.`);
+                      const message = encodeURIComponent(`Hello, I am ${bookingName}. I would like to book a consultation on ${bookingDate} ${currentMonthName} ${currentYear}.`);
                       window.open(`https://wa.me/919591578333?text=${message}`, "_blank");
                     }}
                     className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer text-sm"

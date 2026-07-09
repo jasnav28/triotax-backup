@@ -245,8 +245,20 @@
   animation: marquee-rtl 80s linear infinite;
 }
 
-.animate-marquee-ltr:hover,
-.animate-marquee-rtl:hover {
+.animate-marquee-ltr-slow {
+  animation: marquee-ltr 120s linear infinite;
+}
+
+.animate-marquee-rtl-slow {
+  animation: marquee-rtl 120s linear infinite;
+}
+
+/* Synchronize pause on hover by pausing all tracks in the marquee container */
+.mask-gradient:hover .animate-marquee-ltr,
+.mask-gradient:hover .animate-gradient-ltr,
+.mask-gradient:hover .animate-marquee-rtl,
+.mask-gradient:hover .animate-marquee-ltr-slow,
+.mask-gradient:hover .animate-marquee-rtl-slow {
   animation-play-state: paused;
 }
 
