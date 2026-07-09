@@ -831,7 +831,7 @@ function Footer({ setActivePage, setSelectedServiceId }: { setActivePage: (p: Pa
               <img
                 src="/Artboard.png"
                 alt="TRIOTAX Logo"
-                className="h-10 object-contain"
+                className="h-[67px] object-contain"
               />
             </div>
             <p className="text-gray-400 text-sm leading-relaxed mb-6">
