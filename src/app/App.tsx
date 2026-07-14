@@ -7,10 +7,13 @@ import {
   Menu, X, Check, Zap, DollarSign, IndianRupee, Headphones, Lock,
   ThumbsUp, Send, Facebook, Twitter, Linkedin, Instagram,
   Calendar, Clock, GraduationCap, Heart, Target,
-  ChevronRight, Building, Users2, Lightbulb, Sun, Moon,
+  ChevronRight, Building, Users2, Lightbulb, Sun, Moon, LogIn
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Chatbot } from "@/app/components/ui/chatbot";
+import TravelConnectSignIn from "@/components/ui/travel-connect-signin-1";
+import AdminPage from "@/components/ui/admin-page";
+import UserDashboard from "@/components/ui/user-dashboard";
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 
@@ -398,7 +401,7 @@ const TEAM = [
 
 // ─── TYPES & HOOKS ────────────────────────────────────────────────────────────
 
-type Page = "home" | "about" | "services" | "service-detail" | "pricing" | "industries" | "blog" | "contact" | "faq" | "career";
+type Page = "home" | "about" | "services" | "service-detail" | "pricing" | "industries" | "blog" | "contact" | "faq" | "career" | "login" | "admin" | "user";
 
 function useCounter(target: number, active: boolean): number {
   const [count, setCount] = useState(0);
@@ -637,6 +640,14 @@ function NavBar({
 
           <div className="hidden lg:flex items-center gap-3">
             <button
+              onClick={() => navigate("login")}
+              className={`flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border transition-all ${isDarkMode ? "hover:bg-white/10" : "hover:bg-blue-50"}`}
+              style={{ borderColor: isDarkMode ? "#60A5FA" : "#0F4C81", color: isDarkMode ? "#60A5FA" : "#0F4C81" }}
+            >
+              <LogIn className="h-4 w-4" />
+              Login
+            </button>
+            <button
               onClick={() => navigate("contact")}
               className={`text-sm font-medium px-4 py-2 rounded-lg border transition-all ${isDarkMode ? "hover:bg-white/10" : "hover:bg-blue-50"}`}
               style={{ borderColor: isDarkMode ? "#60A5FA" : "#0F4C81", color: isDarkMode ? "#60A5FA" : "#0F4C81" }}
@@ -677,7 +688,15 @@ function NavBar({
                 {label}
               </button>
             ))}
-            <div className="px-4 pt-3">
+            <div className="px-4 pt-3 flex flex-col gap-3">
+              <button
+                onClick={() => navigate("login")}
+                className={`flex items-center justify-center gap-2 w-full py-3 text-sm font-semibold rounded-xl border transition-all ${isDarkMode ? "hover:bg-white/10" : "hover:bg-blue-50"}`}
+                style={{ borderColor: isDarkMode ? "#60A5FA" : "#0F4C81", color: isDarkMode ? "#60A5FA" : "#0F4C81" }}
+              >
+                <LogIn className="h-4 w-4" />
+                Login
+              </button>
               <button
                 onClick={() => {
                   setActivePage("home");
@@ -7053,6 +7072,29 @@ export default function App() {
   const [theme, setTheme] = useState<"light" | "dark">(
     () => (document.documentElement.classList.contains("dark") ? "dark" : "light")
   );
+  
+  // Auth state
+  const [isAdminAuth, setIsAdminAuth] = useState(false);
+  const [isUserAuth, setIsUserAuth] = useState(false);
+
+  const handleAdminLogin = (password: string, username: string) => {
+    if (username === "admin" && password === "admin123") {
+      setIsAdminAuth(true);
+      return true;
+    }
+    return false;
+  };
+
+  const handleUserLogin = () => {
+    setIsUserAuth(true);
+    navigateToPage("user");
+  };
+
+  const handleLogout = () => {
+    setIsAdminAuth(false);
+    setIsUserAuth(false);
+    navigateToPage("home");
+  };
 
   // Watch for dark mode changes on <html> element
   useEffect(() => {
@@ -7069,7 +7111,7 @@ export default function App() {
     const handleUrlChange = () => {
       const path = window.location.pathname.replace(/^\/|\/$/g, "");
       const matchedPage = (path || "home") as Page;
-      const validPages: Page[] = ["home", "about", "services", "service-detail", "pricing", "industries", "blog", "contact", "faq", "career"];
+      const validPages: Page[] = ["home", "about", "services", "service-detail", "pricing", "industries", "blog", "contact", "faq", "career", "login", "admin", "user"];
       if (validPages.includes(matchedPage)) {
         setActivePage(matchedPage);
       } else {
@@ -7149,9 +7191,22 @@ export default function App() {
       case "contact": return <ContactPage />;
       case "faq": return <FAQPage setActivePage={navigateToPage} />;
       case "career": return <CareerPage setActivePage={navigateToPage} />;
+      case "login": return <TravelConnectSignIn onLogin={handleUserLogin} />;
+      case "admin": return <AdminPage isAdminAuth={isAdminAuth} onLogin={handleAdminLogin} onLogout={handleLogout} />;
+      case "user": return <UserDashboard onLogout={handleLogout} />;
       default: return <HomePage setActivePage={navigateToPage} setSelectedServiceId={setSelectedServiceId} />;
     }
   };
+
+  const isDashboardLayout = activePage === "admin" || activePage === "user";
+
+  if (isDashboardLayout) {
+    return (
+      <div className="min-h-screen bg-[#F5F8FC] dark:bg-[#060e1d] text-gray-900 dark:text-white transition-colors duration-300">
+        {renderPage()}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F5F8FC] dark:bg-[#060e1d] text-gray-900 dark:text-white transition-colors duration-300">
