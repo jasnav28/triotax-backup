@@ -7106,6 +7106,20 @@ export default function App() {
     return () => observer.disconnect();
   }, []);
 
+  // Enforce theme restrictions: Only allow dark mode on User and Admin pages
+  useEffect(() => {
+    if (activePage !== "user" && activePage !== "admin") {
+      document.documentElement.classList.remove("dark");
+    } else {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    }
+  }, [activePage]);
+
   // Sync state with URL pathname on initial load and handle back/forward actions
   useEffect(() => {
     const handleUrlChange = () => {

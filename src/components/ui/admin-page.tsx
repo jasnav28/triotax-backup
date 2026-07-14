@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield, Lock, User, ArrowRight, LayoutDashboard, Users, FileText, Settings, LogOut, UserPlus, FileCheck, X } from "lucide-react";
+import { ThemeToggle } from "@/app/components/ui/theme-toggle";
 
 interface AdminPageProps {
   isAdminAuth: boolean;
@@ -152,46 +153,77 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
           <>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               {['Total Users', 'Active Sessions', 'Pending Requests', 'Revenue'].map((metric, i) => (
-                <div key={metric} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">{metric}</h3>
-                  <p className="text-3xl font-bold text-gray-800">{(i + 1) * 1234}</p>
+                <div key={metric} className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm transition-colors">
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">{metric}</h3>
+                  <p className="text-3xl font-bold text-gray-800 dark:text-white">{(i + 1) * 1234}</p>
                 </div>
               ))}
             </div>
             
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 min-h-[400px] flex items-center justify-center">
-              <p className="text-gray-400">Admin Dashboard Content</p>
+            <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6 min-h-[400px] flex items-center justify-center transition-colors">
+              <p className="text-gray-400 dark:text-gray-500">Admin Dashboard Content</p>
             </div>
           </>
         );
       case "create-user":
         return (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 max-w-2xl">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">Create New User</h2>
-            <form onSubmit={handleCreateUser} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <input type="text" required className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="John Doe" />
+          <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6 max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Create New User Profile</h2>
+            <form onSubmit={handleCreateUser} className="space-y-6">
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Business Details Section */}
+                <div className="space-y-4 md:col-span-2">
+                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 border-b border-gray-200 dark:border-zinc-800 pb-2">Business Details</h3>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name of the Company</label>
+                  <input type="text" required className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. Acme Corp" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Owner Name</label>
+                  <input type="text" required className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="John Doe" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email ID</label>
+                  <input type="email" required className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="john@example.com" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contact Number</label>
+                  <input type="tel" required className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="+91 9876543210" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Alternative Number</label>
+                  <input type="tel" className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="+91 9876543211" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Business Address</label>
+                  <textarea required rows={3} className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Full business address"></textarea>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Business Description (Optional)</label>
+                  <textarea rows={2} className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Brief description of the business"></textarea>
+                </div>
+
+                {/* Account Credentials Section */}
+                <div className="space-y-4 md:col-span-2 mt-4">
+                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 border-b border-gray-200 dark:border-zinc-800 pb-2">Account Credentials</h3>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username</label>
+                  <input type="text" required className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="johndoe123" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Initial Password</label>
+                  <input type="text" required className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Secure password" />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                <input type="email" required className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="john@example.com" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Temporary Password</label>
-                <input type="password" required className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Enter temporary password" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">User Role</label>
-                <select className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                  <option>Standard User</option>
-                  <option>Premium Client</option>
-                  <option>Admin</option>
-                </select>
-              </div>
-              <div className="pt-4">
-                <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">
-                  Create User
+
+              <div className="pt-6 flex justify-end">
+                <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-colors shadow-sm">
+                  Create User Account
                 </button>
               </div>
             </form>
@@ -199,15 +231,15 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
         );
       case "gst-tracking":
         return (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-800">GST Tracking & Billing History</h2>
-              <p className="text-sm text-gray-500 mt-1">Click on a user to view their billing history and manage GST status.</p>
+          <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden transition-colors">
+            <div className="p-6 border-b border-gray-200 dark:border-zinc-800">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-white">GST Tracking & Billing History</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Click on a user to view their billing history and manage GST status.</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-gray-50 text-gray-600 text-sm border-b border-gray-200">
+                  <tr className="bg-gray-50 dark:bg-zinc-950/50 text-gray-600 dark:text-gray-300 text-sm border-b border-gray-200 dark:border-zinc-800">
                     <th className="p-4 font-medium">User Details</th>
                     <th className="p-4 font-medium">GST Status</th>
                     <th className="p-4 font-medium">Admin Note</th>
@@ -218,19 +250,19 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
                     <tr 
                       key={user.id} 
                       onClick={() => openUserModal(user)}
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
+                      className="border-b border-gray-100 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer"
                     >
                       <td className="p-4">
-                        <div className="font-medium text-gray-800">{user.name}</div>
-                        <div className="text-sm text-gray-500">{user.email}</div>
+                        <div className="font-medium text-gray-800 dark:text-gray-200">{user.name}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
                       </td>
                       <td className="p-4">
-                        <span className={`px-3 py-1 text-xs font-medium rounded-full ${user.gstStatus === "Completed" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+                        <span className={`px-3 py-1 text-xs font-medium rounded-full ${user.gstStatus === "Completed" ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"}`}>
                           {user.gstStatus}
                         </span>
                       </td>
-                      <td className="p-4 text-sm text-gray-600">
-                        {user.note || <span className="text-gray-400 italic">No notes</span>}
+                      <td className="p-4 text-sm text-gray-600 dark:text-gray-400">
+                        {user.note || <span className="text-gray-400 dark:text-gray-600 italic">No notes</span>}
                       </td>
                     </tr>
                   ))}
@@ -253,10 +285,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
   ];
 
   return (
-    <div className="flex h-screen bg-slate-50 w-full overflow-hidden">
+    <div className="flex h-screen bg-slate-50 dark:bg-[#0a0a0b] w-full overflow-hidden transition-colors">
       {/* Sidebar */}
-      <div className="w-64 bg-slate-900 text-white flex flex-col h-full">
-        <div className="p-6 border-b border-slate-800 flex items-center gap-3">
+      <div className="w-64 bg-slate-900 dark:bg-zinc-950 text-white flex flex-col h-full dark:border-r dark:border-zinc-800 transition-colors">
+        <div className="p-6 border-b border-slate-800 dark:border-zinc-800 flex items-center gap-3">
           <Shield className="text-blue-400 h-6 w-6" />
           <h1 className="text-xl font-bold">Admin Panel</h1>
         </div>
@@ -269,7 +301,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
                 activeTab === item.id 
                   ? "bg-blue-600/20 text-blue-400" 
-                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800 dark:hover:bg-zinc-900"
               }`}
             >
               <item.icon size={18} /> {item.label}
@@ -277,10 +309,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
           ))}
         </div>
         
-        <div className="p-4 border-t border-slate-800">
+        <div className="p-4 border-t border-slate-800 dark:border-zinc-800">
           <button 
             onClick={onLogout}
-            className="w-full flex items-center gap-3 text-slate-400 hover:text-white hover:bg-slate-800 px-4 py-3 rounded-lg font-medium transition-colors"
+            className="w-full flex items-center gap-3 text-slate-400 hover:text-white hover:bg-slate-800 dark:hover:bg-zinc-900 px-4 py-3 rounded-lg font-medium transition-colors"
           >
             <LogOut size={18} /> Sign Out
           </button>
@@ -289,13 +321,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
       
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <header className="bg-white border-b border-gray-200 h-16 flex items-center px-8 justify-between">
-          <h2 className="text-lg font-semibold text-gray-800 capitalize">
+        <header className="bg-white dark:bg-zinc-900/50 border-b border-gray-200 dark:border-zinc-800 h-16 flex items-center px-8 justify-between transition-colors">
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-white capitalize">
             {activeTab.replace("-", " ")}
           </h2>
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-gray-600">Admin User</span>
-            <div className="h-8 w-8 bg-blue-100 text-blue-600 font-bold flex items-center justify-center rounded-full">
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Admin User</span>
+            <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-bold flex items-center justify-center rounded-full">
               A
             </div>
           </div>
@@ -321,14 +354,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden relative z-10 flex flex-col max-h-[90vh]"
+              className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden relative z-10 flex flex-col max-h-[90vh] transition-colors"
             >
-              <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+              <div className="p-6 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-800">{selectedUser.name}</h3>
-                  <p className="text-sm text-gray-500">{selectedUser.email}</p>
+                  <h3 className="text-xl font-bold text-gray-800 dark:text-white">{selectedUser.name}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{selectedUser.email}</p>
                 </div>
-                <button onClick={() => setSelectedUser(null)} className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
+                <button onClick={() => setSelectedUser(null)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
                   <X size={20} />
                 </button>
               </div>
@@ -336,26 +369,26 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
               <div className="p-6 overflow-y-auto">
                 <div className="space-y-6">
                   <div>
-                    <h4 className="text-sm font-semibold text-gray-800 uppercase tracking-wider mb-3">Update GST Details</h4>
+                    <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 uppercase tracking-wider mb-3">Update GST Details</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">GST Status</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">GST Status</label>
                         <select 
                           value={editStatus}
                           onChange={(e) => setEditStatus(e.target.value)}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
                         >
                           <option value="Ongoing">Ongoing</option>
                           <option value="Completed">Completed</option>
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Admin Note</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Admin Note</label>
                         <input 
                           type="text"
                           value={editNote}
                           onChange={(e) => setEditNote(e.target.value)}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
                           placeholder="Add a note for the user..."
                         />
                       </div>
@@ -363,26 +396,26 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
                   </div>
 
                   <div>
-                    <h4 className="text-sm font-semibold text-gray-800 uppercase tracking-wider mb-3">Billing History</h4>
-                    <div className="border border-gray-200 rounded-xl overflow-hidden">
+                    <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 uppercase tracking-wider mb-3">Billing History</h4>
+                    <div className="border border-gray-200 dark:border-zinc-800 rounded-xl overflow-hidden">
                       <table className="w-full text-left border-collapse text-sm">
-                        <thead className="bg-gray-50 text-gray-600">
+                        <thead className="bg-gray-50 dark:bg-zinc-950/50 text-gray-600 dark:text-gray-300">
                           <tr>
-                            <th className="p-3 font-medium border-b border-gray-200">Date</th>
-                            <th className="p-3 font-medium border-b border-gray-200">Note / Description</th>
+                            <th className="p-3 font-medium border-b border-gray-200 dark:border-zinc-800">Date</th>
+                            <th className="p-3 font-medium border-b border-gray-200 dark:border-zinc-800">Note / Description</th>
                           </tr>
                         </thead>
                         <tbody>
                           {selectedUser.billingHistory.length > 0 ? (
                             selectedUser.billingHistory.map((item, idx) => (
-                              <tr key={idx} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                                <td className="p-3 text-gray-600 whitespace-nowrap">{item.date}</td>
-                                <td className="p-3 text-gray-800">{item.note}</td>
+                              <tr key={idx} className="border-b border-gray-100 dark:border-zinc-800 last:border-0 hover:bg-gray-50 dark:hover:bg-zinc-800/50">
+                                <td className="p-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{item.date}</td>
+                                <td className="p-3 text-gray-800 dark:text-gray-200">{item.note}</td>
                               </tr>
                             ))
                           ) : (
                             <tr>
-                              <td colSpan={2} className="p-4 text-center text-gray-500 italic">No billing history found.</td>
+                              <td colSpan={2} className="p-4 text-center text-gray-500 dark:text-gray-500 italic">No billing history found.</td>
                             </tr>
                           )}
                         </tbody>
@@ -392,16 +425,16 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
                 </div>
               </div>
               
-              <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+              <div className="p-6 border-t border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950/30 flex justify-end gap-3 transition-colors">
                 <button 
                   onClick={() => setSelectedUser(null)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors"
                 >
                   Cancel
                 </button>
                 <button 
                   onClick={handleSaveUserDetails}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
                 >
                   Save Changes
                 </button>
