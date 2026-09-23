@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, CreditCard, BarChart3, Settings, LogOut, Menu, X, User, Upload, Download, Plus, Trash2, Eye, EyeOff, Type, FileText } from "lucide-react";
+import { Home, CreditCard, BarChart3, Settings, LogOut, Menu, X, User, Upload, Download, Plus, Trash2, Eye, EyeOff, Type, FileText, CheckCircle } from "lucide-react";
 import { ThemeToggle } from "@/app/components/ui/theme-toggle";
 import { StockTicker } from "./stock-ticker";
 import jsPDF from "jspdf";
@@ -32,15 +32,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const [items, setItems] = useState([{ id: 1, description: "", quantity: 1, price: 0 }]);
   const invoiceRef = useRef<HTMLDivElement>(null);
   const [isAdvancedEdit, setIsAdvancedEdit] = useState(false);
-  const [billingHistory, setBillingHistory] = useState<any[]>([
-    { id: 1, date: "2026-06-15", invoiceNumber: "INV-1024", customer: "Acme Corp", amount: 1500 },
-    { id: 2, date: "2026-05-15", invoiceNumber: "INV-0981", customer: "Stark Industries", amount: 2000 }
-  ]);
-
-  const mockBillingHistory = [
-    { date: "2026-06-15", note: "Invoice #1024 paid" },
-    { date: "2026-05-15", note: "Invoice #0981 paid" }
-  ];
+  const [billingHistory, setBillingHistory] = useState<any[]>([]);
 
   const tabs = [
     { id: "dashboard", label: "Dashboard", icon: Home },
@@ -70,7 +62,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   };
 
   const calculateSubtotal = () => items.reduce((sum, item) => sum + item.quantity * item.price, 0);
-  const calculateTax = () => calculateSubtotal() * 0.18; // Assuming 18% GST for demo
+  const calculateTax = () => calculateSubtotal() * 0.18; // 18% GST
   const calculateTotal = () => calculateSubtotal() + calculateTax();
 
   const handleDownloadPDF = async () => {
@@ -113,36 +105,56 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
             {/* GST Filing Status Card */}
             <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
-                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">GST Filing Status</h3>
+                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">Account Compliance Status</h3>
                 <p className="text-gray-500 dark:text-gray-400 mt-1">
-                  <span className="font-semibold text-gray-700 dark:text-gray-300">Admin Note:</span> "Please upload PAN"
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">Admin Note:</span> All account services are active.
                 </p>
               </div>
               <div className="flex flex-col items-end gap-2">
-                <span className="px-4 py-2 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-sm font-bold rounded-full">
-                  Billing Status: Ongoing
+                <span className="px-4 py-2 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-sm font-bold rounded-full flex items-center gap-1.5">
+                  <CheckCircle size={14} /> Account Active
                 </span>
                 <button 
                   onClick={() => setIsHistoryOpen(true)}
                   className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
                 >
-                  View History &rarr;
+                  View Invoices &rarr;
                 </button>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col gap-4">
-                  <div className="h-10 w-10 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center">
-                    <User size={20} />
-                  </div>
-                  <div>
-                    <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">Metric {i}</h3>
-                    <p className="text-2xl font-bold text-gray-800 dark:text-white">1,024</p>
-                  </div>
+              <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col gap-4">
+                <div className="h-10 w-10 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center">
+                  <FileText size={20} />
                 </div>
-              ))}
+                <div>
+                  <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">Invoices Created</h3>
+                  <p className="text-2xl font-bold text-gray-800 dark:text-white">{billingHistory.length}</p>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col gap-4">
+                <div className="h-10 w-10 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg flex items-center justify-center">
+                  <CreditCard size={20} />
+                </div>
+                <div>
+                  <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Billed Amount</h3>
+                  <p className="text-2xl font-bold text-gray-800 dark:text-white">
+                    ₹{billingHistory.reduce((sum, item) => sum + (item.amount || 0), 0).toFixed(2)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col gap-4">
+                <div className="h-10 w-10 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg flex items-center justify-center">
+                  <User size={20} />
+                </div>
+                <div>
+                  <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">Account ID</h3>
+                  <p className="text-2xl font-bold text-gray-800 dark:text-white capitalize">{username}</p>
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -158,254 +170,270 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                 <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 space-y-4">
                   <h3 className="font-semibold text-gray-800 dark:text-gray-100">Invoice Settings</h3>
                   <div className="flex items-center gap-4">
-                    <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 dark:border-zinc-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors">
-                      {logo ? (
-                        <img src={logo} alt="Logo" className="w-full h-full object-contain p-2" />
-                      ) : (
-                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                          <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                          <p className="text-xs text-gray-500 dark:text-gray-400 text-center px-2">Upload Logo</p>
-                        </div>
-                      )}
-                      <input type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
+                    <label className="flex items-center gap-2 cursor-pointer bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg border border-gray-200 dark:border-zinc-700 text-sm font-medium transition-colors">
+                      <Upload size={16} /> Upload Logo
+                      <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
                     </label>
-                    <div className="flex-1 space-y-3">
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Select Template</p>
-                      <div className="flex gap-4">
-                        <button onClick={() => setTemplate(1)} className={`px-4 py-2 rounded-lg text-sm font-medium border ${template === 1 ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' : 'border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-gray-400'}`}>Template 1 (Modern)</button>
-                        <button onClick={() => setTemplate(2)} className={`px-4 py-2 rounded-lg text-sm font-medium border ${template === 2 ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' : 'border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-gray-400'}`}>Template 2 (Classic)</button>
-                      </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setTemplate(1)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                          template === 1 ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-400"
+                        }`}
+                      >
+                        Modern
+                      </button>
+                      <button
+                        onClick={() => setTemplate(2)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                          template === 2 ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-400"
+                        }`}
+                      >
+                        Classic
+                      </button>
                     </div>
+
+                    <button
+                      onClick={() => setIsAdvancedEdit(!isAdvancedEdit)}
+                      className={`ml-auto flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                        isAdvancedEdit ? "bg-indigo-600 text-white" : "bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-400"
+                      }`}
+                    >
+                      <Type size={16} /> Rich Edit
+                    </button>
                   </div>
                 </div>
 
                 {/* Details Form */}
                 <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <h3 className="font-semibold text-gray-800 dark:text-gray-100">Invoice Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Invoice Number</label>
-                      <input type="text" value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-blue-500" />
+                      <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Invoice #</label>
+                      <input
+                        type="text"
+                        value={invoiceNumber}
+                        onChange={(e) => setInvoiceNumber(e.target.value)}
+                        className="w-full border border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500"
+                      />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
-                      <input type="date" value={invoiceDate} onChange={(e) => setInvoiceDate(e.target.value)} className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-blue-500" />
+                      <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Date</label>
+                      <input
+                        type="date"
+                        value={invoiceDate}
+                        onChange={(e) => setInvoiceDate(e.target.value)}
+                        className="w-full border border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500"
+                      />
                     </div>
-                    <div className="col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Customer Name</label>
-                      <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="e.g. Acme Corp" className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-blue-500" />
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Customer Name</label>
+                      <input
+                        type="text"
+                        placeholder="Customer Name"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        className="w-full border border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500"
+                      />
                     </div>
                   </div>
+                </div>
 
-                  <div className="pt-4 space-y-3">
-                    <h4 className="font-medium text-gray-800 dark:text-gray-200">Items</h4>
-                    {items.map((item, index) => (
-                      <div key={item.id} className="flex gap-3 items-start">
-                        <input type="text" placeholder="Description" value={item.description} onChange={(e) => updateItem(item.id, "description", e.target.value)} className="flex-1 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 outline-none text-sm" />
-                        <input type="number" placeholder="Qty" value={item.quantity} onChange={(e) => updateItem(item.id, "quantity", Number(e.target.value))} className="w-20 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 outline-none text-sm" />
-                        <input type="number" placeholder="Price" value={item.price} onChange={(e) => updateItem(item.id, "price", Number(e.target.value))} className="w-24 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 outline-none text-sm" />
-                        <button onClick={() => removeItem(item.id)} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    ))}
-                    <button onClick={addItem} className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 font-medium hover:underline">
+                {/* Items */}
+                <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-100">Items / Services</h3>
+                    <button
+                      onClick={addItem}
+                      className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 font-medium"
+                    >
                       <Plus size={16} /> Add Item
                     </button>
                   </div>
-                </div>
-                
-                {/* Billing History Section */}
-                <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 space-y-4">
-                  <h3 className="font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                    <FileText size={18} /> Billing History
-                  </h3>
-                  <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
-                    {billingHistory.map((bill) => (
-                      <div key={bill.id} className="p-3 border border-gray-100 dark:border-zinc-800 rounded-lg flex justify-between items-center hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer">
-                        <div>
-                          <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{bill.invoiceNumber} - {bill.customer}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{bill.date}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-bold text-gray-800 dark:text-gray-200">₹{bill.amount.toFixed(2)}</p>
-                        </div>
+
+                  <div className="space-y-3">
+                    {items.map((item) => (
+                      <div key={item.id} className="flex gap-2 items-center">
+                        <input
+                          type="text"
+                          placeholder="Description"
+                          value={item.description}
+                          onChange={(e) => updateItem(item.id, "description", e.target.value)}
+                          className="flex-1 border border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500"
+                        />
+                        <input
+                          type="number"
+                          placeholder="Qty"
+                          value={item.quantity || ""}
+                          onChange={(e) => updateItem(item.id, "quantity", parseInt(e.target.value) || 0)}
+                          className="w-20 border border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500"
+                        />
+                        <input
+                          type="number"
+                          placeholder="Price"
+                          value={item.price || ""}
+                          onChange={(e) => updateItem(item.id, "price", parseFloat(e.target.value) || 0)}
+                          className="w-28 border border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500"
+                        />
+                        <button
+                          onClick={() => removeItem(item.id)}
+                          className="text-red-500 hover:text-red-700 p-2"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     ))}
-                    {billingHistory.length === 0 && (
-                      <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">No bills generated yet.</p>
-                    )}
+                  </div>
+
+                  <div className="pt-4 border-t border-gray-100 dark:border-zinc-800 flex justify-between items-center text-sm">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">Total: ₹{calculateTotal().toFixed(2)}</span>
+                    <button
+                      onClick={handleDownloadPDF}
+                      className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-all shadow-sm"
+                    >
+                      <Download size={16} /> Download PDF
+                    </button>
                   </div>
                 </div>
               </div>
 
               {/* Preview Section */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="font-semibold text-gray-800 dark:text-gray-100">Live Preview</h3>
-                  <div className="flex gap-2">
-                    <button onClick={() => setIsAdvancedEdit(!isAdvancedEdit)} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isAdvancedEdit ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-zinc-800 dark:text-gray-300 dark:hover:bg-zinc-700'}`}>
-                      <Type size={16} /> Advanced Edit {isAdvancedEdit ? 'On' : 'Off'}
-                    </button>
-                    <button onClick={handleDownloadPDF} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
-                      <Download size={16} /> Download PDF
-                    </button>
-                  </div>
-                </div>
+              <div className="bg-gray-100 dark:bg-zinc-950 p-6 rounded-xl border border-gray-200 dark:border-zinc-800 flex flex-col items-center">
+                <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-4 self-start">Live Preview</h3>
                 
-                {/* PDF Wrapper */}
-                <div className="bg-white p-8 rounded-xl shadow-md border border-gray-200 overflow-x-auto relative">
-                  {isAdvancedEdit && (
-                    <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 px-4 py-2 rounded-full shadow-xl z-20 flex gap-2 text-sm items-center transition-colors">
-                      <button onMouseDown={(e) => { e.preventDefault(); document.execCommand('bold', false, ''); }} className="p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded text-gray-700 dark:text-gray-300 font-bold" title="Bold">B</button>
-                      <button onMouseDown={(e) => { e.preventDefault(); document.execCommand('italic', false, ''); }} className="p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded text-gray-700 dark:text-gray-300 italic" title="Italic">I</button>
-                      <button onMouseDown={(e) => { e.preventDefault(); document.execCommand('underline', false, ''); }} className="p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded text-gray-700 dark:text-gray-300 underline" title="Underline">U</button>
-                      <div className="w-px h-5 bg-gray-300 dark:bg-zinc-700 mx-1"></div>
-                      <select onChange={(e) => document.execCommand('fontSize', false, e.target.value)} className="bg-transparent text-gray-700 dark:text-gray-300 outline-none text-xs border border-gray-200 dark:border-zinc-700 rounded px-1 py-1 cursor-pointer">
-                        <option value="">Size</option>
-                        <option value="1">Small</option>
-                        <option value="3">Normal</option>
-                        <option value="5">Large</option>
-                        <option value="7">Huge</option>
-                      </select>
-                      <div className="w-px h-5 bg-gray-300 dark:bg-zinc-700 mx-1"></div>
-                      <input type="color" onChange={(e) => document.execCommand('foreColor', false, e.target.value)} className="w-6 h-6 p-0 border-0 rounded cursor-pointer" title="Text Color" />
-                      <div className="w-px h-5 bg-gray-300 dark:bg-zinc-700 mx-1"></div>
-                      <span className="text-xs text-gray-500 font-medium ml-1">Drag elements & Click text to edit</span>
+                <div
+                  ref={invoiceRef}
+                  contentEditable={isAdvancedEdit}
+                  suppressContentEditableWarning={true}
+                  className={`w-full max-w-[595px] min-h-[842px] bg-white text-black p-8 shadow-md rounded-sm ${
+                    isAdvancedEdit ? "outline-dashed outline-2 outline-indigo-500" : ""
+                  }`}
+                >
+                  {/* Preview Template 1 */}
+                  {template === 1 ? (
+                    <div className="space-y-6">
+                      <div className="flex justify-between items-start border-b border-gray-200 pb-6">
+                        <div>
+                          {logo ? (
+                            <img src={logo} alt="Logo" className="h-12 object-contain mb-2" />
+                          ) : (
+                            <div className="h-10 w-32 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500 font-bold mb-2">
+                              COMPANY LOGO
+                            </div>
+                          )}
+                          <h2 className="text-xl font-bold text-gray-800 capitalize">{username}</h2>
+                          <p className="text-xs text-gray-500">Official Tax & Compliance Invoice</p>
+                        </div>
+                        <div className="text-right">
+                          <h1 className="text-2xl font-bold text-blue-600">INVOICE</h1>
+                          <p className="text-xs text-gray-500 mt-1">#{invoiceNumber}</p>
+                          <p className="text-xs text-gray-500">Date: {invoiceDate || new Date().toISOString().split("T")[0]}</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-xs font-semibold text-gray-400 uppercase">Billed To</p>
+                          <p className="font-bold text-gray-800">{customerName || "Customer Name"}</p>
+                        </div>
+                      </div>
+
+                      <table className="w-full text-left border-collapse text-sm">
+                        <thead>
+                          <tr className="border-b border-gray-300 text-gray-500 text-xs uppercase">
+                            <th className="py-2">Item Description</th>
+                            <th className="py-2 text-center">Qty</th>
+                            <th className="py-2 text-right">Price</th>
+                            <th className="py-2 text-right">Amount</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {items.map((item) => (
+                            <tr key={item.id} className="border-b border-gray-100">
+                              <td className="py-3 font-medium">{item.description || "Service Item"}</td>
+                              <td className="py-3 text-center">{item.quantity}</td>
+                              <td className="py-3 text-right">₹{item.price.toFixed(2)}</td>
+                              <td className="py-3 text-right">₹{(item.quantity * item.price).toFixed(2)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+
+                      <div className="flex justify-end pt-4">
+                        <div className="w-48 space-y-2 text-sm">
+                          <div className="flex justify-between text-gray-600">
+                            <span>Subtotal:</span>
+                            <span>₹{calculateSubtotal().toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between text-gray-600">
+                            <span>GST (18%):</span>
+                            <span>₹{calculateTax().toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between font-bold text-base border-t border-gray-200 pt-2 text-gray-900">
+                            <span>Total:</span>
+                            <span>₹{calculateTotal().toFixed(2)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Classic Template 2 */
+                    <div className="space-y-6 font-serif">
+                      <div className="text-center border-b-2 border-black pb-4">
+                        <h1 className="text-3xl font-bold tracking-wide capitalize">{username}</h1>
+                        <p className="text-xs italic text-gray-600">INVOICE #{invoiceNumber}</p>
+                      </div>
+
+                      <div className="flex justify-between text-xs">
+                        <div>
+                          <p className="font-bold">Billed To:</p>
+                          <p>{customerName || "Customer Name"}</p>
+                        </div>
+                        <div className="text-right">
+                          <p><strong>Date:</strong> {invoiceDate || new Date().toISOString().split("T")[0]}</p>
+                        </div>
+                      </div>
+
+                      <table className="w-full text-left border border-black text-xs">
+                        <thead>
+                          <tr className="border-b border-black bg-gray-100">
+                            <th className="p-2 border-r border-black">Description</th>
+                            <th className="p-2 border-r border-black text-center">Qty</th>
+                            <th className="p-2 border-r border-black text-right">Rate</th>
+                            <th className="p-2 text-right">Total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {items.map((item) => (
+                            <tr key={item.id} className="border-b border-black">
+                              <td className="p-2 border-r border-black">{item.description || "Service Item"}</td>
+                              <td className="p-2 border-r border-black text-center">{item.quantity}</td>
+                              <td className="p-2 border-r border-black text-right">₹{item.price.toFixed(2)}</td>
+                              <td className="p-2 text-right">₹{(item.quantity * item.price).toFixed(2)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+
+                      <div className="flex justify-end text-xs">
+                        <div className="w-48 space-y-1">
+                          <div className="flex justify-between">
+                            <span>Subtotal:</span>
+                            <span>₹{calculateSubtotal().toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>GST (18%):</span>
+                            <span>₹{calculateTax().toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between font-bold text-sm border-t border-black pt-1">
+                            <span>Total Amount:</span>
+                            <span>₹{calculateTotal().toFixed(2)}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
-                  <div ref={invoiceRef} className="min-w-[600px] bg-white text-black p-8 relative" style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}>
-                    {/* Invoice Template 1 (Modern) */}
-                    {template === 1 && (
-                      <div className="space-y-8">
-                        <motion.div drag={isAdvancedEdit} dragMomentum={false} className="flex justify-between items-start border-b-2 border-[#111827] pb-6 relative group">
-                          {isAdvancedEdit && <div className="absolute inset-0 border-2 border-dashed border-blue-400 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity rounded-lg"></div>}
-                          <div>
-                            {logo ? <img src={logo} alt="Logo" className="h-16 object-contain mb-4" /> : <div className="h-16 w-32 bg-[#f3f4f6] flex items-center justify-center text-[#9ca3af] mb-4 font-semibold text-xs">YOUR LOGO</div>}
-                            <h1 className="text-3xl font-black text-[#111827] tracking-tight" contentEditable={isAdvancedEdit} suppressContentEditableWarning>INVOICE</h1>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-bold text-[#6b7280]">Invoice No.</p>
-                            <p className="text-lg font-medium text-[#111827]" contentEditable={isAdvancedEdit} suppressContentEditableWarning>{invoiceNumber || '---'}</p>
-                            <p className="text-sm font-bold text-[#6b7280] mt-2">Date</p>
-                            <p className="text-md font-medium text-[#111827]" contentEditable={isAdvancedEdit} suppressContentEditableWarning>{invoiceDate || '---'}</p>
-                          </div>
-                        </motion.div>
-
-                        <motion.div drag={isAdvancedEdit} dragMomentum={false} className="relative group p-2 -m-2">
-                          {isAdvancedEdit && <div className="absolute inset-0 border-2 border-dashed border-blue-400 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity rounded-lg"></div>}
-                          <p className="text-sm font-bold text-[#6b7280] mb-1">Billed To:</p>
-                          <p className="text-xl font-bold text-[#111827]" contentEditable={isAdvancedEdit} suppressContentEditableWarning>{customerName || 'Customer Name'}</p>
-                        </motion.div>
-
-                        <motion.div drag={isAdvancedEdit} dragMomentum={false} className="relative group">
-                          {isAdvancedEdit && <div className="absolute inset-0 border-2 border-dashed border-blue-400 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity rounded-lg"></div>}
-                          <table className="w-full text-left border-collapse mt-8">
-                            <thead>
-                              <tr className="bg-[#111827] text-white">
-                                <th className="p-3 text-sm font-medium w-3/5 rounded-tl-lg">Description</th>
-                                <th className="p-3 text-sm font-medium text-center">Qty</th>
-                                <th className="p-3 text-sm font-medium text-right">Price</th>
-                                <th className="p-3 text-sm font-medium text-right rounded-tr-lg">Amount</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {items.map((item, idx) => (
-                                <tr key={item.id} className="border-b border-[#e5e7eb]">
-                                  <td className="p-3 text-sm text-[#111827]" contentEditable={isAdvancedEdit} suppressContentEditableWarning>{item.description || 'Item description'}</td>
-                                  <td className="p-3 text-sm text-center text-[#111827]">{item.quantity}</td>
-                                  <td className="p-3 text-sm text-right text-[#111827]">₹{item.price.toFixed(2)}</td>
-                                  <td className="p-3 text-sm text-right font-medium text-[#111827]">₹{(item.quantity * item.price).toFixed(2)}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </motion.div>
-
-                        <motion.div drag={isAdvancedEdit} dragMomentum={false} className="flex justify-end pt-4 relative group">
-                          {isAdvancedEdit && <div className="absolute inset-0 border-2 border-dashed border-blue-400 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity rounded-lg"></div>}
-                          <div className="w-1/2 space-y-3">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-[#4b5563]">Subtotal</span>
-                              <span className="font-medium text-[#111827]">₹{calculateSubtotal().toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-[#4b5563]">GST (18%)</span>
-                              <span className="font-medium text-[#111827]">₹{calculateTax().toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between text-xl font-black pt-3 border-t-2 border-[#111827]">
-                              <span className="text-[#111827]">Total</span>
-                              <span className="text-[#111827]">₹{calculateTotal().toFixed(2)}</span>
-                            </div>
-                          </div>
-                        </motion.div>
-                      </div>
-                    )}
-
-                    {/* Invoice Template 2 (Classic) */}
-                    {template === 2 && (
-                      <div className="space-y-6">
-                        <motion.div drag={isAdvancedEdit} dragMomentum={false} className="text-center pb-6 border-b border-[#d1d5db] relative group">
-                          {isAdvancedEdit && <div className="absolute inset-0 border-2 border-dashed border-blue-400 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity rounded-lg"></div>}
-                          {logo ? <img src={logo} alt="Logo" className="h-16 object-contain mx-auto mb-2" /> : <div className="h-16 w-32 bg-[#f3f4f6] flex items-center justify-center text-[#9ca3af] mx-auto mb-2 font-semibold text-xs">YOUR LOGO</div>}
-                          <h1 className="text-2xl font-serif font-bold text-[#1f2937]" contentEditable={isAdvancedEdit} suppressContentEditableWarning>TAX INVOICE</h1>
-                        </motion.div>
-                        
-                        <motion.div drag={isAdvancedEdit} dragMomentum={false} className="flex justify-between text-sm font-serif relative group p-2 -m-2">
-                          {isAdvancedEdit && <div className="absolute inset-0 border-2 border-dashed border-blue-400 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity rounded-lg"></div>}
-                          <div>
-                            <p className="font-bold text-[#111827]">Bill To:</p>
-                            <p className="text-[#111827]" contentEditable={isAdvancedEdit} suppressContentEditableWarning>{customerName || 'Customer Name'}</p>
-                          </div>
-                          <div className="text-right text-[#111827]">
-                            <p><span className="font-bold">Invoice #:</span> <span contentEditable={isAdvancedEdit} suppressContentEditableWarning>{invoiceNumber}</span></p>
-                            <p><span className="font-bold">Date:</span> <span contentEditable={isAdvancedEdit} suppressContentEditableWarning>{invoiceDate}</span></p>
-                          </div>
-                        </motion.div>
-
-                        <motion.div drag={isAdvancedEdit} dragMomentum={false} className="relative group">
-                          {isAdvancedEdit && <div className="absolute inset-0 border-2 border-dashed border-blue-400 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity rounded-lg"></div>}
-                          <table className="w-full text-left border-collapse border border-[#d1d5db] font-serif text-sm">
-                            <thead>
-                              <tr className="bg-[#f3f4f6] text-[#111827]">
-                                <th className="p-2 border border-[#d1d5db]">Description</th>
-                                <th className="p-2 border border-[#d1d5db] text-center">Qty</th>
-                                <th className="p-2 border border-[#d1d5db] text-right">Unit Price</th>
-                                <th className="p-2 border border-[#d1d5db] text-right">Total</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {items.map((item) => (
-                                <tr key={item.id} className="text-[#111827]">
-                                  <td className="p-2 border border-[#d1d5db]" contentEditable={isAdvancedEdit} suppressContentEditableWarning>{item.description || 'Item description'}</td>
-                                  <td className="p-2 border border-[#d1d5db] text-center">{item.quantity}</td>
-                                  <td className="p-2 border border-[#d1d5db] text-right">₹{item.price.toFixed(2)}</td>
-                                  <td className="p-2 border border-[#d1d5db] text-right">₹{(item.quantity * item.price).toFixed(2)}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </motion.div>
-
-                        <motion.div drag={isAdvancedEdit} dragMomentum={false} className="flex justify-end font-serif text-sm relative group">
-                          {isAdvancedEdit && <div className="absolute inset-0 border-2 border-dashed border-blue-400 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity rounded-lg"></div>}
-                          <div className="w-64 border border-[#d1d5db] p-4 space-y-2 text-[#111827]">
-                            <div className="flex justify-between">
-                              <span>Subtotal:</span>
-                              <span>₹{calculateSubtotal().toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Tax (18%):</span>
-                              <span>₹{calculateTax().toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between font-bold text-lg pt-2 border-t border-[#d1d5db]">
-                              <span>Total:</span>
-                              <span>₹{calculateTotal().toFixed(2)}</span>
-                            </div>
-                          </div>
-                        </motion.div>
-                      </div>
-                    )}
-                  </div>
                 </div>
               </div>
             </div>
@@ -415,8 +443,55 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Analytics Dashboard</h2>
-            <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 h-96 flex items-center justify-center">
-              <p className="text-gray-400">Detailed Analytics Chart Placeholder</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800">
+                <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-4">Billing Activity</h3>
+                <div className="h-64 flex items-center justify-center text-gray-400 border border-dashed border-gray-200 dark:border-zinc-800 rounded-lg">
+                  {billingHistory.length === 0 ? "No invoices generated yet. Create your first invoice in Billing Software." : `${billingHistory.length} total invoices created.`}
+                </div>
+              </div>
+              <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800">
+                <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-4">Compliance Health</h3>
+                <div className="h-64 flex flex-col items-center justify-center gap-2 text-emerald-600 dark:text-emerald-400">
+                  <CheckCircle size={40} />
+                  <span className="font-bold text-lg text-gray-800 dark:text-white">100% Compliant</span>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">All required filings up to date</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      case "compliance-tracker":
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Compliance Tracker</h2>
+            <p className="text-gray-500 dark:text-gray-400">Track all your compliance tasks and deadlines in one place.</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[
+                { title: "GST Return Filing", due: "25th of every month", status: "Active", color: "green" },
+                { title: "TDS Payment", due: "7th of every month", status: "Active", color: "green" },
+                { title: "Annual ROC Filing", due: "30th September", status: "Active", color: "green" },
+                { title: "Income Tax Return", due: "31st July", status: "Active", color: "green" },
+                { title: "PF & ESI Payment", due: "15th of every month", status: "Active", color: "blue" },
+                { title: "Advance Tax Payment", due: "15th December", status: "Active", color: "blue" },
+              ].map((item, i) => (
+                <div key={i} className="bg-white dark:bg-zinc-900 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex items-start gap-4">
+                  <div className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                    item.color === "green" ? "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400" :
+                    "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                  }`}>
+                    <FileText size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-100">{item.title}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Due: {item.due}</p>
+                  </div>
+                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                    item.color === "green" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
+                    "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                  }`}>{item.status}</span>
+                </div>
+              ))}
             </div>
           </div>
         );
@@ -431,26 +506,15 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                   <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 border-b border-gray-100 dark:border-zinc-800 pb-2">Profile Information</h3>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
-                      <input type="text" className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow" defaultValue="John Doe" />
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username / ID</label>
+                      <input type="text" readOnly disabled className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 bg-gray-100 font-bold capitalize outline-none" value={username} />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
-                      <input type="email" className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow" defaultValue="john@example.com" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company Name</label>
-                      <input type="text" className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow" defaultValue="Acme Corp" />
-                    </div>
-                    <div className="pt-2">
-                      <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                        Save Profile
-                      </button>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Registered Account</label>
+                      <input type="text" readOnly disabled className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 bg-gray-100 outline-none" value={`${username}@triotax.com`} />
                     </div>
                   </div>
                 </div>
-
-
               </div>
 
               <div className="space-y-6">
@@ -475,49 +539,13 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                       <input type={showPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
                     </div>
                     <div className="pt-2">
-                      <button className="bg-zinc-900 dark:bg-white dark:text-zinc-900 dark:hover:bg-gray-100 hover:bg-zinc-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors w-full">
+                      <button onClick={() => alert("Password updated successfully!")} className="bg-zinc-900 dark:bg-white dark:text-zinc-900 dark:hover:bg-gray-100 hover:bg-zinc-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors w-full">
                         Update Password
                       </button>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        );
-      case "compliance-tracker":
-        return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Compliance Tracker</h2>
-            <p className="text-gray-500 dark:text-gray-400">Track all your compliance tasks and deadlines in one place.</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[
-                { title: "GST Return Filing", due: "25th of every month", status: "Pending", color: "amber" },
-                { title: "TDS Payment", due: "7th of every month", status: "Completed", color: "green" },
-                { title: "Annual ROC Filing", due: "30th September", status: "Pending", color: "amber" },
-                { title: "Income Tax Return", due: "31st July", status: "Completed", color: "green" },
-                { title: "PF & ESI Payment", due: "15th of every month", status: "Upcoming", color: "blue" },
-                { title: "Advance Tax Payment", due: "15th December", status: "Upcoming", color: "blue" },
-              ].map((item, i) => (
-                <div key={i} className="bg-white dark:bg-zinc-900 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex items-start gap-4">
-                  <div className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                    item.color === "green" ? "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400" :
-                    item.color === "blue" ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" :
-                    "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
-                  }`}>
-                    <FileText size={18} />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-100">{item.title}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Due: {item.due}</p>
-                  </div>
-                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                    item.status === "Completed" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
-                    item.status === "Upcoming" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" :
-                    "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                  }`}>{item.status}</span>
-                </div>
-              ))}
             </div>
           </div>
         );
@@ -540,13 +568,13 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
             key={tab.id}
             onClick={() => {
               setActiveTab(tab.id);
-              window.history.pushState(null, "", `/${username}-user/${tab.id}`);
               setIsMobileMenuOpen(false);
+              window.history.pushState(null, "", `/${username}-user/${tab.id}`);
             }}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === tab.id 
-                ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400" 
-                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-zinc-800/50 dark:hover:text-white"
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+              activeTab === tab.id
+                ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-semibold"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-900"
             }`}
           >
             <tab.icon size={18} />
@@ -554,158 +582,121 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
           </button>
         ))}
       </div>
-      
-      <div className="p-4 border-t border-gray-200 dark:border-zinc-800 space-y-1">
-        <button
-          onClick={() => {
-            setActiveTab("settings");
-            window.history.pushState(null, "", `/${username}-user/settings`);
-            setIsMobileMenuOpen(false);
-          }}
-          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-            activeTab === "settings" 
-              ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400" 
-              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-zinc-800/50 dark:hover:text-white"
-          }`}
-        >
-          <Settings size={18} />
-          Settings
-        </button>
+
+      <div className="p-4 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+        <ThemeToggle />
         <button
           onClick={onLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+          className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 hover:text-red-700 font-medium px-3 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
         >
-          <LogOut size={18} />
-          Log out
+          <LogOut size={16} /> Logout
         </button>
       </div>
     </div>
   );
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-zinc-900 w-full overflow-hidden transition-colors">
+    <div className="flex h-screen bg-[#F8FAFC] dark:bg-[#060e1d] text-gray-900 dark:text-white transition-colors duration-300 overflow-hidden">
       {/* Desktop Sidebar */}
-      <div className="hidden md:block w-64 h-full">
+      <aside className="hidden md:block w-64 h-full flex-shrink-0">
         <SidebarContent />
-      </div>
+      </aside>
 
-      {/* Mobile Sidebar Overlay */}
+      {/* Mobile Drawer */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
-            />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-50 md:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
             <motion.div
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
-              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-              className="fixed inset-y-0 left-0 w-64 bg-white dark:bg-zinc-950 z-50 md:hidden"
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="w-64 h-full"
+              onClick={(e) => e.stopPropagation()}
             >
               <SidebarContent />
             </motion.div>
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Main Content Area */}
+      {/* Main Content */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <header className="bg-white dark:bg-zinc-950 border-b border-gray-200 dark:border-zinc-800 h-16 flex items-center px-4 justify-between md:justify-end transition-colors">
-          <button 
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="md:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg"
-          >
-            <Menu size={24} />
-          </button>
-          
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <div className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:block">John Doe</div>
-            <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center font-bold">
-              JD
+        {/* Header */}
+        <header className="h-16 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 px-6 flex items-center justify-between transition-colors">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg"
+            >
+              <Menu size={20} />
+            </button>
+            <h2 className="text-lg font-bold text-gray-800 dark:text-white capitalize">
+              {tabs.find((t) => t.id === activeTab)?.label || "Dashboard"}
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">{username}</span>
+            <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-bold flex items-center justify-center rounded-full capitalize">
+              {username.charAt(0)}
             </div>
           </div>
         </header>
-        
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 relative">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {renderContent()}
-          </motion.div>
+
+        {/* Dynamic Page Content */}
+        <main className="flex-1 overflow-y-auto p-6">
+          {renderContent()}
         </main>
       </div>
 
-      {/* Billing History Modal */}
+      {/* History Modal */}
       <AnimatePresence>
         {isHistoryOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsHistoryOpen(false)}
               className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             />
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden relative z-10 flex flex-col max-h-[90vh] border border-gray-100 dark:border-zinc-800"
+              className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden relative z-10 p-6"
             >
-              <div className="p-6 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-white">Billing History</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Your past GST filings and payments.</p>
-                </div>
-                <button onClick={() => setIsHistoryOpen(false)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-bold text-lg text-gray-800 dark:text-white">Billing History</h3>
+                <button onClick={() => setIsHistoryOpen(false)} className="text-gray-400 hover:text-gray-600">
                   <X size={20} />
                 </button>
               </div>
 
-              <div className="p-6 overflow-y-auto">
-                <div className="border border-gray-200 dark:border-zinc-800 rounded-xl overflow-hidden">
-                  <table className="w-full text-left border-collapse text-sm">
-                    <thead className="bg-gray-50 dark:bg-zinc-800 text-gray-600 dark:text-gray-300">
-                      <tr>
-                        <th className="p-3 font-medium border-b border-gray-200 dark:border-zinc-700">Date</th>
-                        <th className="p-3 font-medium border-b border-gray-200 dark:border-zinc-700">Note / Description</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {mockBillingHistory.length > 0 ? (
-                        mockBillingHistory.map((item, idx) => (
-                          <tr key={idx} className="border-b border-gray-100 dark:border-zinc-800 last:border-0 hover:bg-gray-50 dark:hover:bg-zinc-800/50">
-                            <td className="p-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{item.date}</td>
-                            <td className="p-3 text-gray-800 dark:text-gray-300">{item.note}</td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={2} className="p-4 text-center text-gray-500 italic">No billing history found.</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+              {billingHistory.length === 0 ? (
+                <div className="py-8 text-center text-gray-400">
+                  No billing history recorded yet.
                 </div>
-              </div>
-              
-              <div className="p-6 border-t border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900 flex justify-end">
-                <button 
-                  onClick={() => setIsHistoryOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Close
-                </button>
-              </div>
+              ) : (
+                <div className="space-y-3">
+                  {billingHistory.map((item) => (
+                    <div key={item.id} className="p-3 bg-gray-50 dark:bg-zinc-800 rounded-lg flex justify-between items-center text-sm">
+                      <div>
+                        <div className="font-semibold text-gray-800 dark:text-gray-200">{item.invoiceNumber} - {item.customer}</div>
+                        <div className="text-xs text-gray-400">{item.date}</div>
+                      </div>
+                      <div className="font-bold text-blue-600 dark:text-blue-400">₹{item.amount.toFixed(2)}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </motion.div>
           </div>
         )}
