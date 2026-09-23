@@ -7085,9 +7085,14 @@ export default function App() {
     return false;
   };
 
-  const handleUserLogin = () => {
+  const handleUserLogin = (username?: string, _password?: string) => {
+    if (!username) return;
     setIsUserAuth(true);
-    navigateToPage("user");
+    setUsername(username);
+    setUserTab("dashboard");
+    window.history.pushState(null, "", `/${username}-user/dashboard`);
+    setActivePage("user");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleLogout = () => {
@@ -7120,14 +7125,25 @@ export default function App() {
     }
   }, [activePage]);
 
+  const [username, setUsername] = useState<string>("");
+  const [userTab, setUserTab] = useState<string>("home");
+
   // Sync state with URL pathname on initial load and handle back/forward actions
   useEffect(() => {
     const handleUrlChange = () => {
       const path = window.location.pathname.replace(/^\/|\/$/g, "");
-      const matchedPage = (path || "home") as Page;
-      const validPages: Page[] = ["home", "about", "services", "service-detail", "pricing", "industries", "blog", "contact", "faq", "career", "login", "admin", "user"];
-      if (validPages.includes(matchedPage)) {
-        setActivePage(matchedPage);
+      const validPages = ["home", "about", "services", "service-detail", "pricing", "industries", "blog", "contact", "faq", "career", "login", "admin", "user"];
+      
+      if (path === "trioadmin") {
+        setActivePage("admin");
+      } else if (path.includes("-user")) {
+        const parts = path.split("/");
+        const userPart = parts[0];
+        setUsername(userPart.replace("-user", ""));
+        setUserTab(parts.length > 1 ? parts.slice(1).join("/") : "home");
+        setActivePage("user");
+      } else if (validPages.includes(path || "home")) {
+        setActivePage((path || "home") as Page);
       } else {
         setActivePage("home");
       }
@@ -7182,7 +7198,10 @@ export default function App() {
 
   const navigateToPage = (page: Page) => {
     setActivePage(page);
-    const path = page === "home" ? "/" : `/${page}`;
+    let path;
+    if (page === "home") path = "/";
+    else if (page === "admin") path = "/trioadmin";
+    else path = `/${page}`;
     window.history.pushState(null, "", path);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -7207,7 +7226,7 @@ export default function App() {
       case "career": return <CareerPage setActivePage={navigateToPage} />;
       case "login": return <TravelConnectSignIn onLogin={handleUserLogin} />;
       case "admin": return <AdminPage isAdminAuth={isAdminAuth} onLogin={handleAdminLogin} onLogout={handleLogout} />;
-      case "user": return <UserDashboard onLogout={handleLogout} />;
+      case "user": return <UserDashboard onLogout={handleLogout} username={username} initialTab={userTab} />;
       default: return <HomePage setActivePage={navigateToPage} setSelectedServiceId={setSelectedServiceId} />;
     }
   };

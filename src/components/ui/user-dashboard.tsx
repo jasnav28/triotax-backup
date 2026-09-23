@@ -8,10 +8,12 @@ import html2canvas from "html2canvas";
 
 interface UserDashboardProps {
   onLogout: () => void;
+  username?: string;
+  initialTab?: string;
 }
 
-export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout }) => {
-  const [activeTab, setActiveTab] = useState("home");
+export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username = "user", initialTab = "dashboard" }) => {
+  const [activeTab, setActiveTab] = useState(initialTab || "dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
@@ -41,9 +43,11 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout }) => {
   ];
 
   const tabs = [
+    { id: "dashboard", label: "Dashboard", icon: Home },
     { id: "home", label: "Home", icon: Home },
-    { id: "billing", label: "Billing Software", icon: CreditCard },
+    { id: "billing-software", label: "Billing Software", icon: CreditCard },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
+    { id: "compliance-tracker", label: "Compliance Tracker", icon: FileText },
   ];
 
   // --- Billing Functions ---
@@ -98,10 +102,11 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout }) => {
 
   const renderContent = () => {
     switch (activeTab) {
+      case "dashboard":
       case "home":
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Welcome back, User!</h2>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Welcome back, {username}!</h2>
             
             <StockTicker />
 
@@ -141,7 +146,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout }) => {
             </div>
           </div>
         );
-      case "billing":
+      case "billing-software":
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Billing Software</h2>
@@ -480,6 +485,42 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout }) => {
             </div>
           </div>
         );
+      case "compliance-tracker":
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Compliance Tracker</h2>
+            <p className="text-gray-500 dark:text-gray-400">Track all your compliance tasks and deadlines in one place.</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[
+                { title: "GST Return Filing", due: "25th of every month", status: "Pending", color: "amber" },
+                { title: "TDS Payment", due: "7th of every month", status: "Completed", color: "green" },
+                { title: "Annual ROC Filing", due: "30th September", status: "Pending", color: "amber" },
+                { title: "Income Tax Return", due: "31st July", status: "Completed", color: "green" },
+                { title: "PF & ESI Payment", due: "15th of every month", status: "Upcoming", color: "blue" },
+                { title: "Advance Tax Payment", due: "15th December", status: "Upcoming", color: "blue" },
+              ].map((item, i) => (
+                <div key={i} className="bg-white dark:bg-zinc-900 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex items-start gap-4">
+                  <div className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                    item.color === "green" ? "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400" :
+                    item.color === "blue" ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" :
+                    "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
+                  }`}>
+                    <FileText size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-100">{item.title}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Due: {item.due}</p>
+                  </div>
+                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                    item.status === "Completed" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
+                    item.status === "Upcoming" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" :
+                    "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                  }`}>{item.status}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
       default:
         return null;
     }
@@ -499,6 +540,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout }) => {
             key={tab.id}
             onClick={() => {
               setActiveTab(tab.id);
+              window.history.pushState(null, "", `/${username}-user/${tab.id}`);
               setIsMobileMenuOpen(false);
             }}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
@@ -517,6 +559,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout }) => {
         <button
           onClick={() => {
             setActiveTab("settings");
+            window.history.pushState(null, "", `/${username}-user/settings`);
             setIsMobileMenuOpen(false);
           }}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${

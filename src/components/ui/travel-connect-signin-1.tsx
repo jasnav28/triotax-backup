@@ -221,11 +221,13 @@ const DotMap = () => {
   );
 };
 
-export const SignInCard = ({ onLogin }: { onLogin?: () => void }) => {
+export const SignInCard = ({ onLogin }: { onLogin?: (username: string, password: string) => void }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isHovered, setIsHovered] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   
   return (
     <div className="flex w-full h-full items-center justify-center">
@@ -262,18 +264,24 @@ export const SignInCard = ({ onLogin }: { onLogin?: () => void }) => {
           >
             <h1 className="text-2xl md:text-3xl font-bold mb-1 text-gray-800">Welcome back</h1>
             <p className="text-gray-500 mb-8">Sign in to your account</p>
+
+            {errorMsg && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg">
+                {errorMsg}
+              </div>
+            )}
             
             <form className="space-y-5">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email <span className="text-blue-500">*</span>
+                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+                  Username <span className="text-blue-500">*</span>
                 </label>
                 <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email address"
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter your username"
                   required
                   className="bg-gray-50 border-gray-200 placeholder:text-gray-400 text-gray-800 w-full focus:border-blue-500 focus:ring-blue-500"
                 />
@@ -312,22 +320,41 @@ export const SignInCard = ({ onLogin }: { onLogin?: () => void }) => {
               >
                 <Button
                   type="submit"
+                  disabled={isLoading}
                   className={cn(
                     "w-full bg-gradient-to-r relative overflow-hidden from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white py-2 rounded-lg transition-all duration-300",
                     isHovered ? "shadow-lg shadow-blue-200" : ""
                   )}
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.preventDefault();
-                    if (email && password) {
-                      if (onLogin) onLogin();
+                    if (!username || !password) return;
+                    setIsLoading(true);
+                    setErrorMsg("");
+                    try {
+                      const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "https://triotax-backend-production.up.railway.app";
+                      const resp = await fetch(`${API_BASE_URL}/api/login`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ username, password }),
+                      });
+                      if (resp.ok) {
+                        if (onLogin) onLogin(username, password);
+                      } else {
+                        const data = await resp.json();
+                        setErrorMsg(data.message || "Invalid username or password");
+                      }
+                    } catch {
+                      setErrorMsg("Cannot connect to server. Make sure the backend is running.");
+                    } finally {
+                      setIsLoading(false);
                     }
                   }}
                 >
                   <span className="flex items-center justify-center">
-                    Sign in
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    {isLoading ? "Signing in..." : "Sign in"}
+                    {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
                   </span>
-                  {isHovered && (
+                  {isHovered && !isLoading && (
                     <motion.span
                       initial={{ left: "-100%" }}
                       animate={{ left: "100%" }}
@@ -352,7 +379,7 @@ export const SignInCard = ({ onLogin }: { onLogin?: () => void }) => {
   );
 };
 
-const Index = ({ onLogin }: { onLogin?: () => void }) => {
+const Index = ({ onLogin }: { onLogin?: (username: string, password: string) => void }) => {
   return (
     <div 
       className="min-h-screen w-full flex items-center justify-center p-4 relative"
