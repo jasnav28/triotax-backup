@@ -273,7 +273,7 @@ export const SignInCard = ({ onLogin }: { onLogin?: (username: string, password:
             
             <form className="space-y-5">
               <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Username <span className="text-blue-500">*</span>
                 </label>
                 <Input
@@ -283,12 +283,12 @@ export const SignInCard = ({ onLogin }: { onLogin?: (username: string, password:
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Enter your username"
                   required
-                  className="bg-gray-50 border-gray-200 placeholder:text-gray-400 text-gray-800 w-full focus:border-blue-500 focus:ring-blue-500"
+                  className="bg-gray-50 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-400 text-gray-900 dark:text-white w-full focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
               
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Password <span className="text-blue-500">*</span>
                 </label>
                 <div className="relative">
@@ -299,11 +299,11 @@ export const SignInCard = ({ onLogin }: { onLogin?: (username: string, password:
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
                     required
-                    className="bg-gray-50 border-gray-200 placeholder:text-gray-400 text-gray-800 w-full pr-10 focus:border-blue-500 focus:ring-blue-500"
+                    className="bg-gray-50 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-400 text-gray-900 dark:text-white w-full pr-10 focus:border-blue-500 focus:ring-blue-500"
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                     onClick={() => setIsPasswordVisible(!isPasswordVisible)}
                   >
                     {isPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -332,19 +332,35 @@ export const SignInCard = ({ onLogin }: { onLogin?: (username: string, password:
                     setErrorMsg("");
                     try {
                       const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "https://triotax-backend-production.up.railway.app";
+                      const controller = new AbortController();
+                      const timeoutId = setTimeout(() => controller.abort(), 4000);
                       const resp = await fetch(`${API_BASE_URL}/api/login`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ username, password }),
+                        signal: controller.signal
                       });
+                      clearTimeout(timeoutId);
                       if (resp.ok) {
                         if (onLogin) onLogin(username, password);
+                        return;
                       } else {
                         const data = await resp.json();
                         setErrorMsg(data.message || "Invalid username or password");
+                        return;
                       }
                     } catch {
-                      setErrorMsg("Cannot connect to server. Make sure the backend is running.");
+                      // Offline local fallback check
+                      try {
+                        const localData = localStorage.getItem("triotax_stored_users");
+                        const localUsers = localData ? JSON.parse(localData) : [];
+                        const found = localUsers.find((u: any) => u.username === username.toLowerCase().replace(/\s+/g, '') && u.password === password);
+                        if (found) {
+                          if (onLogin) onLogin(username, password);
+                          return;
+                        }
+                      } catch {}
+                      setErrorMsg("Network connection poor. Saved locally — try again or check connection.");
                     } finally {
                       setIsLoading(false);
                     }

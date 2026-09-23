@@ -14,6 +14,7 @@ import { Chatbot } from "@/app/components/ui/chatbot";
 import TravelConnectSignIn from "@/components/ui/travel-connect-signin-1";
 import AdminPage from "@/components/ui/admin-page";
 import UserDashboard from "@/components/ui/user-dashboard";
+import { NetworkIndicator } from "@/components/ui/network-indicator";
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 
@@ -7237,6 +7238,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-[#F5F8FC] dark:bg-[#060e1d] text-gray-900 dark:text-white transition-colors duration-300">
         {renderPage()}
+        <NetworkIndicator />
       </div>
     );
   }
@@ -7249,6 +7251,7 @@ export default function App() {
       </main>
       <Footer setActivePage={navigateToPage} setSelectedServiceId={setSelectedServiceId} />
       <Chatbot />
+      <NetworkIndicator />
     </div>
   );
 }
