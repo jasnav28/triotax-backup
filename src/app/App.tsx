@@ -7227,7 +7227,11 @@ export default function App() {
       case "career": return <CareerPage setActivePage={navigateToPage} />;
       case "login": return <TravelConnectSignIn onLogin={handleUserLogin} />;
       case "admin": return <AdminPage isAdminAuth={isAdminAuth} onLogin={handleAdminLogin} onLogout={handleLogout} />;
-      case "user": return <UserDashboard onLogout={handleLogout} username={username} initialTab={userTab} />;
+      case "user":
+        if (!isUserAuth) {
+          return <TravelConnectSignIn onLogin={handleUserLogin} />;
+        }
+        return <UserDashboard onLogout={handleLogout} username={username} initialTab={userTab} />;
       default: return <HomePage setActivePage={navigateToPage} setSelectedServiceId={setSelectedServiceId} />;
     }
   };
