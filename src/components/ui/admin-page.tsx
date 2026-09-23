@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Lock, User, ArrowRight, LayoutDashboard, Users, FileText, Settings, LogOut, UserPlus, FileCheck, X } from "lucide-react";
+import { Shield, Lock, User, ArrowRight, LayoutDashboard, Users, Settings, LogOut, UserPlus, FileCheck, X, Trash2, ExternalLink, RefreshCw } from "lucide-react";
 import { ThemeToggle } from "@/app/components/ui/theme-toggle";
 
 interface AdminPageProps {
@@ -9,41 +9,18 @@ interface AdminPageProps {
   onLogout: () => void;
 }
 
-// Mock initial users for GST tracking
-const initialUsers = [
-  { 
-    id: 1, name: "John Doe", email: "john@example.com", note: "Please upload PAN", gstStatus: "Ongoing",
-    billingHistory: [
-      { date: "2026-06-15", note: "Invoice #1024 paid" },
-      { date: "2026-05-15", note: "Invoice #0981 paid" }
-    ]
-  },
-  { 
-    id: 2, name: "Alice Smith", email: "alice@example.com", note: "Waiting for documents", gstStatus: "Ongoing",
-    billingHistory: [
-      { date: "2026-07-01", note: "Initial setup fee" }
-    ]
-  },
-  { 
-    id: 3, name: "Bob Johnson", email: "bob@example.com", note: "Filed successfully for Q2", gstStatus: "Completed",
-    billingHistory: [
-      { date: "2026-06-30", note: "Q2 GST filing payment" },
-      { date: "2026-03-31", note: "Q1 GST filing payment" }
-    ]
-  },
-];
-
 export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLogout }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [gstUsers, setGstUsers] = useState(initialUsers);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
 
-  const [selectedUser, setSelectedUser] = useState<typeof initialUsers[0] | null>(null);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [editNote, setEditNote] = useState("");
-  const [editStatus, setEditStatus] = useState("");
+  const [editStatus, setEditStatus] = useState("Ongoing");
 
   // Create user form state
   const [newCompany, setNewCompany] = useState("");
@@ -58,6 +35,29 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
   const [createMsg, setCreateMsg] = useState("");
   const [createError, setCreateError] = useState("");
 
+  const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "https://triotax-backend-production.up.railway.app";
+
+  const fetchUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/users`);
+      if (res.ok) {
+        const data = await res.json();
+        setUsers(data.users || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch users:", err);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAdminAuth) {
+      fetchUsers();
+    }
+  }, [isAdminAuth]);
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const success = onLogin(password, username);
@@ -66,19 +66,31 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
     }
   };
 
-  const openUserModal = (user: typeof initialUsers[0]) => {
+  const openUserModal = (user: any) => {
     setSelectedUser(user);
-    setEditNote(user.note);
-    setEditStatus(user.gstStatus);
+    setEditNote(user.note || "");
+    setEditStatus(user.gstStatus || "Ongoing");
   };
 
   const handleSaveUserDetails = () => {
     if (selectedUser) {
-      setGstUsers(prev => prev.map(u => 
-        u.id === selectedUser.id ? { ...u, note: editNote, gstStatus: editStatus } : u
+      setUsers(prev => prev.map(u => 
+        u.username === selectedUser.username ? { ...u, note: editNote, gstStatus: editStatus } : u
       ));
-      alert(`Saved details for ${selectedUser.name} successfully!`);
+      alert(`Updated GST status for ${selectedUser.username}!`);
       setSelectedUser(null);
+    }
+  };
+
+  const handleDeleteUser = async (userToDelete: string) => {
+    if (!confirm(`Are you sure you want to delete user "${userToDelete}"?`)) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/users/${userToDelete}`, { method: "DELETE" });
+      if (res.ok) {
+        fetchUsers();
+      }
+    } catch (err) {
+      console.error("Failed to delete user", err);
     }
   };
 
@@ -87,7 +99,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
     setCreateMsg("");
     setCreateError("");
     try {
-      const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "https://triotax-backend-production.up.railway.app";
       const response = await fetch(`${API_BASE_URL}/api/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -104,9 +115,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
         }),
       });
       if (response.ok) {
-        setCreateMsg(`User "${newUsername}" created successfully! They can now login at /login.`);
+        setCreateMsg(`User "${newUsername}" created successfully! URL: /${newUsername}-user/dashboard`);
         setNewCompany(""); setNewOwner(""); setNewEmail(""); setNewContact(""); setNewAltContact("");
         setNewAddress(""); setNewDesc(""); setNewUsername(""); setNewPassword("");
+        fetchUsers(); // refresh list immediately
       } else {
         const data = await response.json();
         setCreateError(data.message || "Failed to create user. Username may already exist.");
@@ -194,16 +206,74 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
         return (
           <>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              {['Total Users', 'Active Sessions', 'Pending Requests', 'Revenue'].map((metric, i) => (
-                <div key={metric} className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm transition-colors">
-                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">{metric}</h3>
-                  <p className="text-3xl font-bold text-gray-800 dark:text-white">{(i + 1) * 1234}</p>
+              {[
+                { title: 'Total Registered Users', value: users.length },
+                { title: 'Active Accounts', value: users.length },
+                { title: 'Pending GST Filings', value: 0 },
+                { title: 'Total Companies', value: users.length }
+              ].map((metric) => (
+                <div key={metric.title} className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm transition-colors">
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">{metric.title}</h3>
+                  <p className="text-3xl font-bold text-gray-800 dark:text-white">{metric.value}</p>
                 </div>
               ))}
             </div>
             
-            <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6 min-h-[400px] flex items-center justify-center transition-colors">
-              <p className="text-gray-400 dark:text-gray-500">Admin Dashboard Content</p>
+            <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6 transition-colors">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-gray-800 dark:text-white">Registered User Accounts</h3>
+                <button onClick={fetchUsers} className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium">
+                  <RefreshCw size={14} className={loadingUsers ? "animate-spin" : ""} /> Refresh List
+                </button>
+              </div>
+
+              {users.length === 0 ? (
+                <div className="text-center py-12">
+                  <User className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600 mb-3" />
+                  <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300">No Users Created Yet</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-4">Create your first client user to get started.</p>
+                  <button onClick={() => setActiveTab("create-user")} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors">
+                    + Create User Account
+                  </button>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-gray-50 dark:bg-zinc-950/50 text-gray-600 dark:text-gray-300 text-sm border-b border-gray-200 dark:border-zinc-800">
+                        <th className="p-3 font-medium">Company Name</th>
+                        <th className="p-3 font-medium">Owner Name</th>
+                        <th className="p-3 font-medium">Username</th>
+                        <th className="p-3 font-medium">Email / Contact</th>
+                        <th className="p-3 font-medium">Dashboard URL</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users.map((u) => (
+                        <tr key={u.id || u.username} className="border-b border-gray-100 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
+                          <td className="p-3 font-medium text-gray-800 dark:text-gray-200">{u.company_name || u.companyName || "N/A"}</td>
+                          <td className="p-3 text-gray-600 dark:text-gray-400">{u.owner_name || u.ownerName || "N/A"}</td>
+                          <td className="p-3 font-semibold text-blue-600 dark:text-blue-400">{u.username}</td>
+                          <td className="p-3 text-sm text-gray-500 dark:text-gray-400">
+                            <div>{u.email || "No email"}</div>
+                            <div className="text-xs text-gray-400">{u.contact}</div>
+                          </td>
+                          <td className="p-3 text-sm">
+                            <a 
+                              href={`/${u.username}-user/dashboard`} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 text-blue-600 hover:underline"
+                            >
+                              /{u.username}-user/dashboard <ExternalLink size={12} />
+                            </a>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </>
         );
@@ -216,7 +286,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
             <form onSubmit={handleCreateUser} className="space-y-6">
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Business Details Section */}
                 <div className="space-y-4 md:col-span-2">
                   <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 border-b border-gray-200 dark:border-zinc-800 pb-2">Business Details</h3>
                 </div>
@@ -250,7 +319,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
                   <textarea rows={2} value={newDesc} onChange={e => setNewDesc(e.target.value)} className="w-full border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Brief description of the business"></textarea>
                 </div>
 
-                {/* Account Credentials Section */}
                 <div className="space-y-4 md:col-span-2 mt-4">
                   <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 border-b border-gray-200 dark:border-zinc-800 pb-2">Account Credentials</h3>
                 </div>
@@ -277,43 +345,110 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
       case "gst-tracking":
         return (
           <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden transition-colors">
-            <div className="p-6 border-b border-gray-200 dark:border-zinc-800">
-              <h2 className="text-xl font-bold text-gray-800 dark:text-white">GST Tracking & Billing History</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Click on a user to view their billing history and manage GST status.</p>
+            <div className="p-6 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-gray-800 dark:text-white">GST Tracking & Billing History</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Click on a user to view their billing history and manage GST status.</p>
+              </div>
+              <button onClick={fetchUsers} className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                <RefreshCw size={14} className={loadingUsers ? "animate-spin" : ""} /> Refresh
+              </button>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-gray-50 dark:bg-zinc-950/50 text-gray-600 dark:text-gray-300 text-sm border-b border-gray-200 dark:border-zinc-800">
-                    <th className="p-4 font-medium">User Details</th>
-                    <th className="p-4 font-medium">GST Status</th>
-                    <th className="p-4 font-medium">Admin Note</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {gstUsers.map((user) => (
-                    <tr 
-                      key={user.id} 
-                      onClick={() => openUserModal(user)}
-                      className="border-b border-gray-100 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer"
-                    >
-                      <td className="p-4">
-                        <div className="font-medium text-gray-800 dark:text-gray-200">{user.name}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
-                      </td>
-                      <td className="p-4">
-                        <span className={`px-3 py-1 text-xs font-medium rounded-full ${user.gstStatus === "Completed" ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"}`}>
-                          {user.gstStatus}
-                        </span>
-                      </td>
-                      <td className="p-4 text-sm text-gray-600 dark:text-gray-400">
-                        {user.note || <span className="text-gray-400 dark:text-gray-600 italic">No notes</span>}
-                      </td>
+            
+            {users.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">
+                No users found. Use "Create User" to add account profiles.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50 dark:bg-zinc-950/50 text-gray-600 dark:text-gray-300 text-sm border-b border-gray-200 dark:border-zinc-800">
+                      <th className="p-4 font-medium">User Details</th>
+                      <th className="p-4 font-medium">GST Status</th>
+                      <th className="p-4 font-medium">Admin Note</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {users.map((user) => (
+                      <tr 
+                        key={user.id || user.username} 
+                        onClick={() => openUserModal(user)}
+                        className="border-b border-gray-100 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer"
+                      >
+                        <td className="p-4">
+                          <div className="font-medium text-gray-800 dark:text-gray-200">{user.company_name || user.companyName || user.username}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">{user.email || user.username}</div>
+                        </td>
+                        <td className="p-4">
+                          <span className={`px-3 py-1 text-xs font-medium rounded-full ${user.gstStatus === "Completed" ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"}`}>
+                            {user.gstStatus || "Ongoing"}
+                          </span>
+                        </td>
+                        <td className="p-4 text-sm text-gray-600 dark:text-gray-400">
+                          {user.note || <span className="text-gray-400 dark:text-gray-600 italic">No notes</span>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        );
+      case "manage-users":
+        return (
+          <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6 transition-colors">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-gray-800 dark:text-white">Manage All User Accounts</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">View and remove user profiles registered in the system.</p>
+              </div>
+              <button onClick={fetchUsers} className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                <RefreshCw size={14} className={loadingUsers ? "animate-spin" : ""} /> Refresh
+              </button>
             </div>
+
+            {users.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                No user accounts registered.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50 dark:bg-zinc-950/50 text-gray-600 dark:text-gray-300 text-sm border-b border-gray-200 dark:border-zinc-800">
+                      <th className="p-3 font-medium">Username</th>
+                      <th className="p-3 font-medium">Company Name</th>
+                      <th className="p-3 font-medium">Owner Name</th>
+                      <th className="p-3 font-medium">Email / Contact</th>
+                      <th className="p-3 font-medium text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map((u) => (
+                      <tr key={u.id || u.username} className="border-b border-gray-100 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
+                        <td className="p-3 font-semibold text-blue-600 dark:text-blue-400">{u.username}</td>
+                        <td className="p-3 text-gray-800 dark:text-gray-200">{u.company_name || u.companyName || "N/A"}</td>
+                        <td className="p-3 text-gray-600 dark:text-gray-400">{u.owner_name || u.ownerName || "N/A"}</td>
+                        <td className="p-3 text-sm text-gray-500 dark:text-gray-400">
+                          <div>{u.email}</div>
+                          <div className="text-xs text-gray-400">{u.contact}</div>
+                        </td>
+                        <td className="p-3 text-right">
+                          <button 
+                            onClick={() => handleDeleteUser(u.username)}
+                            className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors inline-flex items-center gap-1 text-sm font-medium"
+                          >
+                            <Trash2 size={16} /> Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         );
       default:
@@ -403,8 +538,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
             >
               <div className="p-6 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-white">{selectedUser.name}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{selectedUser.email}</p>
+                  <h3 className="text-xl font-bold text-gray-800 dark:text-white">{selectedUser.company_name || selectedUser.companyName || selectedUser.username}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{selectedUser.email || selectedUser.username}</p>
                 </div>
                 <button onClick={() => setSelectedUser(null)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
                   <X size={20} />
@@ -437,34 +572,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
                           placeholder="Add a note for the user..."
                         />
                       </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 uppercase tracking-wider mb-3">Billing History</h4>
-                    <div className="border border-gray-200 dark:border-zinc-800 rounded-xl overflow-hidden">
-                      <table className="w-full text-left border-collapse text-sm">
-                        <thead className="bg-gray-50 dark:bg-zinc-950/50 text-gray-600 dark:text-gray-300">
-                          <tr>
-                            <th className="p-3 font-medium border-b border-gray-200 dark:border-zinc-800">Date</th>
-                            <th className="p-3 font-medium border-b border-gray-200 dark:border-zinc-800">Note / Description</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {selectedUser.billingHistory.length > 0 ? (
-                            selectedUser.billingHistory.map((item, idx) => (
-                              <tr key={idx} className="border-b border-gray-100 dark:border-zinc-800 last:border-0 hover:bg-gray-50 dark:hover:bg-zinc-800/50">
-                                <td className="p-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{item.date}</td>
-                                <td className="p-3 text-gray-800 dark:text-gray-200">{item.note}</td>
-                              </tr>
-                            ))
-                          ) : (
-                            <tr>
-                              <td colSpan={2} className="p-4 text-center text-gray-500 dark:text-gray-500 italic">No billing history found.</td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
                     </div>
                   </div>
                 </div>
