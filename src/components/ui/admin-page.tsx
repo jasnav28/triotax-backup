@@ -9,34 +9,14 @@ interface AdminPageProps {
   onLogout: () => void;
 }
 
-const LOCAL_STORAGE_USERS_KEY = "triotax_stored_users";
-
-const getStoredLocalUsers = () => {
-  try {
-    const data = localStorage.getItem(LOCAL_STORAGE_USERS_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch {
-    return [];
-  }
-};
-
-const saveStoredLocalUsers = (usersList: any[]) => {
-  try {
-    localStorage.setItem(LOCAL_STORAGE_USERS_KEY, JSON.stringify(usersList));
-  } catch (e) {
-    console.error("Failed to save local users cache", e);
-  }
-};
-
 export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLogout }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [users, setUsers] = useState<any[]>(getStoredLocalUsers());
+  const [users, setUsers] = useState<any[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
-  const [isOfflineMode, setIsOfflineMode] = useState(false);
 
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [editNote, setEditNote] = useState("");
@@ -54,37 +34,20 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
   const [newPassword, setNewPassword] = useState("");
   const [createMsg, setCreateMsg] = useState("");
   const [createError, setCreateError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "https://triotax-backend-production.up.railway.app";
 
   const fetchUsers = async () => {
     setLoadingUsers(true);
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
-      const res = await fetch(`${API_BASE_URL}/api/users`, { signal: controller.signal });
-      clearTimeout(timeoutId);
-
+      const res = await fetch(`${API_BASE_URL}/api/users`);
       if (res.ok) {
         const data = await res.json();
-        const serverUsers = data.users || [];
-        // Combine server users with local users
-        const localUsers = getStoredLocalUsers();
-        const combined = [...serverUsers];
-        localUsers.forEach((lu: any) => {
-          if (!combined.some((su: any) => su.username === lu.username)) {
-            combined.push(lu);
-          }
-        });
-        setUsers(combined);
-        saveStoredLocalUsers(combined);
-        setIsOfflineMode(false);
-      } else {
-        throw new Error("Server error");
+        setUsers(data.users || []);
       }
-    } catch {
-      setIsOfflineMode(true);
-      setUsers(getStoredLocalUsers());
+    } catch (err) {
+      console.error("Failed to fetch users from server:", err);
     } finally {
       setLoadingUsers(false);
     }
@@ -112,31 +75,23 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
 
   const handleSaveUserDetails = () => {
     if (selectedUser) {
-      const updated = users.map(u => 
+      setUsers(prev => prev.map(u => 
         u.username === selectedUser.username ? { ...u, note: editNote, gstStatus: editStatus } : u
-      );
-      setUsers(updated);
-      saveStoredLocalUsers(updated);
+      ));
       alert(`Updated GST status for ${selectedUser.username}!`);
       setSelectedUser(null);
     }
   };
 
   const handleDeleteUser = async (userToDelete: string) => {
-    if (!confirm(`Are you sure you want to delete user "${userToDelete}"?`)) return;
-    
-    // Remove locally immediately
-    const updated = users.filter(u => u.username !== userToDelete);
-    setUsers(updated);
-    saveStoredLocalUsers(updated);
-
+    if (!confirm(`Are you sure you want to delete user "${userToDelete}" from PostgreSQL database?`)) return;
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-      await fetch(`${API_BASE_URL}/api/users/${userToDelete}`, { method: "DELETE", signal: controller.signal });
-      clearTimeout(timeoutId);
-    } catch {
-      console.warn("Deleted locally due to network condition");
+      const res = await fetch(`${API_BASE_URL}/api/users/${userToDelete}`, { method: "DELETE" });
+      if (res.ok) {
+        fetchUsers();
+      }
+    } catch (err) {
+      console.error("Failed to delete user", err);
     }
   };
 
@@ -144,62 +99,42 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
     e.preventDefault();
     setCreateMsg("");
     setCreateError("");
+    setIsSubmitting(true);
 
     const cleanUser = newUsername.toLowerCase().replace(/\s+/g, "");
 
-    if (users.some(u => u.username === cleanUser)) {
-      setCreateError(`Username "${cleanUser}" already exists. Please choose a different one.`);
-      return;
-    }
-
-    const newUserObj = {
-      username: cleanUser,
-      password: newPassword,
-      companyName: newCompany,
-      company_name: newCompany,
-      ownerName: newOwner,
-      owner_name: newOwner,
-      email: newEmail,
-      contact: newContact,
-      altContact: newAltContact,
-      address: newAddress,
-      description: newDesc,
-      role: 'USER',
-      createdAt: new Date().toISOString()
-    };
-
-    // Save locally first to guarantee zero failure
-    const updatedUsers = [newUserObj, ...users];
-    setUsers(updatedUsers);
-    saveStoredLocalUsers(updatedUsers);
-
-    // Try background API push
-    let syncedWithServer = false;
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
       const response = await fetch(`${API_BASE_URL}/api/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newUserObj),
-        signal: controller.signal
+        body: JSON.stringify({
+          companyName: newCompany,
+          ownerName: newOwner,
+          email: newEmail,
+          contact: newContact,
+          altContact: newAltContact,
+          address: newAddress,
+          description: newDesc,
+          username: cleanUser,
+          password: newPassword,
+        }),
       });
-      clearTimeout(timeoutId);
+
       if (response.ok) {
-        syncedWithServer = true;
+        setCreateMsg(`✅ User "${cleanUser}" successfully saved to PostgreSQL database! Login at /login`);
+        setNewCompany(""); setNewOwner(""); setNewEmail(""); setNewContact(""); setNewAltContact("");
+        setNewAddress(""); setNewDesc(""); setNewUsername(""); setNewPassword("");
+        fetchUsers(); // Refresh live server users
+      } else {
+        const data = await response.json();
+        setCreateError(data.message || `Failed to create user "${cleanUser}".`);
       }
-    } catch {
-      syncedWithServer = false;
+    } catch (err) {
+      console.error("Error creating user:", err);
+      setCreateError("Could not connect to Railway server. Please verify network connection.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    if (syncedWithServer) {
-      setCreateMsg(`✅ User "${cleanUser}" created & synced with server! Login at /login`);
-    } else {
-      setCreateMsg(`✅ User "${cleanUser}" created successfully (Saved locally - Network sync active)`);
-    }
-
-    setNewCompany(""); setNewOwner(""); setNewEmail(""); setNewContact(""); setNewAltContact("");
-    setNewAddress(""); setNewDesc(""); setNewUsername(""); setNewPassword("");
   };
 
   if (!isAdminAuth) {
@@ -295,14 +230,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
             
             <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6 transition-colors">
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-lg font-bold text-gray-800 dark:text-white">Registered User Accounts</h3>
-                  {isOfflineMode && (
-                    <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full font-medium">
-                      <AlertCircle size={12} /> Local Cache Mode
-                    </span>
-                  )}
-                </div>
+                <h3 className="text-lg font-bold text-gray-800 dark:text-white">Registered User Accounts (Railway Server Database)</h3>
                 <button onClick={fetchUsers} className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium">
                   <RefreshCw size={14} className={loadingUsers ? "animate-spin" : ""} /> Refresh List
                 </button>
@@ -312,7 +240,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
                 <div className="text-center py-12">
                   <User className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600 mb-3" />
                   <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300">No Users Created Yet</h4>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-4">Create your first client user to get started.</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-4">Create your first client user to save directly to PostgreSQL.</p>
                   <button onClick={() => setActiveTab("create-user")} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors">
                     + Create User Account
                   </button>
@@ -485,8 +413,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
               </div>
 
               <div className="pt-6 flex justify-end">
-                <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-colors shadow-sm">
-                  Create User Account
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isSubmitting ? "Creating & Saving to Database..." : "Create User Account"}
                 </button>
               </div>
             </form>
