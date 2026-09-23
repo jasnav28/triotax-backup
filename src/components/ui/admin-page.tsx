@@ -36,12 +36,21 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
   const [createError, setCreateError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "https://triotax-backend-production.up.railway.app";
+  const getCleanApiUrl = (endpoint: string) => {
+    let base = (import.meta as any).env?.VITE_API_URL || "https://triotax-backend-production.up.railway.app";
+    base = base.trim().replace(/\/+$/, "");
+    if (base.endsWith("/api")) {
+      base = base.substring(0, base.length - 4);
+    }
+    const cleanEndpoint = endpoint.replace(/^\/+/, "");
+    const finalEndpoint = cleanEndpoint.startsWith("api/") ? cleanEndpoint : `api/${cleanEndpoint}`;
+    return `${base}/${finalEndpoint}`;
+  };
 
   const fetchUsers = async () => {
     setLoadingUsers(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/users`);
+      const res = await fetch(getCleanApiUrl("users"));
       if (res.ok) {
         const data = await res.json();
         setUsers(data.users || []);
@@ -86,7 +95,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
   const handleDeleteUser = async (userToDelete: string) => {
     if (!confirm(`Are you sure you want to delete user "${userToDelete}" from PostgreSQL database?`)) return;
     try {
-      const res = await fetch(`${API_BASE_URL}/api/users/${userToDelete}`, { method: "DELETE" });
+      const res = await fetch(getCleanApiUrl(`users/${userToDelete}`), { method: "DELETE" });
       if (res.ok) {
         fetchUsers();
       }
@@ -104,7 +113,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
     const cleanUser = newUsername.toLowerCase().replace(/\s+/g, "");
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/users`, {
+      const response = await fetch(getCleanApiUrl("users"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

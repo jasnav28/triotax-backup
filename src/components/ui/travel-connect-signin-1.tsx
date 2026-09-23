@@ -331,16 +331,21 @@ export const SignInCard = ({ onLogin }: { onLogin?: (username: string, password:
                     setIsLoading(true);
                     setErrorMsg("");
                     try {
-                      const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "https://triotax-backend-production.up.railway.app";
-                      const controller = new AbortController();
-                      const timeoutId = setTimeout(() => controller.abort(), 4000);
-                      const resp = await fetch(`${API_BASE_URL}/api/login`, {
+                      const getCleanApiUrl = (endpoint: string) => {
+                        let base = (import.meta as any).env?.VITE_API_URL || "https://triotax-backend-production.up.railway.app";
+                        base = base.trim().replace(/\/+$/, "");
+                        if (base.endsWith("/api")) {
+                          base = base.substring(0, base.length - 4);
+                        }
+                        const cleanEndpoint = endpoint.replace(/^\/+/, "");
+                        const finalEndpoint = cleanEndpoint.startsWith("api/") ? cleanEndpoint : `api/${cleanEndpoint}`;
+                        return `${base}/${finalEndpoint}`;
+                      };
+                      const resp = await fetch(getCleanApiUrl("login"), {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ username, password }),
-                        signal: controller.signal
                       });
-                      clearTimeout(timeoutId);
                       if (resp.ok) {
                         if (onLogin) onLogin(username, password);
                         return;
