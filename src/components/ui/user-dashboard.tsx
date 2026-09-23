@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, CreditCard, BarChart3, Settings, LogOut, Menu, X, User, Upload, Download, Plus, Trash2, Eye, EyeOff, Type, FileText, CheckCircle } from "lucide-react";
+import { Home, CreditCard, BarChart3, Settings, LogOut, Menu, X, User, Upload, Download, Plus, Trash2, Eye, EyeOff, Type, FileText, CheckCircle, Wallet, Users, DollarSign, Briefcase, Calendar } from "lucide-react";
 import { ThemeToggle } from "@/app/components/ui/theme-toggle";
 import { StockTicker } from "./stock-ticker";
 import jsPDF from "jspdf";
@@ -34,12 +34,24 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const [isAdvancedEdit, setIsAdvancedEdit] = useState(false);
   const [billingHistory, setBillingHistory] = useState<any[]>([]);
 
+  // --- Payrolls State ---
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [isAddEmpOpen, setIsAddEmpOpen] = useState(false);
+  const [empName, setEmpName] = useState("");
+  const [empRole, setEmpRole] = useState("");
+  const [empBasic, setEmpBasic] = useState<number | "">("");
+  const [empHra, setEmpHra] = useState<number | "">("");
+  const [empDeductions, setEmpDeductions] = useState<number | "">("");
+  const [selectedPayslipEmp, setSelectedPayslipEmp] = useState<any | null>(null);
+  const payslipRef = useRef<HTMLDivElement>(null);
+
   const tabs = [
     { id: "dashboard", label: "Dashboard", icon: Home },
     { id: "home", label: "Home", icon: Home },
     { id: "billing-software", label: "Billing Software", icon: CreditCard },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
     { id: "compliance-tracker", label: "Compliance Tracker", icon: FileText },
+    { id: "payrolls", label: "Payrolls", icon: Wallet },
   ];
 
   // --- Billing Functions ---
@@ -92,6 +104,72 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
     }
   };
 
+  // --- Payroll Functions ---
+  const handleAddEmployee = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!empName || !empRole || !empBasic) return;
+
+    const basicVal = Number(empBasic) || 0;
+    const hraVal = Number(empHra) || 0;
+    const dedVal = Number(empDeductions) || 0;
+    const netSalary = basicVal + hraVal - dedVal;
+
+    const newEmp = {
+      id: Date.now(),
+      name: empName,
+      role: empRole,
+      basic: basicVal,
+      hra: hraVal,
+      deductions: dedVal,
+      netSalary,
+      status: "Pending",
+      paymentDate: "Pending"
+    };
+
+    setEmployees([newEmp, ...employees]);
+    setEmpName("");
+    setEmpRole("");
+    setEmpBasic("");
+    setEmpHra("");
+    setEmpDeductions("");
+    setIsAddEmpOpen(false);
+  };
+
+  const handleMarkPaid = (id: number) => {
+    setEmployees(prev => prev.map(emp => 
+      emp.id === id ? { ...emp, status: "Paid", paymentDate: new Date().toISOString().split("T")[0] } : emp
+    ));
+  };
+
+  const handleDeleteEmployee = (id: number) => {
+    if (confirm("Remove this employee from payroll?")) {
+      setEmployees(prev => prev.filter(emp => emp.id !== id));
+    }
+  };
+
+  const handleDownloadPayslip = async (emp: any) => {
+    setSelectedPayslipEmp(emp);
+    setTimeout(async () => {
+      if (!payslipRef.current) return;
+      try {
+        const canvas = await html2canvas(payslipRef.current, { scale: 2 });
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "mm", "a4");
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`Payslip_${emp.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
+      } catch (err) {
+        console.error("Error generating payslip PDF", err);
+      } finally {
+        setSelectedPayslipEmp(null);
+      }
+    }, 300);
+  };
+
+  const totalMonthlyPayroll = employees.reduce((sum, emp) => sum + (emp.netSalary || 0), 0);
+  const totalPendingSalaries = employees.filter(e => e.status === "Pending").reduce((sum, emp) => sum + (emp.netSalary || 0), 0);
+
   const renderContent = () => {
     switch (activeTab) {
       case "dashboard":
@@ -123,7 +201,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col gap-4">
                 <div className="h-10 w-10 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center">
                   <FileText size={20} />
@@ -139,7 +217,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                   <CreditCard size={20} />
                 </div>
                 <div>
-                  <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Billed Amount</h3>
+                  <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Billed</h3>
                   <p className="text-2xl font-bold text-gray-800 dark:text-white">
                     ₹{billingHistory.reduce((sum, item) => sum + (item.amount || 0), 0).toFixed(2)}
                   </p>
@@ -148,11 +226,21 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
 
               <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col gap-4">
                 <div className="h-10 w-10 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg flex items-center justify-center">
-                  <User size={20} />
+                  <Users size={20} />
                 </div>
                 <div>
-                  <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">Account ID</h3>
-                  <p className="text-2xl font-bold text-gray-800 dark:text-white capitalize">{username}</p>
+                  <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">Payroll Employees</h3>
+                  <p className="text-2xl font-bold text-gray-800 dark:text-white">{employees.length}</p>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col gap-4">
+                <div className="h-10 w-10 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg flex items-center justify-center">
+                  <Wallet size={20} />
+                </div>
+                <div>
+                  <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">Monthly Payroll</h3>
+                  <p className="text-2xl font-bold text-gray-800 dark:text-white">₹{totalMonthlyPayroll.toFixed(2)}</p>
                 </div>
               </div>
             </div>
@@ -164,9 +252,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Billing Software</h2>
             
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-              {/* Form Section */}
               <div className="space-y-6">
-                {/* Logo & Template */}
                 <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 space-y-4">
                   <h3 className="font-semibold text-gray-800 dark:text-gray-100">Invoice Settings</h3>
                   <div className="flex items-center gap-4">
@@ -205,7 +291,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                   </div>
                 </div>
 
-                {/* Details Form */}
                 <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 space-y-4">
                   <h3 className="font-semibold text-gray-800 dark:text-gray-100">Invoice Details</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -240,7 +325,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                   </div>
                 </div>
 
-                {/* Items */}
                 <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-gray-800 dark:text-gray-100">Items / Services</h3>
@@ -298,7 +382,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                 </div>
               </div>
 
-              {/* Preview Section */}
+              {/* Preview */}
               <div className="bg-gray-100 dark:bg-zinc-950 p-6 rounded-xl border border-gray-200 dark:border-zinc-800 flex flex-col items-center">
                 <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-4 self-start">Live Preview</h3>
                 
@@ -310,7 +394,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                     isAdvancedEdit ? "outline-dashed outline-2 outline-indigo-500" : ""
                   }`}
                 >
-                  {/* Preview Template 1 */}
                   {template === 1 ? (
                     <div className="space-y-6">
                       <div className="flex justify-between items-start border-b border-gray-200 pb-6">
@@ -378,7 +461,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                       </div>
                     </div>
                   ) : (
-                    /* Classic Template 2 */
                     <div className="space-y-6 font-serif">
                       <div className="text-center border-b-2 border-black pb-4">
                         <h1 className="text-3xl font-bold tracking-wide capitalize">{username}</h1>
@@ -492,6 +574,143 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                   }`}>{item.status}</span>
                 </div>
               ))}
+            </div>
+          </div>
+        );
+      case "payrolls":
+        return (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Employee Payroll Management</h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Manage employee salaries, allowances, deductions, and generate monthly payslips.</p>
+              </div>
+              <button
+                onClick={() => setIsAddEmpOpen(true)}
+                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm self-start sm:self-auto"
+              >
+                <Plus size={18} /> Add Employee
+              </button>
+            </div>
+
+            {/* Payroll Metrics */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex items-center gap-4">
+                <div className="h-12 w-12 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
+                  <Users size={22} />
+                </div>
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Staff</h3>
+                  <p className="text-2xl font-bold text-gray-800 dark:text-white mt-1">{employees.length}</p>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex items-center gap-4">
+                <div className="h-12 w-12 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center">
+                  <DollarSign size={22} />
+                </div>
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Monthly Outflow</h3>
+                  <p className="text-2xl font-bold text-gray-800 dark:text-white mt-1">₹{totalMonthlyPayroll.toFixed(2)}</p>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex items-center gap-4">
+                <div className="h-12 w-12 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center">
+                  <Wallet size={22} />
+                </div>
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Pending Disbursal</h3>
+                  <p className="text-2xl font-bold text-gray-800 dark:text-white mt-1">₹{totalPendingSalaries.toFixed(2)}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Employee Table */}
+            <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden">
+              <div className="p-6 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+                <h3 className="font-bold text-lg text-gray-800 dark:text-white">Employee Salary List</h3>
+                <span className="text-xs text-gray-400 font-medium">{employees.length} Employees Registered</span>
+              </div>
+
+              {employees.length === 0 ? (
+                <div className="text-center py-16 px-4">
+                  <Briefcase className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600 mb-3" />
+                  <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300">No Employees Added</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-5">Click "Add Employee" to start managing staff salaries and payslips.</p>
+                  <button
+                    onClick={() => setIsAddEmpOpen(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+                  >
+                    + Add First Employee
+                  </button>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-sm">
+                    <thead>
+                      <tr className="bg-gray-50 dark:bg-zinc-950/50 text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-zinc-800">
+                        <th className="p-4 font-medium">Employee Name & Role</th>
+                        <th className="p-4 font-medium">Basic Pay</th>
+                        <th className="p-4 font-medium">HRA / Allowances</th>
+                        <th className="p-4 font-medium">PF/ESI Deductions</th>
+                        <th className="p-4 font-medium">Net Salary</th>
+                        <th className="p-4 font-medium">Status</th>
+                        <th className="p-4 font-medium text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {employees.map((emp) => (
+                        <tr key={emp.id} className="border-b border-gray-100 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
+                          <td className="p-4">
+                            <div className="font-semibold text-gray-800 dark:text-gray-200">{emp.name}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">{emp.role}</div>
+                          </td>
+                          <td className="p-4 text-gray-700 dark:text-gray-300">₹{emp.basic.toFixed(2)}</td>
+                          <td className="p-4 text-green-600 dark:text-green-400">+₹{emp.hra.toFixed(2)}</td>
+                          <td className="p-4 text-red-500 dark:text-red-400">-₹{emp.deductions.toFixed(2)}</td>
+                          <td className="p-4 font-bold text-gray-900 dark:text-white">₹{emp.netSalary.toFixed(2)}</td>
+                          <td className="p-4">
+                            <span className={`px-3 py-1 text-xs font-bold rounded-full ${
+                              emp.status === "Paid" 
+                                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" 
+                                : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                            }`}>
+                              {emp.status}
+                            </span>
+                          </td>
+                          <td className="p-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              {emp.status !== "Paid" && (
+                                <button
+                                  onClick={() => handleMarkPaid(emp.id)}
+                                  className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition-colors"
+                                >
+                                  Mark Paid
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleDownloadPayslip(emp)}
+                                className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                title="Download Payslip PDF"
+                              >
+                                <Download size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteEmployee(emp.id)}
+                                className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                title="Remove Employee"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         );
@@ -655,6 +874,175 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
           {renderContent()}
         </main>
       </div>
+
+      {/* Add Employee Modal */}
+      <AnimatePresence>
+        {isAddEmpOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsAddEmpOpen(false)}
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden relative z-10 p-6 transition-colors"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-bold text-xl text-gray-800 dark:text-white">Add New Employee</h3>
+                <button onClick={() => setIsAddEmpOpen(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <form onSubmit={handleAddEmployee} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Employee Full Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={empName}
+                    onChange={(e) => setEmpName(e.target.value)}
+                    placeholder="e.g. Rahul Sharma"
+                    className="w-full border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-400 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Designation / Role</label>
+                  <input
+                    type="text"
+                    required
+                    value={empRole}
+                    onChange={(e) => setEmpRole(e.target.value)}
+                    placeholder="e.g. Senior Accountant"
+                    className="w-full border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-400 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Basic Pay (₹)</label>
+                    <input
+                      type="number"
+                      required
+                      value={empBasic}
+                      onChange={(e) => setEmpBasic(e.target.value ? parseFloat(e.target.value) : "")}
+                      placeholder="35000"
+                      className="w-full border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-400 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">HRA / Bonus (₹)</label>
+                    <input
+                      type="number"
+                      value={empHra}
+                      onChange={(e) => setEmpHra(e.target.value ? parseFloat(e.target.value) : "")}
+                      placeholder="5000"
+                      className="w-full border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-400 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Deductions (₹)</label>
+                    <input
+                      type="number"
+                      value={empDeductions}
+                      onChange={(e) => setEmpDeductions(e.target.value ? parseFloat(e.target.value) : "")}
+                      placeholder="1800"
+                      className="w-full border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-400 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-4 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsAddEmpOpen(false)}
+                    className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm"
+                  >
+                    Save Employee
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Hidden Printable Payslip Template */}
+      {selectedPayslipEmp && (
+        <div className="fixed left-[-9999px] top-[-9999px]">
+          <div ref={payslipRef} className="w-[595px] min-h-[842px] bg-white text-black p-8 font-sans space-y-6">
+            <div className="border-b-2 border-slate-900 pb-4 flex justify-between items-center">
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900 capitalize">{username}</h1>
+                <p className="text-xs text-slate-500">Official Monthly Salary Slip</p>
+              </div>
+              <div className="text-right">
+                <span className="text-lg font-bold text-blue-600">PAYSLIP</span>
+                <p className="text-xs text-slate-500 mt-1">Generated: {new Date().toISOString().split("T")[0]}</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 grid grid-cols-2 gap-4 text-xs">
+              <div>
+                <span className="text-slate-400 font-semibold uppercase">Employee Details</span>
+                <p className="font-bold text-slate-800 text-sm">{selectedPayslipEmp.name}</p>
+                <p className="text-slate-600">Role: {selectedPayslipEmp.role}</p>
+              </div>
+              <div className="text-right">
+                <span className="text-slate-400 font-semibold uppercase">Payment Information</span>
+                <p className="text-slate-600 mt-1">Status: <strong>{selectedPayslipEmp.status}</strong></p>
+                <p className="text-slate-600">Date: {selectedPayslipEmp.paymentDate}</p>
+              </div>
+            </div>
+
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-slate-300 bg-slate-100 text-slate-700 font-bold uppercase">
+                  <th className="p-3">Salary Component</th>
+                  <th className="p-3 text-right">Amount (₹)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-slate-100">
+                  <td className="p-3 font-medium">Basic Pay</td>
+                  <td className="p-3 text-right">₹{selectedPayslipEmp.basic.toFixed(2)}</td>
+                </tr>
+                <tr className="border-b border-slate-100">
+                  <td className="p-3 font-medium text-emerald-600">HRA & Allowances</td>
+                  <td className="p-3 text-right text-emerald-600">+₹{selectedPayslipEmp.hra.toFixed(2)}</td>
+                </tr>
+                <tr className="border-b border-slate-100">
+                  <td className="p-3 font-medium text-rose-500">PF & ESI Deductions</td>
+                  <td className="p-3 text-right text-rose-500">-₹{selectedPayslipEmp.deductions.toFixed(2)}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div className="flex justify-end pt-4">
+              <div className="w-56 p-4 bg-slate-900 text-white rounded-lg flex justify-between items-center text-sm font-bold">
+                <span>Net Payable:</span>
+                <span>₹{selectedPayslipEmp.netSalary.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div className="pt-12 text-center text-xs text-slate-400 border-t border-slate-200">
+              This is a computer-generated payslip created via TrioTax Dashboard.
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* History Modal */}
       <AnimatePresence>
