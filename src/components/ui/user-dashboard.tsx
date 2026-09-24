@@ -245,11 +245,13 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const renderContent = () => {
     switch (activeTab) {
       case "dashboard":
-      case "home":
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Welcome back, {username}!</h2>
             
+            {/* Top Admin Scrolling Ad Banner */}
+            <ScrollingAdBanner />
+
             <StockTicker />
 
             {/* GST Filing Status Card */}
@@ -317,9 +319,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                 </div>
               </div>
             </div>
-
-            {/* Admin Scrolling Ad Banner right below metric boxes */}
-            <ScrollingAdBanner />
           </div>
         );
       case "billing-software":
