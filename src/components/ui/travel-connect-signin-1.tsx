@@ -221,6 +221,54 @@ const DotMap = () => {
   );
 };
 
+const FrameAnimationPlayer = () => {
+  const [currentFrame, setCurrentFrame] = useState(1);
+  const totalFrames = 300;
+
+  useEffect(() => {
+    // Preload frames into browser memory for stutter-free looping playback
+    const preloadedImages: HTMLImageElement[] = [];
+    for (let i = 1; i <= totalFrames; i++) {
+      const num = String(i).padStart(5, "0");
+      const img = new Image();
+      img.src = `/frames/frame_${num}.webp`;
+      preloadedImages.push(img);
+    }
+
+    let animationFrameId: number;
+    let lastTime = performance.now();
+    const fps = 30; // 30 FPS playback
+    const interval = 1000 / fps;
+
+    const updateFrame = (now: number) => {
+      if (now - lastTime >= interval) {
+        setCurrentFrame((prev) => (prev % totalFrames) + 1);
+        lastTime = now;
+      }
+      animationFrameId = requestAnimationFrame(updateFrame);
+    };
+
+    animationFrameId = requestAnimationFrame(updateFrame);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  const paddedFrame = String(currentFrame).padStart(5, "0");
+  const frameSrc = `/frames/frame_${paddedFrame}.webp`;
+
+  return (
+    <div className="relative w-full h-full overflow-hidden bg-slate-950 flex items-center justify-center">
+      <img
+        src={frameSrc}
+        alt="Login Animation Frame"
+        className="w-full h-full object-cover object-center transition-none"
+      />
+    </div>
+  );
+};
+
 export const SignInCard = ({ onLogin }: { onLogin?: (username: string, password: string) => void }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [username, setUsername] = useState("");
@@ -235,25 +283,10 @@ export const SignInCard = ({ onLogin }: { onLogin?: (username: string, password:
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-4xl overflow-hidden rounded-2xl flex bg-white shadow-xl"
+        className="w-full max-w-4xl overflow-hidden rounded-2xl flex bg-white shadow-xl border border-gray-100 dark:border-zinc-800"
       >
-        <div className="hidden md:block w-1/2 h-[600px] relative overflow-hidden border-r border-gray-100">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-100">
-            <DotMap />
-            
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 z-10">
-              <motion.div 
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.5 }}
-                className="mb-6"
-              >
-                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-200">
-                  <ArrowRight className="text-white h-6 w-6" />
-                </div>
-              </motion.div>
-            </div>
-          </div>
+        <div className="hidden md:block w-1/2 h-[600px] relative overflow-hidden border-r border-gray-100 bg-slate-950">
+          <FrameAnimationPlayer />
         </div>
         
         <div className="w-full md:w-1/2 p-8 md:p-10 flex flex-col justify-center bg-white">
