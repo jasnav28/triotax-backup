@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Lock, User, ArrowRight, LayoutDashboard, Users, Settings, LogOut, UserPlus, FileCheck, X, Trash2, ExternalLink, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
+import { Shield, Lock, User, ArrowRight, LayoutDashboard, Users, Settings, LogOut, UserPlus, FileCheck, X, Trash2, ExternalLink, RefreshCw, CheckCircle2, AlertCircle, Megaphone, Play, Pause, Plus, Image as ImageIcon, Link as LinkIcon } from "lucide-react";
 import { ThemeToggle } from "@/app/components/ui/theme-toggle";
+import { getAdsConfig, DEFAULT_ADS, AdItem } from "@/components/ui/scrolling-ad-banner";
 
 interface AdminPageProps {
   isAdminAuth: boolean;
@@ -35,6 +36,53 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
   const [createMsg, setCreateMsg] = useState("");
   const [createError, setCreateError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // --- Play Ads State ---
+  const [adsState, setAdsState] = useState(getAdsConfig());
+  const [newAdTitle, setNewAdTitle] = useState("");
+  const [newAdImage, setNewAdImage] = useState("");
+  const [newAdLink, setNewAdLink] = useState("");
+
+  const updateAdsConfig = (newEnabled: boolean, newList: AdItem[]) => {
+    const updated = { isAdsEnabled: newEnabled, adList: newList };
+    setAdsState(updated);
+    try {
+      localStorage.setItem("triotax_ads_config", JSON.stringify(updated));
+      window.dispatchEvent(new Event("triotax_ads_update"));
+    } catch (e) {
+      console.error("Failed to save ads config", e);
+    }
+  };
+
+  const handleToggleAds = (enabled: boolean) => {
+    updateAdsConfig(enabled, adsState.adList || DEFAULT_ADS);
+  };
+
+  const handleAddAd = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAdTitle || !newAdImage) return;
+
+    const newAd: AdItem = {
+      id: Date.now(),
+      title: newAdTitle,
+      imageUrl: newAdImage,
+      linkUrl: newAdLink || "#"
+    };
+
+    const currentList = adsState.adList && adsState.adList.length > 0 ? adsState.adList : DEFAULT_ADS;
+    const updatedList = [newAd, ...currentList];
+    updateAdsConfig(adsState.isAdsEnabled, updatedList);
+
+    setNewAdTitle("");
+    setNewAdImage("");
+    setNewAdLink("");
+  };
+
+  const handleDeleteAd = (id: string | number) => {
+    const currentList = adsState.adList && adsState.adList.length > 0 ? adsState.adList : DEFAULT_ADS;
+    const updatedList = currentList.filter(ad => ad.id !== id);
+    updateAdsConfig(adsState.isAdsEnabled, updatedList);
+  };
 
   const getCleanApiUrl = (endpoint: string) => {
     let base = (import.meta as any).env?.VITE_API_URL || "https://triotax-backend-production.up.railway.app";
@@ -133,7 +181,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
         setCreateMsg(`✅ User "${cleanUser}" successfully saved to PostgreSQL database! Login at /login`);
         setNewCompany(""); setNewOwner(""); setNewEmail(""); setNewContact(""); setNewAltContact("");
         setNewAddress(""); setNewDesc(""); setNewUsername(""); setNewPassword("");
-        fetchUsers(); // Refresh live server users
+        fetchUsers();
       } else {
         const data = await response.json();
         setCreateError(data.message || `Failed to create user "${cleanUser}".`);
@@ -217,6 +265,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
       </div>
     );
   }
+
+  const activeAdsList = adsState.adList && adsState.adList.length > 0 ? adsState.adList : DEFAULT_ADS;
 
   const renderContent = () => {
     switch (activeTab) {
@@ -542,6 +592,136 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
             )}
           </div>
         );
+      case "play-ads":
+        return (
+          <div className="space-y-6 max-w-5xl mx-auto">
+            {/* Global Ads Toggle Header */}
+            <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div>
+                <div className="flex items-center gap-3">
+                  <Megaphone className="text-blue-600 dark:text-blue-400 h-7 w-7" />
+                  <h2 className="text-2xl font-extrabold text-gray-800 dark:text-white">User Dashboard Ads Manager</h2>
+                </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Turn scrolling Ad banners ON or OFF across all client user dashboards.
+                </p>
+              </div>
+
+              {/* Toggle Switch */}
+              <div className="flex items-center gap-4 bg-gray-50 dark:bg-zinc-800/80 px-5 py-3 rounded-2xl border border-gray-200 dark:border-zinc-700">
+                <span className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                  Ads Display: <strong className={adsState.isAdsEnabled ? "text-emerald-600 dark:text-emerald-400" : "text-gray-400"}>{adsState.isAdsEnabled ? "ACTIVE (ON)" : "OFF"}</strong>
+                </span>
+                <button
+                  onClick={() => handleToggleAds(!adsState.isAdsEnabled)}
+                  className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors focus:outline-none ${
+                    adsState.isAdsEnabled ? "bg-emerald-500" : "bg-gray-300 dark:bg-zinc-600"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                      adsState.isAdsEnabled ? "translate-x-9" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {/* Create New Ad Form */}
+            <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                <Plus className="text-blue-600" size={20} /> Add New Ad Banner
+              </h3>
+
+              <form onSubmit={handleAddAd} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Ad Title / Announcement</label>
+                    <input
+                      type="text"
+                      required
+                      value={newAdTitle}
+                      onChange={(e) => setNewAdTitle(e.target.value)}
+                      placeholder="e.g. Special Offer: 30% Off GST Filing!"
+                      className="w-full border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-400 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Banner Image URL</label>
+                    <div className="relative">
+                      <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <input
+                        type="url"
+                        required
+                        value={newAdImage}
+                        onChange={(e) => setNewAdImage(e.target.value)}
+                        placeholder="https://images.unsplash.com/..."
+                        className="w-full pl-9 border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-400 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Destination Link (Optional)</label>
+                    <div className="relative">
+                      <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <input
+                        type="url"
+                        value={newAdLink}
+                        onChange={(e) => setNewAdLink(e.target.value)}
+                        placeholder="https://triotax.com/offer"
+                        className="w-full pl-9 border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-400 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="submit"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-all shadow-sm flex items-center gap-2"
+                  >
+                    <Plus size={16} /> Publish Ad Banner
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Active Ads Gallery */}
+            <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4">Currently Playing Banners</h3>
+
+              {activeAdsList.length === 0 ? (
+                <div className="text-center py-12 text-gray-400">
+                  No active Ads. Click "Publish Ad Banner" above to add your first Ad.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {activeAdsList.map((ad) => (
+                    <div key={ad.id} className="border border-gray-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-gray-50 dark:bg-zinc-950 flex flex-col justify-between">
+                      <div className="h-32 w-full relative overflow-hidden bg-slate-900">
+                        <img src={ad.imageUrl} alt={ad.title} className="w-full h-full object-cover opacity-60" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent p-4 flex items-end">
+                          <h4 className="text-sm font-bold text-white leading-snug drop-shadow">{ad.title}</h4>
+                        </div>
+                      </div>
+                      <div className="p-3 flex items-center justify-between border-t border-gray-200 dark:border-zinc-800">
+                        <span className="text-xs text-blue-600 dark:text-blue-400 truncate max-w-[200px]">{ad.linkUrl || "No link"}</span>
+                        <button
+                          onClick={() => handleDeleteAd(ad.id)}
+                          className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors"
+                        >
+                          <Trash2 size={14} /> Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        );
       default:
         return null;
     }
@@ -552,6 +732,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
     { id: "create-user", label: "Create User", icon: UserPlus },
     { id: "gst-tracking", label: "GST Tracking", icon: FileCheck },
     { id: "manage-users", label: "Manage Users", icon: Users },
+    { id: "play-ads", label: "Play Ads", icon: Megaphone },
     { id: "settings", label: "System Settings", icon: Settings },
   ];
 

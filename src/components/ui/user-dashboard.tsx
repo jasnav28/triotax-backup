@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Home, CreditCard, BarChart3, Settings, LogOut, Menu, X, User, Upload, Download, Plus, Trash2, Eye, EyeOff, Type, FileText, CheckCircle, Wallet, Users, DollarSign, Briefcase, Calendar } from "lucide-react";
 import { ThemeToggle } from "@/app/components/ui/theme-toggle";
 import { StockTicker } from "./stock-ticker";
+import { ScrollingAdBanner } from "./scrolling-ad-banner";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -201,6 +202,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
               </div>
             </div>
 
+            {/* Metric Boxes */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col gap-4">
                 <div className="h-10 w-10 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center">
@@ -244,11 +246,17 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                 </div>
               </div>
             </div>
+
+            {/* Admin Scrolling Ad Banner right below metric boxes */}
+            <ScrollingAdBanner />
           </div>
         );
       case "billing-software":
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 pt-4">
+            {/* Top Admin Scrolling Ad Banner */}
+            <ScrollingAdBanner />
+
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Billing Software</h2>
             
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
@@ -382,7 +390,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                 </div>
               </div>
 
-              {/* Preview */}
+              {/* Live Preview */}
               <div className="bg-gray-100 dark:bg-zinc-950 p-6 rounded-xl border border-gray-200 dark:border-zinc-800 flex flex-col items-center">
                 <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-4 self-start">Live Preview</h3>
                 
@@ -523,7 +531,10 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
         );
       case "analytics":
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 pt-4">
+            {/* Top Admin Scrolling Ad Banner */}
+            <ScrollingAdBanner />
+
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Analytics Dashboard</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800">
@@ -545,7 +556,10 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
         );
       case "compliance-tracker":
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 pt-4">
+            {/* Top Admin Scrolling Ad Banner */}
+            <ScrollingAdBanner />
+
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Compliance Tracker</h2>
             <p className="text-gray-500 dark:text-gray-400">Track all your compliance tasks and deadlines in one place.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -579,7 +593,10 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
         );
       case "payrolls":
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 pt-4">
+            {/* Top Admin Scrolling Ad Banner */}
+            <ScrollingAdBanner />
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Employee Payroll Management</h2>
