@@ -46,6 +46,16 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const [selectedPayslipEmp, setSelectedPayslipEmp] = useState<any | null>(null);
   const payslipRef = useRef<HTMLDivElement>(null);
 
+  // --- Compliance State ---
+  const [complianceTasks, setComplianceTasks] = useState<any[]>([
+    { id: "gst", title: "GST Return Filing", due: "25th of every month", status: "Ongoing" },
+    { id: "tds", title: "TDS Payment", due: "7th of every month", status: "Due" },
+    { id: "roc", title: "Annual ROC Filing", due: "30th September", status: "Due" },
+    { id: "itr", title: "Income Tax Return", due: "31st July", status: "Done/Completed" },
+    { id: "pf", title: "PF & ESI Payment", due: "15th of every month", status: "Ongoing" },
+    { id: "adv_tax", title: "Advance Tax Payment", due: "15th December", status: "Due" },
+  ]);
+
   const tabs = [
     { id: "dashboard", label: "Dashboard", icon: Home },
     { id: "billing-software", label: "Billing Software", icon: CreditCard },
@@ -130,14 +140,22 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
       const res = await fetch(getCleanApiUrl(`users/${username}/data`));
       if (res.ok) {
         const result = await res.json();
-        if (result.data || result.billingHistory || result.employees) {
-          const billing = result.billingHistory || result.data?.billingHistory || [];
-          const emps = result.employees || result.data?.employees || [];
-          setBillingHistory(billing);
-          setEmployees(emps);
-          localStorage.setItem(`triotax_user_data_${username}`, JSON.stringify({ billingHistory: billing, employees: emps }));
-          return;
+        const billing = result.billingHistory || result.data?.billingHistory || [];
+        const emps = result.employees || result.data?.employees || [];
+        const tasks = result.complianceTasks || result.data?.complianceTasks || localData?.complianceTasks;
+
+        setBillingHistory(billing);
+        setEmployees(emps);
+        if (tasks && tasks.length > 0) {
+          setComplianceTasks(tasks);
         }
+
+        localStorage.setItem(`triotax_user_data_${username}`, JSON.stringify({
+          billingHistory: billing,
+          employees: emps,
+          complianceTasks: tasks || complianceTasks
+        }));
+        return;
       }
     } catch (err) {
       console.warn("Backend data fetch error, using local fallback:", err);
@@ -146,11 +164,12 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
     if (localData) {
       if (localData.billingHistory) setBillingHistory(localData.billingHistory);
       if (localData.employees) setEmployees(localData.employees);
+      if (localData.complianceTasks) setComplianceTasks(localData.complianceTasks);
     }
   };
 
-  const saveUserData = async (newBilling: any[], newEmployees: any[]) => {
-    const payload = { billingHistory: newBilling, employees: newEmployees };
+  const saveUserData = async (newBilling: any[], newEmployees: any[], newTasks: any[] = complianceTasks) => {
+    const payload = { billingHistory: newBilling, employees: newEmployees, complianceTasks: newTasks };
     localStorage.setItem(`triotax_user_data_${username}`, JSON.stringify(payload));
     try {
       await fetch(getCleanApiUrl(`users/${username}/data`), {
@@ -167,7 +186,11 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
     loadUserData();
     const handleUpdate = () => loadUserData();
     window.addEventListener("triotax_data_backup_update", handleUpdate);
-    return () => window.removeEventListener("triotax_data_backup_update", handleUpdate);
+    window.addEventListener("triotax_compliance_update", handleUpdate);
+    return () => {
+      window.removeEventListener("triotax_data_backup_update", handleUpdate);
+      window.removeEventListener("triotax_compliance_update", handleUpdate);
+    };
   }, [username]);
 
   // --- Payroll Functions ---
@@ -630,34 +653,42 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
             {/* Top Admin Scrolling Ad Banner */}
             <ScrollingAdBanner />
 
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Compliance Tracker</h2>
-            <p className="text-gray-500 dark:text-gray-400">Track all your compliance tasks and deadlines in one place.</p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Compliance Tracker</h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mt-0.5">Track all your compliance tasks and deadlines updated live by your tax administrator.</p>
+              </div>
+              <span className="px-3.5 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-semibold rounded-full border border-blue-200 dark:border-blue-800 self-start sm:self-auto flex items-center gap-1.5">
+                <CheckCircle size={14} /> Admin Verified Status
+              </span>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[
-                { title: "GST Return Filing", due: "25th of every month", status: "Active", color: "green" },
-                { title: "TDS Payment", due: "7th of every month", status: "Active", color: "green" },
-                { title: "Annual ROC Filing", due: "30th September", status: "Active", color: "green" },
-                { title: "Income Tax Return", due: "31st July", status: "Active", color: "green" },
-                { title: "PF & ESI Payment", due: "15th of every month", status: "Active", color: "blue" },
-                { title: "Advance Tax Payment", due: "15th December", status: "Active", color: "blue" },
-              ].map((item, i) => (
-                <div key={i} className="bg-white dark:bg-zinc-900 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex items-start gap-4">
-                  <div className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                    item.color === "green" ? "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400" :
-                    "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-                  }`}>
-                    <FileText size={18} />
+              {complianceTasks.map((item, i) => {
+                const isCompleted = item.status?.includes("Completed") || item.status?.includes("Done");
+                const isOngoing = item.status?.includes("Ongoing");
+
+                return (
+                  <div key={item.id || i} className="bg-white dark:bg-zinc-900 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex items-start gap-4">
+                    <div className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                      isCompleted ? "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400" :
+                      isOngoing ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" :
+                      "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
+                    }`}>
+                      <FileText size={18} />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-100">{item.title}</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Due: {item.due}</p>
+                    </div>
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                      isCompleted ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
+                      isOngoing ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" :
+                      "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                    }`}>{item.status}</span>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-100">{item.title}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Due: {item.due}</p>
-                  </div>
-                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                    item.color === "green" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
-                    "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                  }`}>{item.status}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         );

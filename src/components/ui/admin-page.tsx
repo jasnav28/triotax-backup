@@ -22,6 +22,15 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [editNote, setEditNote] = useState("");
   const [editStatus, setEditStatus] = useState("Ongoing");
+  const [editComplianceTasks, setEditComplianceTasks] = useState<any[]>([
+    { id: "gst", title: "GST Return Filing", due: "25th of every month", status: "Ongoing" },
+    { id: "tds", title: "TDS Payment", due: "7th of every month", status: "Due" },
+    { id: "roc", title: "Annual ROC Filing", due: "30th September", status: "Due" },
+    { id: "itr", title: "Income Tax Return", due: "31st July", status: "Done/Completed" },
+    { id: "pf", title: "PF & ESI Payment", due: "15th of every month", status: "Ongoing" },
+    { id: "adv_tax", title: "Advance Tax Payment", due: "15th December", status: "Due" },
+  ]);
+  const [isSavingCompliance, setIsSavingCompliance] = useState(false);
 
   // Create user form state
   const [newCompany, setNewCompany] = useState("");
@@ -263,19 +272,94 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
     }
   };
 
-  const openUserModal = (user: any) => {
+  const openUserModal = async (user: any) => {
     setSelectedUser(user);
-    setEditNote(user.note || "");
+    setEditNote(user.note || user.adminNote || "");
     setEditStatus(user.gstStatus || "Ongoing");
+
+    let initialTasks = [
+      { id: "gst", title: "GST Return Filing", due: "25th of every month", status: "Ongoing" },
+      { id: "tds", title: "TDS Payment", due: "7th of every month", status: "Due" },
+      { id: "roc", title: "Annual ROC Filing", due: "30th September", status: "Due" },
+      { id: "itr", title: "Income Tax Return", due: "31st July", status: "Done/Completed" },
+      { id: "pf", title: "PF & ESI Payment", due: "15th of every month", status: "Ongoing" },
+      { id: "adv_tax", title: "Advance Tax Payment", due: "15th December", status: "Due" },
+    ];
+
+    try {
+      const res = await fetch(getCleanApiUrl(`users/${user.username}/data`));
+      if (res.ok) {
+        const result = await res.json();
+        const serverTasks = result.complianceTasks || result.data?.complianceTasks;
+        if (serverTasks && serverTasks.length > 0) {
+          initialTasks = serverTasks;
+        }
+      }
+    } catch (e) {
+      console.warn("Could not fetch server user data for modal", e);
+    }
+
+    const local = localStorage.getItem(`triotax_user_data_${user.username}`);
+    if (local) {
+      try {
+        const parsed = JSON.parse(local);
+        if (parsed.complianceTasks && parsed.complianceTasks.length > 0) {
+          initialTasks = parsed.complianceTasks;
+        }
+      } catch (e) {}
+    }
+
+    setEditComplianceTasks(initialTasks);
   };
 
-  const handleSaveUserDetails = () => {
-    if (selectedUser) {
-      setUsers(prev => prev.map(u => 
-        u.username === selectedUser.username ? { ...u, note: editNote, gstStatus: editStatus } : u
+  const handleTaskStatusChange = (taskId: string, newStatus: string) => {
+    setEditComplianceTasks(prev =>
+      prev.map(t => (t.id === taskId ? { ...t, status: newStatus } : t))
+    );
+  };
+
+  const handleSaveUserDetails = async () => {
+    if (!selectedUser) return;
+    setIsSavingCompliance(true);
+
+    try {
+      const targetUsername = selectedUser.username;
+      let currentLocal: any = {};
+      const rawLocal = localStorage.getItem(`triotax_user_data_${targetUsername}`);
+      if (rawLocal) {
+        try { currentLocal = JSON.parse(rawLocal); } catch (e) {}
+      }
+
+      const updatedPayload = {
+        ...currentLocal,
+        complianceTasks: editComplianceTasks,
+        gstStatus: editStatus,
+        adminNote: editNote,
+        lastUpdatedByAdmin: new Date().toISOString()
+      };
+
+      // Post to PostgreSQL DB
+      await fetch(getCleanApiUrl(`users/${targetUsername}/data`), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: updatedPayload })
+      });
+
+      // Save to localStorage and dispatch events
+      localStorage.setItem(`triotax_user_data_${targetUsername}`, JSON.stringify(updatedPayload));
+      window.dispatchEvent(new Event("triotax_compliance_update"));
+      window.dispatchEvent(new Event("triotax_data_backup_update"));
+
+      setUsers(prev => prev.map(u =>
+        u.username === targetUsername ? { ...u, note: editNote, gstStatus: editStatus, complianceTasks: editComplianceTasks } : u
       ));
-      alert(`Updated GST status for ${selectedUser.username}!`);
+
+      alert(`✅ Successfully updated Compliance Tracker for ${selectedUser.company_name || selectedUser.companyName || targetUsername}!`);
       setSelectedUser(null);
+    } catch (err: any) {
+      alert(`Error saving compliance updates: ${err.message}`);
+    } finally {
+      setIsSavingCompliance(false);
     }
   };
 
@@ -457,22 +541,36 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
                     </thead>
                     <tbody>
                       {users.map((u) => (
-                        <tr key={u.id || u.username} className="border-b border-gray-100 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
-                          <td className="p-3 font-medium text-gray-800 dark:text-gray-200">{u.company_name || u.companyName || "N/A"}</td>
+                        <tr 
+                          key={u.id || u.username} 
+                          onClick={() => openUserModal(u)}
+                          className="border-b border-gray-100 dark:border-zinc-800 hover:bg-blue-50/50 dark:hover:bg-zinc-800/60 cursor-pointer transition-colors"
+                        >
+                          <td className="p-3 font-semibold text-gray-800 dark:text-gray-200">
+                            {u.company_name || u.companyName || "N/A"}
+                            <span className="text-xs text-blue-500 font-normal block">Click to manage compliance</span>
+                          </td>
                           <td className="p-3 text-gray-600 dark:text-gray-400">{u.owner_name || u.ownerName || "N/A"}</td>
-                          <td className="p-3 font-semibold text-blue-600 dark:text-blue-400">{u.username}</td>
+                          <td className="p-3 font-semibold text-blue-600 dark:text-blue-400">@{u.username}</td>
                           <td className="p-3 text-sm text-gray-500 dark:text-gray-400">
                             <div>{u.email || "No email"}</div>
                             <div className="text-xs text-gray-400">{u.contact}</div>
                           </td>
-                          <td className="p-3 text-sm">
+                          <td className="p-3 text-sm flex items-center gap-3">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); openUserModal(u); }}
+                              className="px-3 py-1 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 font-semibold text-xs rounded-lg transition-colors flex items-center gap-1"
+                            >
+                              <FileCheck size={12} /> Compliance
+                            </button>
                             <a 
                               href={`/${u.username}-user/dashboard`} 
                               target="_blank" 
                               rel="noreferrer"
-                              className="inline-flex items-center gap-1 text-blue-600 hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
                             >
-                              /{u.username}-user/dashboard <ExternalLink size={12} />
+                              /{u.username}-user <ExternalLink size={11} />
                             </a>
                           </td>
                         </tr>
@@ -1116,32 +1214,64 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
                 </button>
               </div>
 
-              <div className="p-6 overflow-y-auto">
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 uppercase tracking-wider mb-3">Update GST Details</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">GST Status</label>
-                        <select 
-                          value={editStatus}
-                          onChange={(e) => setEditStatus(e.target.value)}
-                          className="w-full border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="Ongoing">Ongoing</option>
-                          <option value="Completed">Completed</option>
-                        </select>
+              <div className="p-6 overflow-y-auto max-h-[65vh] space-y-6">
+                {/* Section 1: Compliance Tracker Management */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-bold text-gray-800 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                      <FileCheck className="text-blue-500" size={18} /> Compliance Tracker Tasks
+                    </h4>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Updates sync to User Dashboard in real-time</span>
+                  </div>
+
+                  <div className="space-y-3">
+                    {editComplianceTasks.map((task) => (
+                      <div key={task.id} className="p-3 bg-gray-50 dark:bg-zinc-800/60 rounded-xl border border-gray-200 dark:border-zinc-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                          <h5 className="font-semibold text-gray-800 dark:text-gray-100 text-sm">{task.title}</h5>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Due: {task.due}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Status:</label>
+                          <select
+                            value={task.status}
+                            onChange={(e) => handleTaskStatusChange(task.id, e.target.value)}
+                            className="px-3 py-1.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg text-xs font-semibold text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="Due">Due</option>
+                            <option value="Ongoing">Ongoing</option>
+                            <option value="Done/Completed">Done/Completed</option>
+                          </select>
+                        </div>
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Admin Note</label>
-                        <input 
-                          type="text"
-                          value={editNote}
-                          onChange={(e) => setEditNote(e.target.value)}
-                          className="w-full border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-400 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="Add a note for the user..."
-                        />
-                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section 2: Account GST Details & Admin Note */}
+                <div className="pt-4 border-t border-gray-200 dark:border-zinc-800">
+                  <h4 className="text-sm font-bold text-gray-800 dark:text-white uppercase tracking-wider mb-3">Account GST & Notes</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">GST Account Status</label>
+                      <select 
+                        value={editStatus}
+                        onChange={(e) => setEditStatus(e.target.value)}
+                        className="w-full border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+                      >
+                        <option value="Ongoing">Ongoing</option>
+                        <option value="Completed">Completed</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Admin Note for User</label>
+                      <input 
+                        type="text"
+                        value={editNote}
+                        onChange={(e) => setEditNote(e.target.value)}
+                        className="w-full border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-400 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Add a note for the user..."
+                      />
                     </div>
                   </div>
                 </div>
@@ -1156,9 +1286,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
                 </button>
                 <button 
                   onClick={handleSaveUserDetails}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                  disabled={isSavingCompliance}
+                  className="px-5 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm flex items-center gap-2"
                 >
-                  Save Changes
+                  <FileCheck size={16} /> {isSavingCompliance ? "Updating..." : "Update Compliance & Save"}
                 </button>
               </div>
             </motion.div>
