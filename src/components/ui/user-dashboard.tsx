@@ -300,8 +300,8 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
 
             {/* Metric Boxes */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col gap-4">
-                <div className="h-10 w-10 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center">
+              <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col gap-4">
+                <div className="h-11 w-11 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center border border-blue-100 dark:border-blue-900/40">
                   <FileText size={20} />
                 </div>
                 <div>
@@ -310,8 +310,8 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col gap-4">
-                <div className="h-10 w-10 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg flex items-center justify-center">
+              <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col gap-4">
+                <div className="h-11 w-11 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center border border-blue-100 dark:border-blue-900/40">
                   <CreditCard size={20} />
                 </div>
                 <div>
@@ -322,8 +322,8 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col gap-4">
-                <div className="h-10 w-10 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg flex items-center justify-center">
+              <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col gap-4">
+                <div className="h-11 w-11 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center border border-blue-100 dark:border-blue-900/40">
                   <Users size={20} />
                 </div>
                 <div>
@@ -332,8 +332,8 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col gap-4">
-                <div className="h-10 w-10 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg flex items-center justify-center">
+              <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col gap-4">
+                <div className="h-11 w-11 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center border border-blue-100 dark:border-blue-900/40">
                   <Wallet size={20} />
                 </div>
                 <div>
@@ -669,22 +669,18 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                 const isOngoing = item.status?.includes("Ongoing");
 
                 return (
-                  <div key={item.id || i} className="bg-white dark:bg-zinc-900 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 flex items-start gap-4">
-                    <div className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                      isCompleted ? "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400" :
-                      isOngoing ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" :
-                      "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
-                    }`}>
-                      <FileText size={18} />
+                  <div key={item.id || i} className="bg-white dark:bg-zinc-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-800 flex items-start gap-4">
+                    <div className="h-11 w-11 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center flex-shrink-0 border border-blue-100 dark:border-blue-900/40">
+                      <FileText size={19} />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-100">{item.title}</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Due: {item.due}</p>
+                      <h3 className="font-bold text-gray-800 dark:text-gray-100 text-base">{item.title}</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Due: {item.due}</p>
                     </div>
-                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                      isCompleted ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
-                      isOngoing ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" :
-                      "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                    <span className={`text-xs font-semibold px-3 py-1 rounded-full border ${
+                      isCompleted ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800" :
+                      isOngoing ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800" :
+                      "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800"
                     }`}>{item.status}</span>
                   </div>
                 );
