@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, CreditCard, BarChart3, Settings, LogOut, Menu, X, User, Upload, Download, Plus, Trash2, Eye, EyeOff, Type, FileText, CheckCircle, Wallet, Users, DollarSign, Briefcase, Calendar } from "lucide-react";
+import { Home, CreditCard, BarChart3, Settings, LogOut, Menu, X, User, Upload, Download, Plus, Trash2, Eye, EyeOff, Type, FileText, CheckCircle, Wallet, Users, DollarSign, Briefcase, Calendar, Move, GripVertical, RotateCcw, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/app/components/ui/theme-toggle";
 import { StockTicker } from "./stock-ticker";
 import { ScrollingAdBanner } from "./scrolling-ad-banner";
@@ -33,6 +33,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const [items, setItems] = useState([{ id: 1, description: "", quantity: 1, price: 0 }]);
   const invoiceRef = useRef<HTMLDivElement>(null);
   const [isAdvancedEdit, setIsAdvancedEdit] = useState(false);
+  const [canvasResetKey, setCanvasResetKey] = useState(0);
   const [billingHistory, setBillingHistory] = useState<any[]>([]);
 
   // --- Payrolls State ---
@@ -383,11 +384,13 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
 
                     <button
                       onClick={() => setIsAdvancedEdit(!isAdvancedEdit)}
-                      className={`ml-auto flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                        isAdvancedEdit ? "bg-indigo-600 text-white" : "bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-400"
+                      className={`ml-auto flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm ${
+                        isAdvancedEdit
+                          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white ring-2 ring-indigo-400"
+                          : "bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200"
                       }`}
                     >
-                      <Type size={16} /> Rich Edit
+                      <Move size={14} /> {isAdvancedEdit ? "✨ Canva Drag Mode Active" : "Canva Drag & Edit Mode"}
                     </button>
                   </div>
                 </div>
@@ -485,138 +488,292 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
 
               {/* Live Preview */}
               <div className="bg-gray-100 dark:bg-zinc-950 p-6 rounded-xl border border-gray-200 dark:border-zinc-800 flex flex-col items-center">
-                <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-4 self-start">Live Preview</h3>
+                <div className="flex items-center justify-between w-full max-w-[595px] mb-4">
+                  <h3 className="font-semibold text-gray-800 dark:text-gray-100">Live Preview</h3>
+                  {isAdvancedEdit && (
+                    <span className="text-xs text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-1">
+                      <Sparkles size={14} className="animate-pulse" /> Canva Drag Mode Active
+                    </span>
+                  )}
+                </div>
+
+                {/* Canva Control Toolbar */}
+                {isAdvancedEdit && (
+                  <div className="w-full max-w-[595px] mb-3 p-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl shadow-md flex items-center justify-between text-xs font-semibold">
+                    <div className="flex items-center gap-2">
+                      <Move size={15} />
+                      <span>Drag any component block freely. Click text to inline edit.</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setCanvasResetKey((prev) => prev + 1)}
+                      className="px-2.5 py-1 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center gap-1 text-[11px]"
+                    >
+                      <RotateCcw size={12} /> Reset Canvas
+                    </button>
+                  </div>
+                )}
                 
                 <div
                   ref={invoiceRef}
                   contentEditable={isAdvancedEdit}
                   suppressContentEditableWarning={true}
-                  className={`w-full max-w-[595px] min-h-[842px] bg-white text-black p-8 shadow-md rounded-sm ${
-                    isAdvancedEdit ? "outline-dashed outline-2 outline-indigo-500" : ""
+                  className={`w-full max-w-[595px] min-h-[842px] bg-white text-black p-8 shadow-md rounded-sm relative overflow-hidden transition-all ${
+                    isAdvancedEdit ? "outline-dashed outline-2 outline-indigo-500 bg-slate-50/50" : ""
                   }`}
                 >
-                  {template === 1 ? (
-                    <div className="space-y-6">
-                      <div className="flex justify-between items-start border-b border-gray-200 pb-6">
-                        <div>
-                          {logo ? (
-                            <img src={logo} alt="Logo" className="h-12 object-contain mb-2" />
-                          ) : (
-                            <div className="h-10 w-32 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500 font-bold mb-2">
-                              COMPANY LOGO
+                  <div key={canvasResetKey} className="space-y-6 relative">
+                    {template === 1 ? (
+                      <>
+                        {/* Block 1: Company Logo & Header */}
+                        <motion.div
+                          drag={isAdvancedEdit}
+                          dragConstraints={invoiceRef}
+                          dragElastic={0.05}
+                          dragMomentum={false}
+                          className={`relative transition-all ${
+                            isAdvancedEdit ? "cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-indigo-500 rounded-lg p-3 bg-indigo-50/30 group border border-dashed border-indigo-300" : ""
+                          }`}
+                        >
+                          {isAdvancedEdit && (
+                            <div className="absolute -top-3 left-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow flex items-center gap-1 pointer-events-none z-10">
+                              <GripVertical size={10} /> Header & Logo Block (Drag Me)
                             </div>
                           )}
-                          <h2 className="text-xl font-bold text-gray-800 capitalize">{username}</h2>
-                          <p className="text-xs text-gray-500">Official Tax & Compliance Invoice</p>
-                        </div>
-                        <div className="text-right">
-                          <h1 className="text-2xl font-bold text-blue-600">INVOICE</h1>
-                          <p className="text-xs text-gray-500 mt-1">#{invoiceNumber}</p>
-                          <p className="text-xs text-gray-500">Date: {invoiceDate || new Date().toISOString().split("T")[0]}</p>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <p className="text-xs font-semibold text-gray-400 uppercase">Billed To</p>
-                          <p className="font-bold text-gray-800">{customerName || "Customer Name"}</p>
-                        </div>
-                      </div>
-
-                      <table className="w-full text-left border-collapse text-sm">
-                        <thead>
-                          <tr className="border-b border-gray-300 text-gray-500 text-xs uppercase">
-                            <th className="py-2">Item Description</th>
-                            <th className="py-2 text-center">Qty</th>
-                            <th className="py-2 text-right">Price</th>
-                            <th className="py-2 text-right">Amount</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {items.map((item) => (
-                            <tr key={item.id} className="border-b border-gray-100">
-                              <td className="py-3 font-medium">{item.description || "Service Item"}</td>
-                              <td className="py-3 text-center">{item.quantity}</td>
-                              <td className="py-3 text-right">₹{item.price.toFixed(2)}</td>
-                              <td className="py-3 text-right">₹{(item.quantity * item.price).toFixed(2)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-
-                      <div className="flex justify-end pt-4">
-                        <div className="w-48 space-y-2 text-sm">
-                          <div className="flex justify-between text-gray-600">
-                            <span>Subtotal:</span>
-                            <span>₹{calculateSubtotal().toFixed(2)}</span>
+                          <div className="flex justify-between items-start border-b border-gray-200 pb-4">
+                            <div>
+                              {logo ? (
+                                <img src={logo} alt="Logo" className="h-12 object-contain mb-2" />
+                              ) : (
+                                <div className="h-10 w-32 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500 font-bold mb-2">
+                                  COMPANY LOGO
+                                </div>
+                              )}
+                              <h2 className="text-xl font-bold text-gray-800 capitalize">{username}</h2>
+                              <p className="text-xs text-gray-500">Official Tax & Compliance Invoice</p>
+                            </div>
+                            <div className="text-right">
+                              <h1 className="text-2xl font-bold text-blue-600">INVOICE</h1>
+                              <p className="text-xs text-gray-500 mt-1">#{invoiceNumber}</p>
+                              <p className="text-xs text-gray-500">Date: {invoiceDate || new Date().toISOString().split("T")[0]}</p>
+                            </div>
                           </div>
-                          <div className="flex justify-between text-gray-600">
-                            <span>GST (18%):</span>
-                            <span>₹{calculateTax().toFixed(2)}</span>
-                          </div>
-                          <div className="flex justify-between font-bold text-base border-t border-gray-200 pt-2 text-gray-900">
-                            <span>Total:</span>
-                            <span>₹{calculateTotal().toFixed(2)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-6 font-serif">
-                      <div className="text-center border-b-2 border-black pb-4">
-                        <h1 className="text-3xl font-bold tracking-wide capitalize">{username}</h1>
-                        <p className="text-xs italic text-gray-600">INVOICE #{invoiceNumber}</p>
-                      </div>
+                        </motion.div>
 
-                      <div className="flex justify-between text-xs">
-                        <div>
-                          <p className="font-bold">Billed To:</p>
-                          <p>{customerName || "Customer Name"}</p>
-                        </div>
-                        <div className="text-right">
-                          <p><strong>Date:</strong> {invoiceDate || new Date().toISOString().split("T")[0]}</p>
-                        </div>
-                      </div>
+                        {/* Block 2: Billed To Details */}
+                        <motion.div
+                          drag={isAdvancedEdit}
+                          dragConstraints={invoiceRef}
+                          dragElastic={0.05}
+                          dragMomentum={false}
+                          className={`relative transition-all ${
+                            isAdvancedEdit ? "cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-indigo-500 rounded-lg p-3 bg-indigo-50/30 group border border-dashed border-indigo-300" : ""
+                          }`}
+                        >
+                          {isAdvancedEdit && (
+                            <div className="absolute -top-3 left-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow flex items-center gap-1 pointer-events-none z-10">
+                              <GripVertical size={10} /> Customer Details Block (Drag Me)
+                            </div>
+                          )}
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <p className="text-xs font-semibold text-gray-400 uppercase">Billed To</p>
+                              <p className="font-bold text-gray-800">{customerName || "Customer Name"}</p>
+                            </div>
+                          </div>
+                        </motion.div>
 
-                      <table className="w-full text-left border border-black text-xs">
-                        <thead>
-                          <tr className="border-b border-black bg-gray-100">
-                            <th className="p-2 border-r border-black">Description</th>
-                            <th className="p-2 border-r border-black text-center">Qty</th>
-                            <th className="p-2 border-r border-black text-right">Rate</th>
-                            <th className="p-2 text-right">Total</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {items.map((item) => (
-                            <tr key={item.id} className="border-b border-black">
-                              <td className="p-2 border-r border-black">{item.description || "Service Item"}</td>
-                              <td className="p-2 border-r border-black text-center">{item.quantity}</td>
-                              <td className="p-2 border-r border-black text-right">₹{item.price.toFixed(2)}</td>
-                              <td className="p-2 text-right">₹{(item.quantity * item.price).toFixed(2)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                        {/* Block 3: Items / Services Table */}
+                        <motion.div
+                          drag={isAdvancedEdit}
+                          dragConstraints={invoiceRef}
+                          dragElastic={0.05}
+                          dragMomentum={false}
+                          className={`relative transition-all ${
+                            isAdvancedEdit ? "cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-indigo-500 rounded-lg p-3 bg-indigo-50/30 group border border-dashed border-indigo-300" : ""
+                          }`}
+                        >
+                          {isAdvancedEdit && (
+                            <div className="absolute -top-3 left-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow flex items-center gap-1 pointer-events-none z-10">
+                              <GripVertical size={10} /> Items Table Block (Drag Me)
+                            </div>
+                          )}
+                          <table className="w-full text-left border-collapse text-sm">
+                            <thead>
+                              <tr className="border-b border-gray-300 text-gray-500 text-xs uppercase">
+                                <th className="py-2">Item Description</th>
+                                <th className="py-2 text-center">Qty</th>
+                                <th className="py-2 text-right">Price</th>
+                                <th className="py-2 text-right">Amount</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {items.map((item) => (
+                                <tr key={item.id} className="border-b border-gray-100">
+                                  <td className="py-3 font-medium">{item.description || "Service Item"}</td>
+                                  <td className="py-3 text-center">{item.quantity}</td>
+                                  <td className="py-3 text-right">₹{item.price.toFixed(2)}</td>
+                                  <td className="py-3 text-right">₹{(item.quantity * item.price).toFixed(2)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </motion.div>
 
-                      <div className="flex justify-end text-xs">
-                        <div className="w-48 space-y-1">
-                          <div className="flex justify-between">
-                            <span>Subtotal:</span>
-                            <span>₹{calculateSubtotal().toFixed(2)}</span>
+                        {/* Block 4: Financial Summary & Total */}
+                        <motion.div
+                          drag={isAdvancedEdit}
+                          dragConstraints={invoiceRef}
+                          dragElastic={0.05}
+                          dragMomentum={false}
+                          className={`relative transition-all ${
+                            isAdvancedEdit ? "cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-indigo-500 rounded-lg p-3 bg-indigo-50/30 group border border-dashed border-indigo-300" : ""
+                          }`}
+                        >
+                          {isAdvancedEdit && (
+                            <div className="absolute -top-3 left-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow flex items-center gap-1 pointer-events-none z-10">
+                              <GripVertical size={10} /> Totals Summary Block (Drag Me)
+                            </div>
+                          )}
+                          <div className="flex justify-end pt-2">
+                            <div className="w-48 space-y-2 text-sm">
+                              <div className="flex justify-between text-gray-600">
+                                <span>Subtotal:</span>
+                                <span>₹{calculateSubtotal().toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between text-gray-600">
+                                <span>GST (18%):</span>
+                                <span>₹{calculateTax().toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between font-bold text-base border-t border-gray-200 pt-2 text-gray-900">
+                                <span>Total:</span>
+                                <span>₹{calculateTotal().toFixed(2)}</span>
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex justify-between">
-                            <span>GST (18%):</span>
-                            <span>₹{calculateTax().toFixed(2)}</span>
+                        </motion.div>
+                      </>
+                    ) : (
+                      <>
+                        {/* Classic Template Block 1: Header */}
+                        <motion.div
+                          drag={isAdvancedEdit}
+                          dragConstraints={invoiceRef}
+                          dragElastic={0.05}
+                          dragMomentum={false}
+                          className={`relative font-serif transition-all ${
+                            isAdvancedEdit ? "cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-indigo-500 rounded-lg p-3 bg-indigo-50/30 group border border-dashed border-indigo-300" : ""
+                          }`}
+                        >
+                          {isAdvancedEdit && (
+                            <div className="absolute -top-3 left-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow flex items-center gap-1 pointer-events-none z-10">
+                              <GripVertical size={10} /> Header Block (Drag Me)
+                            </div>
+                          )}
+                          <div className="text-center border-b-2 border-black pb-4">
+                            <h1 className="text-3xl font-bold tracking-wide capitalize">{username}</h1>
+                            <p className="text-xs italic text-gray-600">INVOICE #{invoiceNumber}</p>
                           </div>
-                          <div className="flex justify-between font-bold text-sm border-t border-black pt-1">
-                            <span>Total Amount:</span>
-                            <span>₹{calculateTotal().toFixed(2)}</span>
+                        </motion.div>
+
+                        {/* Classic Template Block 2: Details */}
+                        <motion.div
+                          drag={isAdvancedEdit}
+                          dragConstraints={invoiceRef}
+                          dragElastic={0.05}
+                          dragMomentum={false}
+                          className={`relative font-serif transition-all ${
+                            isAdvancedEdit ? "cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-indigo-500 rounded-lg p-3 bg-indigo-50/30 group border border-dashed border-indigo-300" : ""
+                          }`}
+                        >
+                          {isAdvancedEdit && (
+                            <div className="absolute -top-3 left-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow flex items-center gap-1 pointer-events-none z-10">
+                              <GripVertical size={10} /> Details Block (Drag Me)
+                            </div>
+                          )}
+                          <div className="flex justify-between text-xs">
+                            <div>
+                              <p className="font-bold">Billed To:</p>
+                              <p>{customerName || "Customer Name"}</p>
+                            </div>
+                            <div className="text-right">
+                              <p><strong>Date:</strong> {invoiceDate || new Date().toISOString().split("T")[0]}</p>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                        </motion.div>
+
+                        {/* Classic Template Block 3: Table */}
+                        <motion.div
+                          drag={isAdvancedEdit}
+                          dragConstraints={invoiceRef}
+                          dragElastic={0.05}
+                          dragMomentum={false}
+                          className={`relative font-serif transition-all ${
+                            isAdvancedEdit ? "cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-indigo-500 rounded-lg p-3 bg-indigo-50/30 group border border-dashed border-indigo-300" : ""
+                          }`}
+                        >
+                          {isAdvancedEdit && (
+                            <div className="absolute -top-3 left-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow flex items-center gap-1 pointer-events-none z-10">
+                              <GripVertical size={10} /> Table Block (Drag Me)
+                            </div>
+                          )}
+                          <table className="w-full text-left border border-black text-xs">
+                            <thead>
+                              <tr className="border-b border-black bg-gray-100">
+                                <th className="p-2 border-r border-black">Description</th>
+                                <th className="p-2 border-r border-black text-center">Qty</th>
+                                <th className="p-2 border-r border-black text-right">Rate</th>
+                                <th className="p-2 text-right">Total</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {items.map((item) => (
+                                <tr key={item.id} className="border-b border-black">
+                                  <td className="p-2 border-r border-black">{item.description || "Service Item"}</td>
+                                  <td className="p-2 border-r border-black text-center">{item.quantity}</td>
+                                  <td className="p-2 border-r border-black text-right">₹{item.price.toFixed(2)}</td>
+                                  <td className="p-2 text-right">₹{(item.quantity * item.price).toFixed(2)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </motion.div>
+
+                        {/* Classic Template Block 4: Summary */}
+                        <motion.div
+                          drag={isAdvancedEdit}
+                          dragConstraints={invoiceRef}
+                          dragElastic={0.05}
+                          dragMomentum={false}
+                          className={`relative font-serif transition-all ${
+                            isAdvancedEdit ? "cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-indigo-500 rounded-lg p-3 bg-indigo-50/30 group border border-dashed border-indigo-300" : ""
+                          }`}
+                        >
+                          {isAdvancedEdit && (
+                            <div className="absolute -top-3 left-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow flex items-center gap-1 pointer-events-none z-10">
+                              <GripVertical size={10} /> Summary Block (Drag Me)
+                            </div>
+                          )}
+                          <div className="flex justify-end text-xs">
+                            <div className="w-48 space-y-1">
+                              <div className="flex justify-between">
+                                <span>Subtotal:</span>
+                                <span>₹{calculateSubtotal().toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>GST (18%):</span>
+                                <span>₹{calculateTax().toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between font-bold text-sm border-t border-black pt-1">
+                                <span>Total Amount:</span>
+                                <span>₹{calculateTotal().toFixed(2)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
