@@ -7127,7 +7127,7 @@ export default function App() {
   }, [activePage]);
 
   const [username, setUsername] = useState<string>("");
-  const [userTab, setUserTab] = useState<string>("home");
+  const [userTab, setUserTab] = useState<string>("dashboard");
 
   // Sync state with URL pathname on initial load and handle back/forward actions
   useEffect(() => {
@@ -7141,7 +7141,8 @@ export default function App() {
         const parts = path.split("/");
         const userPart = parts[0];
         setUsername(userPart.replace("-user", ""));
-        setUserTab(parts.length > 1 ? parts.slice(1).join("/") : "home");
+        const tabPart = parts.length > 1 ? parts.slice(1).join("/") : "dashboard";
+        setUserTab(tabPart === "home" ? "dashboard" : tabPart);
         setActivePage("user");
       } else if (validPages.includes(path || "home")) {
         setActivePage((path || "home") as Page);

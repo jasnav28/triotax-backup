@@ -14,7 +14,7 @@ interface UserDashboardProps {
 }
 
 export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username = "user", initialTab = "dashboard" }) => {
-  const [activeTab, setActiveTab] = useState(initialTab || "dashboard");
+  const [activeTab, setActiveTab] = useState(initialTab === "home" ? "dashboard" : (initialTab || "dashboard"));
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
@@ -48,7 +48,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
 
   const tabs = [
     { id: "dashboard", label: "Dashboard", icon: Home },
-    { id: "home", label: "Home", icon: Home },
     { id: "billing-software", label: "Billing Software", icon: CreditCard },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
     { id: "compliance-tracker", label: "Compliance Tracker", icon: FileText },
@@ -90,7 +89,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
       pdf.save(`Invoice_${invoiceNumber}.pdf`);
       
       // Save to billing history
-      setBillingHistory([
+      const newHistory = [
         {
           id: Date.now(),
           date: invoiceDate || new Date().toISOString().split("T")[0],
@@ -99,11 +98,77 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
           amount: calculateTotal()
         },
         ...billingHistory
-      ]);
+      ];
+      setBillingHistory(newHistory);
+      saveUserData(newHistory, employees);
     } catch (error) {
       console.error("Error generating PDF", error);
     }
   };
+
+  const getCleanApiUrl = (endpoint: string) => {
+    let base = (import.meta as any).env?.VITE_API_URL || "https://triotax-backend-production.up.railway.app";
+    base = base.trim().replace(/\/+$/, "");
+    if (base.endsWith("/api")) {
+      base = base.substring(0, base.length - 4);
+    }
+    const cleanEndpoint = endpoint.replace(/^\/+/, "");
+    const finalEndpoint = cleanEndpoint.startsWith("api/") ? cleanEndpoint : `api/${cleanEndpoint}`;
+    return `${base}/${finalEndpoint}`;
+  };
+
+  const loadUserData = async () => {
+    let localData: any = null;
+    const local = localStorage.getItem(`triotax_user_data_${username}`);
+    if (local) {
+      try {
+        localData = JSON.parse(local);
+      } catch (e) {}
+    }
+
+    try {
+      const res = await fetch(getCleanApiUrl(`users/${username}/data`));
+      if (res.ok) {
+        const result = await res.json();
+        if (result.data || result.billingHistory || result.employees) {
+          const billing = result.billingHistory || result.data?.billingHistory || [];
+          const emps = result.employees || result.data?.employees || [];
+          setBillingHistory(billing);
+          setEmployees(emps);
+          localStorage.setItem(`triotax_user_data_${username}`, JSON.stringify({ billingHistory: billing, employees: emps }));
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Backend data fetch error, using local fallback:", err);
+    }
+
+    if (localData) {
+      if (localData.billingHistory) setBillingHistory(localData.billingHistory);
+      if (localData.employees) setEmployees(localData.employees);
+    }
+  };
+
+  const saveUserData = async (newBilling: any[], newEmployees: any[]) => {
+    const payload = { billingHistory: newBilling, employees: newEmployees };
+    localStorage.setItem(`triotax_user_data_${username}`, JSON.stringify(payload));
+    try {
+      await fetch(getCleanApiUrl(`users/${username}/data`), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: payload })
+      });
+    } catch (err) {
+      console.warn("Error saving user data to server:", err);
+    }
+  };
+
+  React.useEffect(() => {
+    loadUserData();
+    const handleUpdate = () => loadUserData();
+    window.addEventListener("triotax_data_backup_update", handleUpdate);
+    return () => window.removeEventListener("triotax_data_backup_update", handleUpdate);
+  }, [username]);
 
   // --- Payroll Functions ---
   const handleAddEmployee = (e: React.FormEvent) => {
@@ -127,7 +192,9 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
       paymentDate: "Pending"
     };
 
-    setEmployees([newEmp, ...employees]);
+    const updatedEmps = [newEmp, ...employees];
+    setEmployees(updatedEmps);
+    saveUserData(billingHistory, updatedEmps);
     setEmpName("");
     setEmpRole("");
     setEmpBasic("");
@@ -137,14 +204,18 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   };
 
   const handleMarkPaid = (id: number) => {
-    setEmployees(prev => prev.map(emp => 
+    const updated = employees.map(emp => 
       emp.id === id ? { ...emp, status: "Paid", paymentDate: new Date().toISOString().split("T")[0] } : emp
-    ));
+    );
+    setEmployees(updated);
+    saveUserData(billingHistory, updated);
   };
 
   const handleDeleteEmployee = (id: number) => {
     if (confirm("Remove this employee from payroll?")) {
-      setEmployees(prev => prev.filter(emp => emp.id !== id));
+      const updated = employees.filter(emp => emp.id !== id);
+      setEmployees(updated);
+      saveUserData(billingHistory, updated);
     }
   };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Lock, User, ArrowRight, LayoutDashboard, Users, Settings, LogOut, UserPlus, FileCheck, X, Trash2, ExternalLink, RefreshCw, CheckCircle2, AlertCircle, Megaphone, Play, Pause, Plus, Image as ImageIcon, Link as LinkIcon } from "lucide-react";
+import { Shield, Lock, User, ArrowRight, LayoutDashboard, Users, Settings, LogOut, UserPlus, FileCheck, X, Trash2, ExternalLink, RefreshCw, CheckCircle2, AlertCircle, Megaphone, Play, Pause, Plus, Image as ImageIcon, Link as LinkIcon, Database, Download, Upload, FileText, HardDrive } from "lucide-react";
 import { ThemeToggle } from "@/app/components/ui/theme-toggle";
 import { getAdsConfig, DEFAULT_ADS, AdItem } from "@/components/ui/scrolling-ad-banner";
 
@@ -42,6 +42,145 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
   const [newAdTitle, setNewAdTitle] = useState("");
   const [newAdImage, setNewAdImage] = useState("");
   const [newAdLink, setNewAdLink] = useState("");
+
+  // --- Data Backup & Restore State ---
+  const [backupSelectedCompany, setBackupSelectedCompany] = useState("");
+  const [backupJsonFile, setBackupJsonFile] = useState<File | null>(null);
+  const [backupStatusMsg, setBackupStatusMsg] = useState("");
+  const [backupErrorMsg, setBackupErrorMsg] = useState("");
+  const [isBackupProcessing, setIsBackupProcessing] = useState(false);
+
+  const handleDownloadCompanyData = async (userToDownload: any) => {
+    try {
+      setIsBackupProcessing(true);
+      setBackupStatusMsg(`Downloading JSON data backup for ${userToDownload.company_name || userToDownload.username}...`);
+      setBackupErrorMsg("");
+
+      let serverData: any = null;
+      try {
+        const res = await fetch(getCleanApiUrl(`users/${userToDownload.username}/data`));
+        if (res.ok) {
+          serverData = await res.json();
+        }
+      } catch (e) {
+        console.warn("Could not fetch server data, falling back to local storage:", e);
+      }
+
+      let localData: any = null;
+      const local = localStorage.getItem(`triotax_user_data_${userToDownload.username}`);
+      if (local) {
+        try { localData = JSON.parse(local); } catch (e) {}
+      }
+
+      const payload = {
+        companyProfile: {
+          username: userToDownload.username,
+          companyName: userToDownload.company_name || userToDownload.companyName || "",
+          ownerName: userToDownload.owner_name || userToDownload.ownerName || "",
+          email: userToDownload.email || "",
+          contact: userToDownload.contact || "",
+          address: userToDownload.address || "",
+          description: userToDownload.description || ""
+        },
+        billingHistory: serverData?.billingHistory || localData?.billingHistory || [],
+        employees: serverData?.employees || localData?.employees || [],
+        complianceRecords: serverData?.complianceRecords || localData?.complianceRecords || [],
+        exportedAt: new Date().toISOString(),
+        system: "TrioTax Database Engine",
+        version: "1.0"
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+      const downloadAnchor = document.createElement("a");
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `TrioTax_Backup_${userToDownload.username}_${new Date().toISOString().split("T")[0]}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+
+      setBackupStatusMsg(`✅ Downloaded JSON backup for ${userToDownload.company_name || userToDownload.username}!`);
+    } catch (err: any) {
+      setBackupErrorMsg(`Failed to download backup: ${err.message}`);
+    } finally {
+      setIsBackupProcessing(false);
+    }
+  };
+
+  const handleUploadAndAppendData = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!backupSelectedCompany) {
+      setBackupErrorMsg("Please select a target company profile first.");
+      return;
+    }
+    if (!backupJsonFile) {
+      setBackupErrorMsg("Please select a .json backup file to upload.");
+      return;
+    }
+
+    setBackupStatusMsg("");
+    setBackupErrorMsg("");
+    setIsBackupProcessing(true);
+
+    try {
+      const fileReader = new FileReader();
+      fileReader.onload = async (event) => {
+        try {
+          const fileContent = event.target?.result as string;
+          const restoredJSON = JSON.parse(fileContent);
+
+          const targetUsername = backupSelectedCompany;
+
+          // Post to server restore endpoint (which appends instead of overriding!)
+          let res = await fetch(getCleanApiUrl(`users/${targetUsername}/restore`), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(restoredJSON)
+          });
+
+          // Also update localStorage cache in append mode
+          let currentLocal: any = { billingHistory: [], employees: [], complianceRecords: [] };
+          const rawLocal = localStorage.getItem(`triotax_user_data_${targetUsername}`);
+          if (rawLocal) {
+            try { currentLocal = JSON.parse(rawLocal); } catch (e) {}
+          }
+
+          const mergedLocalBilling = [
+            ...(currentLocal.billingHistory || []),
+            ...(restoredJSON.billingHistory || []).map((item: any, idx: number) => ({ ...item, id: Date.now() + idx + Math.floor(Math.random() * 1000) }))
+          ];
+
+          const mergedLocalEmployees = [
+            ...(currentLocal.employees || []),
+            ...(restoredJSON.employees || []).map((item: any, idx: number) => ({ ...item, id: Date.now() + idx + Math.floor(Math.random() * 1000) }))
+          ];
+
+          const mergedLocalPayload = {
+            ...currentLocal,
+            billingHistory: mergedLocalBilling,
+            employees: mergedLocalEmployees
+          };
+
+          localStorage.setItem(`triotax_user_data_${targetUsername}`, JSON.stringify(mergedLocalPayload));
+          window.dispatchEvent(new Event("triotax_data_backup_update"));
+
+          const numInvoices = restoredJSON.billingHistory?.length || 0;
+          const numEmployees = restoredJSON.employees?.length || 0;
+
+          setBackupStatusMsg(`✅ Successfully uploaded and appended backup data for "${targetUsername}"! Added ${numInvoices} invoice(s) & ${numEmployees} employee record(s). All existing data preserved without overriding.`);
+          setBackupJsonFile(null);
+        } catch (err: any) {
+          setBackupErrorMsg(`Failed to process JSON file: ${err.message}`);
+        } finally {
+          setIsBackupProcessing(false);
+        }
+      };
+
+      fileReader.readAsText(backupJsonFile);
+    } catch (err: any) {
+      setBackupErrorMsg(`Error reading file: ${err.message}`);
+      setIsBackupProcessing(false);
+    }
+  };
 
   const updateAdsConfig = (newEnabled: boolean, newList: AdItem[]) => {
     const updated = { isAdsEnabled: newEnabled, adList: newList };
@@ -722,6 +861,164 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
             </div>
           </div>
         );
+      case "data-backup":
+        return (
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                <Database className="text-blue-500" /> Data Backup & Append Restore Center
+              </h2>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                Select company profiles to download JSON backups to local storage, or upload backup files to append user data into Railway PostgreSQL database without overriding existing records.
+              </p>
+            </div>
+
+            {backupStatusMsg && (
+              <div className="p-4 rounded-xl bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 text-sm font-medium flex items-center gap-2">
+                <CheckCircle2 size={18} /> {backupStatusMsg}
+              </div>
+            )}
+
+            {backupErrorMsg && (
+              <div className="p-4 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-2">
+                <AlertCircle size={18} /> {backupErrorMsg}
+              </div>
+            )}
+
+            {/* Section 1: Upload and Append Data Interface */}
+            <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                    <Upload className="text-indigo-500" size={20} /> Upload & Append Backup JSON File
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Select the company account, upload the JSON file requested by the user, and append the contents safely.
+                  </p>
+                </div>
+                <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 text-xs font-semibold rounded-full border border-amber-200 dark:border-amber-800 flex items-center gap-1">
+                  <Shield size={12} /> Safe Append Mode (No Overwrite)
+                </span>
+              </div>
+
+              <form onSubmit={handleUploadAndAppendData} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      1. Select Target Company Profile *
+                    </label>
+                    <select
+                      value={backupSelectedCompany}
+                      onChange={(e) => setBackupSelectedCompany(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-xl text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-medium text-sm"
+                      required
+                    >
+                      <option value="">-- Choose Company Profile --</option>
+                      {users.map((u) => (
+                        <option key={u.id || u.username} value={u.username}>
+                          {u.company_name || u.companyName || u.username} (@{u.username})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      2. Choose Backup JSON File *
+                    </label>
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={(e) => setBackupJsonFile(e.target.files ? e.target.files[0] : null)}
+                      className="w-full px-4 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-xl text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 text-sm file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-50 dark:bg-zinc-950 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs text-slate-600 dark:text-slate-400">
+                  💡 <span className="font-semibold text-slate-800 dark:text-slate-200">How appending works:</span> When uploaded, invoices, employee payrolls, and compliance entries from the JSON file are merged directly into the company's server database. Both previous data and new data remain intact and accessible to the user.
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={isBackupProcessing || !backupSelectedCompany || !backupJsonFile}
+                    className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-all shadow-sm flex items-center gap-2"
+                  >
+                    <Upload size={16} /> {isBackupProcessing ? "Uploading & Appending..." : "Upload & Append Data"}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Section 2: Company Profiles Download Table */}
+            <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                    <HardDrive className="text-blue-500" size={20} /> Registered Company Profiles Data Backup
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Click "Download Data (JSON)" to export the full company dataset to your local machine.
+                  </p>
+                </div>
+                <button onClick={fetchUsers} className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 font-semibold hover:underline">
+                  <RefreshCw size={13} className={loadingUsers ? "animate-spin" : ""} /> Refresh Profiles
+                </button>
+              </div>
+
+              {users.length === 0 ? (
+                <div className="text-center py-12 text-gray-400">
+                  No company profiles found in database. Create a user to get started.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
+                    <thead className="bg-slate-50 dark:bg-zinc-800/60 text-gray-700 dark:text-gray-300 text-xs uppercase font-semibold">
+                      <tr>
+                        <th className="px-4 py-3 rounded-l-lg">Company Name</th>
+                        <th className="px-4 py-3">Owner / Contact</th>
+                        <th className="px-4 py-3">Username</th>
+                        <th className="px-4 py-3 text-right rounded-r-lg">Download Backup</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                      {users.map((u) => (
+                        <tr key={u.id || u.username} className="hover:bg-gray-50 dark:hover:bg-zinc-800/40 transition-colors">
+                          <td className="px-4 py-4">
+                            <span className="font-bold text-gray-800 dark:text-white block">
+                              {u.company_name || u.companyName || "Unnamed Company"}
+                            </span>
+                            <span className="text-xs text-gray-400">{u.email || "No email"}</span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className="font-medium text-gray-700 dark:text-gray-300 block">
+                              {u.owner_name || u.ownerName || "Owner"}
+                            </span>
+                            <span className="text-xs text-gray-400">{u.contact || "N/A"}</span>
+                          </td>
+                          <td className="px-4 py-4 font-mono text-xs text-blue-600 dark:text-blue-400">
+                            @{u.username}
+                          </td>
+                          <td className="px-4 py-4 text-right">
+                            <button
+                              onClick={() => handleDownloadCompanyData(u)}
+                              disabled={isBackupProcessing}
+                              className="px-3.5 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 font-semibold text-xs rounded-lg transition-colors inline-flex items-center gap-1.5"
+                            >
+                              <Download size={14} /> Download Data (JSON)
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        );
       default:
         return null;
     }
@@ -732,6 +1029,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
     { id: "create-user", label: "Create User", icon: UserPlus },
     { id: "gst-tracking", label: "GST Tracking", icon: FileCheck },
     { id: "manage-users", label: "Manage Users", icon: Users },
+    { id: "data-backup", label: "Data Backup", icon: Database },
     { id: "play-ads", label: "Play Ads", icon: Megaphone },
     { id: "settings", label: "System Settings", icon: Settings },
   ];
