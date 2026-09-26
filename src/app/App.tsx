@@ -849,7 +849,7 @@ function Footer({ setActivePage, setSelectedServiceId }: { setActivePage: (p: Pa
           <div className="lg:col-span-4">
             <div className="flex items-center gap-3 mb-5">
               <img
-                src={isDarkMode ? "/Artboard.png" : "/Artboard 3.png"}
+                src="/Artboard.png"
                 alt="TRIOTAX Logo"
                 className="h-10 md:h-12 w-auto object-contain"
               />
