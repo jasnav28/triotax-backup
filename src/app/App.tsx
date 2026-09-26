@@ -7237,11 +7237,11 @@ export default function App() {
     }
   };
 
-  const isDashboardLayout = activePage === "admin" || activePage === "user";
+  const isFullPageLayout = activePage === "admin" || activePage === "user" || activePage === "login";
 
-  if (isDashboardLayout) {
+  if (isFullPageLayout) {
     return (
-      <div className="min-h-screen bg-[#F5F8FC] dark:bg-[#060e1d] text-gray-900 dark:text-white transition-colors duration-300">
+      <div className="min-h-screen bg-white dark:bg-[#060e1d] text-gray-900 dark:text-white transition-colors duration-300">
         {renderPage()}
         <NetworkIndicator />
       </div>
