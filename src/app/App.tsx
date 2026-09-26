@@ -585,7 +585,7 @@ function NavBar({
             <img
               src={isDarkMode ? "/Artboard.png" : "/Artboard 3.png"}
               alt="TRIOTAX Logo"
-              className="h-[67px] object-contain"
+              className="h-10 md:h-12 w-auto object-contain transition-all duration-300"
             />
           </button>
 
@@ -849,9 +849,9 @@ function Footer({ setActivePage, setSelectedServiceId }: { setActivePage: (p: Pa
           <div className="lg:col-span-4">
             <div className="flex items-center gap-3 mb-5">
               <img
-                src="/Artboard.png"
+                src={isDarkMode ? "/Artboard.png" : "/Artboard 3.png"}
                 alt="TRIOTAX Logo"
-                className="h-[60px] object-contain"
+                className="h-10 md:h-12 w-auto object-contain"
               />
             </div>
             <p className="text-gray-400 text-sm leading-relaxed mb-6">
