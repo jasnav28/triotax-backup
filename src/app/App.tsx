@@ -7237,7 +7237,7 @@ export default function App() {
     }
   };
 
-  const isFullPageLayout = activePage === "admin" || activePage === "user" || activePage === "login";
+  const isFullPageLayout = activePage === "admin" || activePage === "user";
 
   if (isFullPageLayout) {
     return (

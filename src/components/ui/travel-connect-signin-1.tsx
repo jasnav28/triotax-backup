@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { Eye, EyeOff, Maximize2, Minimize2, Play, Pause, RotateCcw, Sun, Moon, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Maximize2, Minimize2, Play, Pause, RotateCcw, Sun, Moon } from "lucide-react";
 import { motion } from "framer-motion";
 
 // Custom Input Component
@@ -16,7 +16,7 @@ const Input = ({ className = "", ...props }: InputProps) => {
   );
 };
 
-// Canvas-Based Full-Bleed Ultra-Smooth Frame Animation Player
+// Canvas-Based Ultra-Smooth Frame Animation Player
 const FrameAnimationPlayer = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -65,7 +65,7 @@ const FrameAnimationPlayer = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     };
   }, []);
 
-  // Canvas GPU-Accelerated Full-Bleed Animation Loop
+  // Canvas GPU-Accelerated Un-cropped Animation Loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -85,15 +85,15 @@ const FrameAnimationPlayer = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       const width = canvas.width;
       const height = canvas.height;
 
-      // Fill background
-      ctx.fillStyle = isDarkMode ? "#090d16" : "#f4f6f9";
+      // Seamless background fill matching frame color
+      ctx.fillStyle = isDarkMode ? "#090d16" : "#f4f6f8";
       ctx.fillRect(0, 0, width, height);
 
       if (currentImg && currentImg.complete && currentImg.naturalWidth > 0) {
-        // Full-bleed cover math (Math.max) so video frame fills 100% of the left half with zero letterboxing
+        // Use Math.min so the full 1280x720 video frame & logo are 100% visible without any cropping on left or right
         const imgW = currentImg.naturalWidth;
         const imgH = currentImg.naturalHeight;
-        const scale = Math.max(width / imgW, height / imgH);
+        const scale = Math.min(width / imgW, height / imgH);
         const drawW = imgW * scale;
         const drawH = imgH * scale;
         const x = (width - drawW) / 2;
@@ -155,15 +155,15 @@ const FrameAnimationPlayer = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     >
       <canvas ref={canvasRef} className="w-full h-full block" />
 
-      {/* Floating Control Capsule matching Image 2 top-left buttons [ ⛶ ⏯ ↺ ] */}
-      <div className="absolute top-6 left-6 z-30 flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/15 px-3 py-2 rounded-xl shadow-2xl text-white">
+      {/* Floating Control Capsule [ ⛶ ⏯ ↺ ] */}
+      <div className="absolute top-4 left-4 z-30 flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/15 px-3 py-1.5 rounded-xl shadow-2xl text-white">
         <button
           type="button"
           onClick={toggleFullscreen}
           title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
           className="p-1 hover:bg-white/20 rounded-lg transition-colors text-gray-200 hover:text-white"
         >
-          {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+          {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
         </button>
 
         <div className="w-[1px] h-4 bg-white/20 my-auto" />
@@ -174,7 +174,7 @@ const FrameAnimationPlayer = ({ isDarkMode }: { isDarkMode?: boolean }) => {
           title={isPlaying ? "Pause Animation" : "Play Animation"}
           className="p-1 hover:bg-white/20 rounded-lg transition-colors text-gray-200 hover:text-white"
         >
-          {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+          {isPlaying ? <Pause size={16} /> : <Play size={16} />}
         </button>
 
         <button
@@ -183,7 +183,7 @@ const FrameAnimationPlayer = ({ isDarkMode }: { isDarkMode?: boolean }) => {
           title="Restart Animation"
           className="p-1 hover:bg-white/20 rounded-lg transition-colors text-gray-200 hover:text-white"
         >
-          <RotateCcw size={18} />
+          <RotateCcw size={16} />
         </button>
       </div>
 
@@ -260,16 +260,9 @@ export const SignInCard = ({
   };
 
   return (
-    <div className={`w-screen h-screen min-h-screen overflow-hidden flex flex-col md:flex-row bg-white dark:bg-zinc-950 ${isDark ? "dark" : ""}`}>
-      {/* Top-Right Controls */}
-      <div className="absolute top-6 right-6 z-30 flex items-center gap-3">
-        <a
-          href="/"
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white text-xs font-semibold transition-colors"
-        >
-          <ArrowLeft size={15} />
-          <span>Home</span>
-        </a>
+    <div className={`w-full h-[calc(100vh-72px)] min-h-[550px] overflow-hidden flex flex-col md:flex-row bg-white dark:bg-zinc-950 ${isDark ? "dark" : ""}`}>
+      {/* Top-Right Theme Toggle */}
+      <div className="absolute top-4 right-6 z-30">
         <button
           type="button"
           onClick={() => setIsDark(!isDark)}
@@ -280,8 +273,8 @@ export const SignInCard = ({
         </button>
       </div>
 
-      {/* Left 50% Full-Bleed Video Frame Panel */}
-      <div className="w-full md:w-1/2 h-1/2 md:h-full relative overflow-hidden bg-slate-950">
+      {/* Left 50% Video Frame Panel */}
+      <div className="w-full md:w-1/2 h-1/2 md:h-full relative overflow-hidden bg-[#f4f6f8] dark:bg-slate-950">
         <FrameAnimationPlayer isDarkMode={isDark} />
       </div>
 
