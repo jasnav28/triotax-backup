@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Lock, User, ArrowRight, LayoutDashboard, Users, Settings, LogOut, UserPlus, FileCheck, X, Trash2, ExternalLink, RefreshCw, CheckCircle2, AlertCircle, Megaphone, Play, Pause, Plus, Image as ImageIcon, Link as LinkIcon, Database, Download, Upload, FileText, HardDrive } from "lucide-react";
+import { Shield, Lock, User, ArrowRight, LayoutDashboard, Users, Settings, LogOut, UserPlus, FileCheck, X, Trash2, ExternalLink, RefreshCw, CheckCircle2, AlertCircle, Megaphone, Play, Pause, Plus, Image as ImageIcon, Link as LinkIcon, Database, Download, Upload, FileText, HardDrive, Search } from "lucide-react";
 import { ThemeToggle } from "@/app/components/ui/theme-toggle";
 import { getAdsConfig, DEFAULT_ADS, AdItem } from "@/components/ui/scrolling-ad-banner";
 
@@ -16,6 +16,28 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
   const [error, setError] = useState("");
   
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [showPlayAds, setShowPlayAds] = useState<boolean>(() => {
+    const saved = localStorage.getItem("triotax_show_play_ads");
+    return saved !== null ? saved === "true" : true;
+  });
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchFeedback, setSearchFeedback] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+      if (e.key === "Escape") {
+        setIsSearchOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const [users, setUsers] = useState<any[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
 
@@ -204,6 +226,25 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
 
   const handleToggleAds = (enabled: boolean) => {
     updateAdsConfig(enabled, adsState.adList || DEFAULT_ADS);
+  };
+
+  const handleSearchChange = (val: string) => {
+    setSearchQuery(val);
+    const lower = val.toLowerCase().trim();
+    if (lower.includes("adon")) {
+      setShowPlayAds(true);
+      localStorage.setItem("triotax_show_play_ads", "true");
+      handleToggleAds(true);
+      setSearchFeedback("Play Ads tab is now VISIBLE & Ads Display toggle is ON");
+    } else if (lower.includes("adoff")) {
+      setShowPlayAds(false);
+      localStorage.setItem("triotax_show_play_ads", "false");
+      handleToggleAds(false);
+      setSearchFeedback("Play Ads tab is now HIDDEN & Ads Display toggle is OFF");
+      setActiveTab((currentTab) => (currentTab === "play-ads" ? "dashboard" : currentTab));
+    } else {
+      setSearchFeedback(null);
+    }
   };
 
   const handleAddAd = (e: React.FormEvent) => {
@@ -1128,7 +1169,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
     { id: "gst-tracking", label: "GST Tracking", icon: FileCheck },
     { id: "manage-users", label: "Manage Users", icon: Users },
     { id: "data-backup", label: "Data Backup", icon: Database },
-    { id: "play-ads", label: "Play Ads", icon: Megaphone },
+    ...(showPlayAds ? [{ id: "play-ads", label: "Play Ads", icon: Megaphone }] : []),
     { id: "settings", label: "System Settings", icon: Settings },
   ];
 
@@ -1174,6 +1215,15 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
             {activeTab.replace("-", " ")}
           </h2>
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-zinc-700 text-xs font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors shadow-sm"
+              title="Admin Search (Ctrl+F)"
+            >
+              <Search size={14} className="text-blue-500" />
+              <span className="hidden sm:inline">Search</span>
+              <kbd className="hidden md:inline-block px-1.5 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded border border-gray-300 dark:border-zinc-700 font-mono text-[10px]">Ctrl+F</kbd>
+            </button>
             <ThemeToggle />
             <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Admin User</span>
             <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-bold flex items-center justify-center rounded-full">
@@ -1291,6 +1341,72 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
                 >
                   <FileCheck size={16} /> {isSavingCompliance ? "Updating..." : "Update Compliance & Save"}
                 </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Quick Search Modal (Ctrl+F) */}
+      <AnimatePresence>
+        {isSearchOpen && (
+          <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsSearchOpen(false)}
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: -20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -20 }}
+              className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 w-full max-w-lg overflow-hidden relative z-10 p-5 space-y-4 transition-colors"
+            >
+              <div className="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-3">
+                <div className="flex items-center gap-2 text-slate-800 dark:text-white font-semibold">
+                  <Search size={18} className="text-blue-500" />
+                  <span>Admin Search (Ctrl+F)</span>
+                </div>
+                <button
+                  onClick={() => setIsSearchOpen(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-lg transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <input
+                  type="text"
+                  autoFocus
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  placeholder="Type 'Adon' to show Play Ads tab, 'Adoff' to hide..."
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-zinc-800/80 border border-gray-200 dark:border-zinc-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 dark:text-white placeholder:text-gray-400"
+                />
+              </div>
+
+              {searchFeedback && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`p-3 rounded-xl text-xs font-semibold flex items-center gap-2 ${
+                    showPlayAds
+                      ? "bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400 border border-green-200 dark:border-green-800/50"
+                      : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50"
+                  }`}
+                >
+                  <CheckCircle2 size={15} />
+                  <span>{searchFeedback}</span>
+                </motion.div>
+              )}
+
+              <div className="flex items-center justify-between text-xs text-gray-400 dark:text-zinc-500 pt-1 border-t border-gray-100 dark:border-zinc-800/60">
+                <span>Press <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded border border-gray-300 dark:border-zinc-700 font-mono text-[10px]">Esc</kbd> to exit</span>
+                <span className="font-mono text-[11px]">Toggle: Adon / Adoff</span>
               </div>
             </motion.div>
           </div>
