@@ -452,7 +452,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
       }
     } catch (err) {
       console.error("Error creating user:", err);
-      setCreateError("Could not connect to Railway server. Please verify network connection.");
+      if (!navigator.onLine) {
+        setCreateError("No Internet Connection. Please check your network.");
+      } else {
+        setCreateError("Could not connect to Railway server. Server may be sleeping or initializing.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -1215,15 +1219,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
             {activeTab.replace("-", " ")}
           </h2>
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsSearchOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-zinc-700 text-xs font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors shadow-sm"
-              title="Admin Search (Ctrl+F)"
-            >
-              <Search size={14} className="text-blue-500" />
-              <span className="hidden sm:inline">Search</span>
-              <kbd className="hidden md:inline-block px-1.5 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded border border-gray-300 dark:border-zinc-700 font-mono text-[10px]">Ctrl+F</kbd>
-            </button>
             <ThemeToggle />
             <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Admin User</span>
             <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-bold flex items-center justify-center rounded-full">

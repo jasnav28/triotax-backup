@@ -253,7 +253,11 @@ export const SignInCard = ({
           return;
         }
       } catch {}
-      setErrorMsg("Network connection poor. Saved locally — try again or check connection.");
+      if (!navigator.onLine) {
+        setErrorMsg("No Internet Connection. Please check your network and try again.");
+      } else {
+        setErrorMsg("Unable to connect to the authentication server. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }

@@ -3,7 +3,7 @@ import { Wifi, WifiOff, AlertTriangle } from "lucide-react";
 
 export const NetworkIndicator: React.FC = () => {
   const [isOnline, setIsOnline] = useState(true);
-  const [isSlow, setIsSlow] = useState(false);
+  const [isServerDown, setIsServerDown] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
@@ -11,6 +11,7 @@ export const NetworkIndicator: React.FC = () => {
 
     const handleOnline = () => {
       setIsOnline(true);
+      setIsServerDown(false);
       setDismissed(false);
     };
     const handleOffline = () => {
@@ -21,27 +22,33 @@ export const NetworkIndicator: React.FC = () => {
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
 
-    // Measure network ping periodically
-    const checkSpeed = async () => {
+    // Periodically verify server connectivity without misinterpreting API response time as bad client internet
+    const checkServerHealth = async () => {
       if (!navigator.onLine) return;
-      const start = performance.now();
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
-        await fetch("https://triotax-backend-production.up.railway.app/api/health", {
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        const res = await fetch("https://triotax-backend-production.up.railway.app/api/health", {
           signal: controller.signal,
           cache: "no-store",
         });
         clearTimeout(timeoutId);
-        const duration = performance.now() - start;
-        setIsSlow(duration > 2500);
-      } catch {
-        setIsSlow(true);
+
+        if (res.ok) {
+          setIsServerDown(false);
+        } else {
+          setIsServerDown(true);
+        }
+      } catch (err) {
+        // If fetch fails while browser IS online, server is unavailable (NOT poor client internet)
+        if (navigator.onLine) {
+          setIsServerDown(true);
+        }
       }
     };
 
-    const interval = setInterval(checkSpeed, 15000);
-    checkSpeed();
+    const interval = setInterval(checkServerHealth, 30000);
+    checkServerHealth();
 
     return () => {
       window.removeEventListener("online", handleOnline);
@@ -57,13 +64,13 @@ export const NetworkIndicator: React.FC = () => {
       {!isOnline ? (
         <div className="flex items-center gap-3 bg-red-600 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg border border-red-500 animate-pulse">
           <WifiOff size={16} />
-          <span>Offline Mode Active &bull; Local Sync Enabled</span>
+          <span>No Internet Connection &bull; Local Mode Active</span>
           <button onClick={() => setDismissed(true)} className="ml-2 text-white/80 hover:text-white font-bold">&times;</button>
         </div>
-      ) : isSlow ? (
-        <div className="flex items-center gap-3 bg-amber-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg border border-amber-400">
+      ) : isServerDown ? (
+        <div className="flex items-center gap-3 bg-amber-600 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg border border-amber-500">
           <AlertTriangle size={16} />
-          <span>Slow Network &bull; Running with Offline Fallback</span>
+          <span>Server Unavailable &bull; Retrying Connection</span>
           <button onClick={() => setDismissed(true)} className="ml-2 text-white/80 hover:text-white font-bold">&times;</button>
         </div>
       ) : (
@@ -75,3 +82,5 @@ export const NetworkIndicator: React.FC = () => {
     </div>
   );
 };
+
+export default NetworkIndicator;
