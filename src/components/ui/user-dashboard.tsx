@@ -73,7 +73,12 @@ import {
   TrendingUp,
   Globe,
   Inbox,
-  Compass
+  Compass,
+  LayoutGrid,
+  History,
+  Info,
+  LayoutDashboard,
+  ChevronUp
 } from "lucide-react";
 import { ThemeToggle } from "@/app/components/ui/theme-toggle";
 import { StockTicker } from "./stock-ticker";
@@ -337,6 +342,25 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const [isCompanyProfileOpen, setIsCompanyProfileOpen] = useState(false);
   const [isInvoicePreviewOpen, setIsInvoicePreviewOpen] = useState(false);
   const [previewInvoice, setPreviewInvoice] = useState<InvoiceRecord | null>(null);
+  const [isQuickAccessOpen, setIsQuickAccessOpen] = useState(false);
+  const [activeChartHover, setActiveChartHover] = useState<number | null>(null);
+  const [activeBarHover, setActiveBarHover] = useState<number | null>(null);
+  const [activeSubTab, setActiveSubTab] = useState<"overview" | "analytics" | "reports" | "notifications">("overview");
+  const quickAccessRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (quickAccessRef.current && !quickAccessRef.current.contains(event.target as Node)) {
+        setIsQuickAccessOpen(false);
+      }
+    };
+    if (isQuickAccessOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isQuickAccessOpen]);
 
   useEffect(() => {
     if (initialTab) {
@@ -1570,16 +1594,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   // ─────────────────────────────────────────────────────────────
   // REFERENCE UI AUTOMATIONS DATA & COMMON HELPERS
   // ─────────────────────────────────────────────────────────────
-  const DEFAULT_SCHEDULES = [
-    { id: "s1", name: "LinkedIn Engagement Monitor", sub: "LinkedIn engagement monitor", nextRun: "Tomorrow, 09:00 AM", lastRun: "Today 10:00 AM", status: "RUNNING", leads: 562, icon: Globe },
-    { id: "s2", name: "Competitor Audience Tracker", sub: "Monitor competitor audiences.", nextRun: "Tomorrow, 09:00 AM", lastRun: "Today 09:00 AM", status: "ACTIVE", leads: 632, icon: Building },
-    { id: "s3", name: "Buying Signals Detection", sub: "Detect buyer intent signals.", nextRun: "Tomorrow, 09:00 AM", lastRun: "Today 10:00 AM", status: "RUNNING", leads: 238, icon: TrendingUp },
-    { id: "s4", name: "Funding Events Tracker", sub: "Track recent funding activities.", nextRun: "Tomorrow, 11:00 AM", lastRun: "Today 08:30 AM", status: "ACTIVE", leads: 260, icon: Compass },
-    { id: "s5", name: "Website Visitor Capture", sub: "Capture website visitors.", nextRun: "Tomorrow, 02:00 PM", lastRun: "Today 11:15 AM", status: "RUNNING", leads: 360, icon: Globe },
-    { id: "s6", name: "Job Change Alerts", sub: "Track career changes.", nextRun: "Tomorrow, 03:30 PM", lastRun: "Today 01:20 PM", status: "ACTIVE", leads: 580, icon: AlertCircle },
-    { id: "s7", name: "High-Intent Lead Finder", sub: "Find high-intent leads.", nextRun: "Tomorrow, 09:00 AM", lastRun: "Today 10:00 AM", status: "RUNNING", leads: 250, icon: Users },
-  ];
-
   const [mainSearchQuery, setMainSearchQuery] = useState("");
 
   const handleTopPrimaryAction = () => {
@@ -1705,115 +1719,521 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const renderContent = () => {
     switch (activeTab) {
       case "home":
-      case "dashboard":
+      case "dashboard": {
+        const filteredHomeInvoices = billingHistory.filter(i =>
+          (i.invoiceNumber + i.customer + (i.clientGstin || "")).toLowerCase().includes(mainSearchQuery.toLowerCase())
+        );
+
+        // Chart 1 Data: Sales Activity Monthly (Dual Smooth Area Chart)
+        const salesActivityData = [
+          { month: "Jan", sales: 28000, collections: 12000, x: 40, salesY: 105, colY: 150 },
+          { month: "Feb", sales: 52000, collections: 22000, x: 160, salesY: 42, colY: 122 },
+          { month: "Mar", sales: 46000, collections: 16000, x: 280, salesY: 60, colY: 140 },
+          { month: "Apr", sales: 29000, collections: 24000, x: 400, salesY: 102, colY: 118 },
+          { month: "May", sales: 38000, collections: 18000, x: 520, salesY: 80, colY: 134 },
+          { month: "Jun", sales: 44000, collections: 21000, x: 640, salesY: 68, colY: 125 },
+        ];
+
+        // Chart 2 Data: Subscriptions (Grouped Dual Bar Chart)
+        const subscriptionsData = [
+          { month: "Jan", bar1: 35, bar2: 20 },
+          { month: "Jan", bar1: 22, bar2: 45 },
+          { month: "Feb", bar1: 32, bar2: 72 },
+          { month: "Mar", bar1: 28, bar2: 60 },
+          { month: "Apr", bar1: 38, bar2: 18 },
+          { month: "May", bar1: 44, bar2: 95 },
+          { month: "Jun", bar1: 20, bar2: 52 },
+          { month: "Jun", bar1: 36, bar2: 58 },
+        ];
+
+        // Default Payments List matching Screenshot
+        const paymentRows = [
+          { id: 1, status: "Success", email: "kent99@yahoo.com", party: "Kent Enterprises", amount: 316.00, date: "Today" },
+          { id: 2, status: "Success", email: "abe45@gmail.com", party: "Abe & Sons Ltd", amount: 242.00, date: "Yesterday" },
+          { id: 3, status: "Processing", email: "monserrat44@gmail.com", party: "Monserrat Studio", amount: 837.00, date: "16 Nov 2026" },
+          { id: 4, status: "Failed", email: "carmela@hotmail.com", party: "Carmela Consulting", amount: 721.00, date: "15 Nov 2026" },
+          ...billingHistory.slice(0, 3).map((inv, idx) => ({
+            id: 100 + idx,
+            status: inv.status === "Paid" ? "Success" : "Processing",
+            email: inv.customer.toLowerCase().replace(/[^a-z0-9]/g, "") + "@client.com",
+            party: inv.customer,
+            amount: inv.amount,
+            date: inv.invoiceDate || "18 Nov 2026"
+          }))
+        ];
+
         return (
           <div className="space-y-6">
-            {/* Page Header */}
+            {/* Page Header matching Shadcnblocks Admin Kit */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Scheduled Automations</h1>
-                <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Create, organize, and manage your chats</p>
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Dashboard</h1>
               </div>
-              <button
-                onClick={handleTopPrimaryAction}
-                className="bg-black hover:bg-zinc-800 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-xs flex items-center gap-2 uppercase tracking-wide self-start sm:self-auto transition-all"
-              >
-                <Plus size={14} />
-                <span>+ CREATE SCHEDULED</span>
-              </button>
+              <div className="flex items-center gap-2.5">
+                <button
+                  onClick={() => {
+                    setActiveTab("sales");
+                    setSalesSubTab("invoices");
+                    setIsCreateInvoiceOpen(true);
+                  }}
+                  className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Plus size={14} />
+                  <span>+ CREATE INVOICE</span>
+                </button>
+                <button
+                  onClick={() => alert("Downloading full financial summary report...")}
+                  className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Download size={13} />
+                  <span>Download</span>
+                </button>
+                <button
+                  onClick={() => alert("Date Range: Current Financial Year 2026-2027")}
+                  className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 text-xs font-medium px-3.5 py-2 rounded-lg shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Calendar size={13} />
+                  <span>Pick a date</span>
+                </button>
+              </div>
             </div>
 
-            {/* 4 Metric Cards Row matching Screenshot */}
+            {/* Sub-Navigation Pill Tabs */}
+            <div className="flex items-center gap-2 pb-1">
+              {[
+                { id: "overview", label: "Overview", icon: LayoutGrid },
+                { id: "analytics", label: "Analytics", icon: BarChart3 },
+                { id: "reports", label: "Reports", icon: FileText },
+                { id: "notifications", label: "Notifications", icon: Bell },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveSubTab(tab.id as any);
+                    if (tab.id === "reports") setActiveTab("reports");
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                    activeSubTab === tab.id
+                      ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800 font-semibold shadow-xs"
+                      : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800"
+                  }`}
+                >
+                  <tab.icon size={13} />
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* 4 Metric Cards Row with Exact Sparklines matching reference screenshot */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {renderKpiCard("Active Schedules", "325", "+8.73%", "This week • Ruin AI workflow", Clock)}
-              {renderKpiCard("Runs Today", "1,032", "+96.7%", "This week • Task completed", Sparkles)}
-              {renderKpiCard("Leads Generate", "1,785", "+12.3%", "Last Month • Qualified prospects", Users)}
-              {renderKpiCard("Next Run", "09:00 AM", "Tomorrow", "Tomorrow • LinkedIn monitor", Calendar)}
-            </div>
-
-            {/* Main Section Card matching Screenshot */}
-            <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100/90 dark:border-zinc-800 shadow-xs p-5 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <h2 className="text-sm font-bold text-gray-900 dark:text-white">Active Schedules</h2>
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <Search size={13} className="absolute left-3 top-2.5 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search Schedules"
-                      value={mainSearchQuery}
-                      onChange={(e) => setMainSearchQuery(e.target.value)}
-                      className="bg-white dark:bg-zinc-800 border border-gray-200/90 dark:border-zinc-700 rounded-xl pl-8 pr-3 py-1.5 text-xs text-gray-800 dark:text-zinc-200 placeholder:text-gray-400 w-52 sm:w-60 outline-none shadow-xs focus:border-gray-400 transition-all"
-                    />
+              {/* Card 1: New Subscriptions */}
+              <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 dark:hover:border-zinc-700 transition-all">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                        <Layers size={13} />
+                      </div>
+                      <span className="text-xs font-bold text-slate-800 dark:text-zinc-200">New Subscriptions</span>
+                    </div>
+                    <Info size={13} className="text-slate-400 hover:text-slate-600 cursor-pointer" />
                   </div>
-                  <button className="p-2 border border-gray-200/90 dark:border-zinc-700 rounded-xl text-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-800 shadow-xs transition-colors" title="Filter">
-                    <SlidersHorizontal size={14} />
+                  <div className="flex items-baseline justify-between mt-3">
+                    <div>
+                      <p className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">4,682</p>
+                      <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5">Since last week</p>
+                    </div>
+                    {/* Red / Coral Sparkline matching screenshot */}
+                    <svg className="w-16 h-8 text-rose-500" viewBox="0 0 60 25">
+                      <path d="M 0 16 Q 14 6, 24 18 T 48 8 T 60 12" fill="none" stroke="#f43f5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-3 mt-2 border-t border-slate-100 dark:border-zinc-800 text-[11px]">
+                  <button onClick={() => { setActiveTab("sales"); setSalesSubTab("invoices"); }} className="text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white font-medium flex items-center gap-0.5">
+                    <span>Details</span> &gt;
                   </button>
+                  <span className="text-emerald-600 font-bold flex items-center gap-0.5">↑ 15.54% ↑</span>
                 </div>
               </div>
 
-              {/* Table exactly as in Reference Image */}
+              {/* Card 2: New Orders */}
+              <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 dark:hover:border-zinc-700 transition-all">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-md bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 flex items-center justify-center">
+                        <ShoppingCart size={13} />
+                      </div>
+                      <span className="text-xs font-bold text-slate-800 dark:text-zinc-200">New Orders</span>
+                    </div>
+                    <Info size={13} className="text-slate-400 hover:text-slate-600 cursor-pointer" />
+                  </div>
+                  <div className="flex items-baseline justify-between mt-3">
+                    <div>
+                      <p className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">1,226</p>
+                      <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5">Since last week</p>
+                    </div>
+                    {/* Emerald Green Sparkline matching screenshot */}
+                    <svg className="w-16 h-8 text-emerald-500" viewBox="0 0 60 25">
+                      <path d="M 0 18 Q 12 22, 22 10 T 45 16 T 60 6" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-3 mt-2 border-t border-slate-100 dark:border-zinc-800 text-[11px]">
+                  <button onClick={() => { setActiveTab("sales"); setSalesSubTab("quotes"); }} className="text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white font-medium flex items-center gap-0.5">
+                    <span>Details</span> &gt;
+                  </button>
+                  <span className="text-emerald-600 font-bold flex items-center gap-0.5">↑ 40.21% ↑</span>
+                </div>
+              </div>
+
+              {/* Card 3: Avg Order Revenue */}
+              <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 dark:hover:border-zinc-700 transition-all">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                        <Package size={13} />
+                      </div>
+                      <span className="text-xs font-bold text-slate-800 dark:text-zinc-200">Avg Order Revenue</span>
+                    </div>
+                    <Info size={13} className="text-slate-400 hover:text-slate-600 cursor-pointer" />
+                  </div>
+                  <div className="flex items-baseline justify-between mt-3">
+                    <div>
+                      <p className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">1,080</p>
+                      <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5">Since last week</p>
+                    </div>
+                    {/* Blue Sparkline matching screenshot */}
+                    <svg className="w-16 h-8 text-blue-500" viewBox="0 0 60 25">
+                      <path d="M 0 16 Q 15 8, 26 20 T 48 6 T 60 10" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-3 mt-2 border-t border-slate-100 dark:border-zinc-800 text-[11px]">
+                  <button onClick={() => setActiveTab("payments-tracker")} className="text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white font-medium flex items-center gap-0.5">
+                    <span>Details</span> &gt;
+                  </button>
+                  <span className="text-emerald-600 font-bold flex items-center gap-0.5">↑ 10.8% ↑</span>
+                </div>
+              </div>
+
+              {/* Card 4: Total Revenue (with area line chart matching screenshot) */}
+              <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 dark:hover:border-zinc-700 transition-all">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                        <CreditCard size={13} />
+                      </div>
+                      <span className="text-xs font-bold text-slate-800 dark:text-zinc-200">Total Revenue</span>
+                    </div>
+                    <Info size={13} className="text-slate-400 hover:text-slate-600 cursor-pointer" />
+                  </div>
+                  <div className="mt-2">
+                    <p className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">$15,231.89</p>
+                    <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5 font-medium">+20.1% from last month</p>
+                  </div>
+                  {/* Blue Area Line Chart with Dots matching screenshot */}
+                  <svg className="w-full h-10 mt-1" viewBox="0 0 180 35">
+                    <defs>
+                      <linearGradient id="blueCardGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.25" />
+                        <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
+                      </linearGradient>
+                    </defs>
+                    <path d="M 5 28 Q 40 18, 70 23 T 125 16 T 175 6 L 175 35 L 5 35 Z" fill="url(#blueCardGrad)" />
+                    <path d="M 5 28 Q 40 18, 70 23 T 125 16 T 175 6" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" />
+                    <circle cx="5" cy="28" r="2.5" fill="#3b82f6" />
+                    <circle cx="45" cy="19" r="2.5" fill="#3b82f6" />
+                    <circle cx="70" cy="23" r="2.5" fill="#3b82f6" />
+                    <circle cx="102" cy="19" r="2.5" fill="#3b82f6" />
+                    <circle cx="125" cy="16" r="2.5" fill="#3b82f6" />
+                    <circle cx="152" cy="12" r="2.5" fill="#3b82f6" />
+                    <circle cx="175" cy="6" r="2.5" fill="#3b82f6" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Middle Row: Two Charts matching screenshot */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              {/* Left Chart: Sales Activity - Monthly (65% width) */}
+              <div className="lg:col-span-8 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-5 shadow-xs relative">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h2 className="text-sm font-bold text-slate-900 dark:text-white">Sales Activity - Monthly</h2>
+                    <p className="text-xs text-slate-400 dark:text-zinc-500 mt-0.5">Showing total sales for the last 6 months</p>
+                  </div>
+                </div>
+
+                {/* SVG Dual Smooth Area Chart */}
+                <div className="relative pt-4 pb-2">
+                  <svg className="w-full h-64 overflow-visible" viewBox="0 0 700 200">
+                    <defs>
+                      <linearGradient id="redAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.35" />
+                        <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.0" />
+                      </linearGradient>
+                      <linearGradient id="greenAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.30" />
+                        <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+                      </linearGradient>
+                    </defs>
+
+                    {/* Horizontal Grid Lines & Y-Axis Labels */}
+                    {[
+                      { val: "60K", y: 20 },
+                      { val: "50K", y: 46 },
+                      { val: "40K", y: 73 },
+                      { val: "30K", y: 100 },
+                      { val: "20K", y: 126 },
+                      { val: "10K", y: 153 },
+                      { val: "0", y: 180 },
+                    ].map(grid => (
+                      <g key={grid.val}>
+                        <text x="5" y={grid.y + 4} className="text-[10px] fill-slate-400 dark:fill-zinc-500 font-medium">
+                          {grid.val}
+                        </text>
+                        <line x1="35" y1={grid.y} x2="685" y2={grid.y} stroke="currentColor" className="text-slate-100 dark:text-zinc-800/80" strokeWidth="1" strokeDasharray="3 3" />
+                      </g>
+                    ))}
+
+                    {/* Red Area (Top Curve) */}
+                    <path
+                      d="M 40 105 C 90 75, 120 42, 160 42 C 210 42, 240 55, 280 60 C 330 65, 360 105, 400 102 C 450 98, 480 82, 520 80 C 570 78, 600 70, 640 68 L 640 180 L 40 180 Z"
+                      fill="url(#redAreaGrad)"
+                    />
+                    <path
+                      d="M 40 105 C 90 75, 120 42, 160 42 C 210 42, 240 55, 280 60 C 330 65, 360 105, 400 102 C 450 98, 480 82, 520 80 C 570 78, 600 70, 640 68"
+                      fill="none"
+                      stroke="#f43f5e"
+                      strokeWidth="2.5"
+                    />
+
+                    {/* Green Area (Bottom Curve) */}
+                    <path
+                      d="M 40 150 C 90 145, 120 122, 160 122 C 210 122, 240 135, 280 140 C 330 145, 360 120, 400 118 C 450 116, 480 132, 520 134 C 570 136, 600 126, 640 125 L 640 180 L 40 180 Z"
+                      fill="url(#greenAreaGrad)"
+                    />
+                    <path
+                      d="M 40 150 C 90 145, 120 122, 160 122 C 210 122, 240 135, 280 140 C 330 145, 360 120, 400 118 C 450 116, 480 132, 520 134 C 570 136, 600 126, 640 125"
+                      fill="none"
+                      stroke="#10b981"
+                      strokeWidth="2.5"
+                    />
+
+                    {/* X-Axis Month Labels & Interactive Invisible Hover Zones */}
+                    {salesActivityData.map((d, idx) => (
+                      <g key={d.month} className="cursor-pointer">
+                        <text x={d.x} y="196" textAnchor="middle" className="text-[11px] fill-slate-500 dark:fill-zinc-400 font-medium">
+                          {d.month}
+                        </text>
+                        {/* Interactive Invisible Hover Rect */}
+                        <rect
+                          x={d.x - 45}
+                          y="10"
+                          width="90"
+                          height="180"
+                          fill="transparent"
+                          onMouseEnter={() => setActiveChartHover(idx)}
+                          onMouseLeave={() => setActiveChartHover(null)}
+                        />
+                        {/* Active Dots and Indicator Line if Hovered */}
+                        {activeChartHover === idx && (
+                          <g>
+                            <line x1={d.x} y1="20" x2={d.x} y2="180" stroke="#94a3b8" strokeWidth="1" strokeDasharray="3 3" />
+                            <circle cx={d.x} cy={d.salesY} r="5" fill="#f43f5e" stroke="#ffffff" strokeWidth="2" />
+                            <circle cx={d.x} cy={d.colY} r="5" fill="#10b981" stroke="#ffffff" strokeWidth="2" />
+                          </g>
+                        )}
+                      </g>
+                    ))}
+                  </svg>
+
+                  {/* Floating Tooltip Box */}
+                  {activeChartHover !== null && (
+                    <div
+                      className="absolute bg-slate-900 text-white rounded-lg p-2.5 text-xs shadow-xl pointer-events-none transition-all z-20 border border-slate-700"
+                      style={{
+                        left: `${(salesActivityData[activeChartHover].x / 700) * 85 + 5}%`,
+                        top: "20px"
+                      }}
+                    >
+                      <p className="font-bold text-slate-200">{salesActivityData[activeChartHover].month} Performance</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+                        <span>Sales: <strong>₹{salesActivityData[activeChartHover].sales.toLocaleString()}</strong></span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span>Collections: <strong>₹{salesActivityData[activeChartHover].collections.toLocaleString()}</strong></span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Chart: Subscriptions (Grouped Dual Bar Chart) (35% width) */}
+              <div className="lg:col-span-4 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-5 shadow-xs flex flex-col justify-between">
+                <div>
+                  <h2 className="text-sm font-bold text-slate-900 dark:text-white">Subscriptions</h2>
+                  <div className="mt-1">
+                    <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">+2350</span>
+                    <span className="text-xs text-slate-400 dark:text-zinc-500 font-medium ml-2">+180.1% from last month</span>
+                  </div>
+                </div>
+
+                {/* Grouped Dual Bar Chart */}
+                <div className="pt-6 pb-2">
+                  <div className="h-48 flex items-end justify-between gap-1 sm:gap-2 px-1">
+                    {subscriptionsData.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex-1 flex flex-col items-center gap-1 group cursor-pointer"
+                        onMouseEnter={() => setActiveBarHover(idx)}
+                        onMouseLeave={() => setActiveBarHover(null)}
+                      >
+                        <div className="w-full flex items-end justify-center gap-1 h-36">
+                          {/* Bar 1: Coral / Red */}
+                          <div
+                            className="w-2 sm:w-2.5 bg-rose-400 dark:bg-rose-500 rounded-t-sm transition-all group-hover:brightness-110"
+                            style={{ height: `${item.bar1}%` }}
+                          ></div>
+                          {/* Bar 2: Teal / Emerald */}
+                          <div
+                            className="w-2 sm:w-2.5 bg-emerald-500 dark:bg-emerald-600 rounded-t-sm transition-all group-hover:brightness-110"
+                            style={{ height: `${item.bar2}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">
+                          {item.month}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {activeBarHover !== null && (
+                    <div className="mt-2 text-center text-xs text-slate-600 dark:text-zinc-400 font-medium bg-slate-50 dark:bg-zinc-800 rounded-lg py-1">
+                      {subscriptionsData[activeBarHover].month}: <span className="text-rose-500 font-bold">{subscriptionsData[activeBarHover].bar1} Invoices</span> • <span className="text-emerald-500 font-bold">{subscriptionsData[activeBarHover].bar2} Subscriptions</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Row: FULL WIDTH PAYMENTS TABLE (NO TEAM MEMBERS DIV as explicitly instructed) */}
+            <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-5 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-base font-bold text-slate-900 dark:text-white">Payments</h2>
+                  <p className="text-xs text-slate-400 dark:text-zinc-500 mt-0.5">Manage your payments.</p>
+                </div>
+              </div>
+
+              {/* Sub-toolbar */}
+              <div className="flex items-center justify-between gap-3">
+                <div className="relative">
+                  <Search size={13} className="absolute left-3 top-2.5 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Filter emails..."
+                    value={mainSearchQuery}
+                    onChange={(e) => setMainSearchQuery(e.target.value)}
+                    className="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-800 dark:text-zinc-200 placeholder:text-slate-400 w-60 sm:w-72 outline-none shadow-xs focus:border-slate-400 transition-all"
+                  />
+                </div>
+                <button
+                  onClick={() => alert("Columns customization: Status, Email, Party, Amount, Actions are all visible.")}
+                  className="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 text-xs font-medium px-3 py-1.5 rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>Columns</span>
+                  <ChevronDown size={13} />
+                </button>
+              </div>
+
+              {/* Table exactly as in Reference Screenshot */}
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="text-[11px] font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wider border-b border-gray-100 dark:border-zinc-800">
+                  <thead className="text-[11px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider border-b border-slate-100 dark:border-zinc-800">
                     <tr>
-                      <th className="py-3 px-3">Name :</th>
-                      <th className="py-3 px-3">Next Run :</th>
-                      <th className="py-3 px-3">Last Run :</th>
-                      <th className="py-3 px-3">Status :</th>
-                      <th className="py-3 px-3">Leads :</th>
-                      <th className="py-3 px-3 text-right">Actions :</th>
+                      <th className="py-3 px-3 w-8">
+                        <input type="checkbox" className="rounded text-blue-600 focus:ring-0 cursor-pointer" />
+                      </th>
+                      <th className="py-3 px-3">Status</th>
+                      <th className="py-3 px-3">
+                        <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700 dark:hover:text-white">
+                          <span>Email</span>
+                          <span className="text-[10px]">⇅</span>
+                        </div>
+                      </th>
+                      <th className="py-3 px-3 text-right">Amount</th>
+                      <th className="py-3 px-3 text-right"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50 dark:divide-zinc-800/60 text-gray-700 dark:text-zinc-300">
-                    {DEFAULT_SCHEDULES.filter(s => s.name.toLowerCase().includes(mainSearchQuery.toLowerCase())).map((item) => (
-                      <tr key={item.id} className="hover:bg-gray-50/60 dark:hover:bg-zinc-800/40 transition-colors">
-                        <td className="py-3.5 px-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-7 h-7 rounded-lg bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-gray-600 dark:text-zinc-300 flex-shrink-0">
-                              <item.icon size={14} />
-                            </div>
-                            <div>
-                              <p className="font-bold text-gray-900 dark:text-white text-xs">{item.name}</p>
-                              <p className="text-[11px] text-gray-400 dark:text-zinc-500">{item.sub}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-3.5 px-3 text-xs text-gray-600 dark:text-zinc-400 font-medium">{item.nextRun}</td>
-                        <td className="py-3.5 px-3 text-xs text-gray-600 dark:text-zinc-400 font-medium">{item.lastRun}</td>
-                        <td className="py-3.5 px-3">{renderStatusBadge(item.status)}</td>
-                        <td className="py-3.5 px-3 font-semibold text-gray-800 dark:text-zinc-200">{item.leads}</td>
-                        <td className="py-3.5 px-3 text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <button onClick={() => alert(`Opening details for ${item.name}`)} className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors" title="Edit">
-                              <Pencil size={13} />
+                  <tbody className="divide-y divide-slate-50 dark:divide-zinc-800/60 text-slate-700 dark:text-zinc-300">
+                    {paymentRows
+                      .filter(p => (p.email + p.party + p.status).toLowerCase().includes(mainSearchQuery.toLowerCase()))
+                      .map((row) => (
+                        <tr key={row.id} className="hover:bg-slate-50/70 dark:hover:bg-zinc-800/40 transition-colors">
+                          <td className="py-3.5 px-3">
+                            <input type="checkbox" className="rounded text-blue-600 focus:ring-0 cursor-pointer" />
+                          </td>
+                          <td className="py-3.5 px-3">
+                            <span
+                              className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                row.status === "Success"
+                                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200/60"
+                                  : row.status === "Processing"
+                                  ? "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200/60"
+                                  : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200/60"
+                              }`}
+                            >
+                              {row.status}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-3 font-medium text-slate-800 dark:text-zinc-200">
+                            {row.email}
+                          </td>
+                          <td className="py-3.5 px-3 font-bold text-slate-900 dark:text-white text-right">
+                            ${row.amount.toFixed(2)}
+                          </td>
+                          <td className="py-3.5 px-3 text-right">
+                            <button
+                              onClick={() => {
+                                const found = billingHistory.find(b => b.amount === row.amount) || billingHistory[0];
+                                if (found) {
+                                  setPreviewInvoice(found);
+                                  setIsInvoicePreviewOpen(true);
+                                } else {
+                                  alert(`Viewing payment details for ${row.email} - $${row.amount}`);
+                                }
+                              }}
+                              className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
+                              title="More options"
+                            >
+                              <MoreHorizontal size={14} />
                             </button>
-                            <button onClick={() => alert(`Duplicated schedule ${item.name}`)} className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors" title="Copy">
-                              <Copy size={13} />
-                            </button>
-                            <button onClick={() => alert(`Action removed: ${item.name}`)} className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors" title="Delete">
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
 
-              {/* Pagination Footer */}
-              <div className="border-t border-gray-100 dark:border-zinc-800 pt-3 flex items-center justify-between text-[11px] text-gray-400 dark:text-zinc-500 font-medium tracking-wide">
-                <span>SHOVING 2 OF 120 CHATS</span>
+              {/* Table Footer */}
+              <div className="border-t border-slate-100 dark:border-zinc-800 pt-3 flex items-center justify-between text-xs text-slate-400 dark:text-zinc-500 font-medium">
+                <span>0 of {paymentRows.length} row(s) selected.</span>
                 <div className="flex items-center gap-2">
-                  <button className="p-1 hover:text-gray-700 dark:hover:text-zinc-300"><ChevronLeft size={14} /></button>
-                  <span className="text-gray-700 dark:text-zinc-300 font-bold">2/120</span>
-                  <button className="p-1 hover:text-gray-700 dark:hover:text-zinc-300"><ChevronRight size={14} /></button>
+                  <button className="px-3 py-1 border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-600 dark:text-zinc-300 hover:bg-slate-50 text-xs">Previous</button>
+                  <button className="px-3 py-1 border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-600 dark:text-zinc-300 hover:bg-slate-50 text-xs">Next</button>
                 </div>
               </div>
             </div>
           </div>
         );
+      }
 
       case "sales":
       case "billing-software":
@@ -1836,9 +2256,9 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
 
             {/* 4 Metric Cards Row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {renderKpiCard("Active Invoices", billingHistory.length || 325, "+8.73%", "This week • Realized billing", CreditCard)}
+              {renderKpiCard("Active Invoices", billingHistory.length, "FY 2026-27", "Realized sales billing", CreditCard)}
               {renderKpiCard("Gross Billed", `₹${totalSales.toFixed(2)}`, "+96.7%", "Tax Total: ₹" + totalGstOutput.toFixed(2), Sparkles)}
-              {renderKpiCard("Active Clients", clients.length || 1785, "+12.3%", "Client master directory", Users)}
+              {renderKpiCard("Active Clients", clients.length, "Verified B2B", "Client master directory", Users)}
               {renderKpiCard("Next Filing", "20th Nov", "Tomorrow", "GSTR-1 / GSTR-3B monthly", Calendar)}
             </div>
 
@@ -2121,7 +2541,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
               {renderKpiCard("Total Purchases", `₹${totalPurchases.toFixed(2)}`, "+8.73%", `${purchases.length} total vendor bills`, ShoppingCart)}
               {renderKpiCard("GST Input Tax Credit", `₹${totalGstItc.toFixed(2)}`, "+96.7%", "Eligible to offset outward tax liability", Sparkles)}
               {renderKpiCard("Pending Dues", `₹${purchases.filter(p=>p.status==="Pending").reduce((s,p)=>s+(p.amount||0),0).toFixed(2)}`, "+12.3%", "Bills pending clearance", Clock)}
-              {renderKpiCard("Active Vendors", "3", "Monthly ITC", "Realized Input Tax", Building)}
+              {renderKpiCard("Active Vendors", new Set(purchases.map(p => p.vendor)).size || 1, "Monthly ITC", "Realized Input Tax", Building)}
             </div>
 
             <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100/90 dark:border-zinc-800 shadow-xs p-5 space-y-4">
@@ -2768,59 +3188,31 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   // SIDEBAR NAVIGATION (STRICTLY MATCHING USER'S ATTACHED IMAGE)
   // ─────────────────────────────────────────────────────────────
   const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-[#0c0c0e] text-zinc-300 border-r border-zinc-800/80 transition-colors select-none font-sans">
-      {/* Brand Header */}
-      <div className="p-4 pb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center text-white">
-            <Sparkles size={14} className="text-white" />
+    <div className="flex flex-col h-full bg-white dark:bg-zinc-950 text-slate-700 dark:text-zinc-200 border-r border-slate-200/80 dark:border-zinc-800 transition-colors select-none font-sans">
+      {/* Brand Header matching Shadcnblocks Admin Kit */}
+      <div className="p-4 pb-3 flex items-center justify-between border-b border-slate-100 dark:border-zinc-800/80">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-xs">
+            <span>@</span>
           </div>
-          <span className="text-[15px] font-bold text-white tracking-tight">TrioTax</span>
+          <div>
+            <span className="text-xs font-bold text-slate-900 dark:text-white tracking-tight block">TrioTax - Admin Kit</span>
+            <span className="text-[10px] text-slate-400 dark:text-zinc-500 block -mt-0.5">Built by shadcn/ui</span>
+          </div>
         </div>
         <button
           onClick={() => setIsMobileMenuOpen(false)}
-          className="text-zinc-500 hover:text-zinc-300 p-1 rounded-md transition-colors"
+          className="md:hidden text-slate-400 hover:text-slate-600 p-1 rounded-md transition-colors"
           title="Toggle Sidebar"
         >
           <PanelLeftClose size={16} />
         </button>
       </div>
 
-      {/* Workspace / Account Pill */}
-      <div className="px-3 pb-2">
-        <button
-          onClick={() => setIsCompanyProfileOpen(true)}
-          className="w-full bg-[#16161a] hover:bg-[#1d1d22] border border-zinc-800/90 text-zinc-200 rounded-xl px-3 py-2 text-xs font-medium flex items-center justify-between transition-all"
-        >
-          <div className="flex items-center gap-2 truncate">
-            <User size={13} className="text-zinc-400 flex-shrink-0" />
-            <span className="truncate uppercase tracking-wider text-[11px] font-semibold">
-              {companyProfile.tradeName || companyProfile.legalName || "PERSONAL"}
-            </span>
-          </div>
-          <ChevronDown size={13} className="text-zinc-400 flex-shrink-0" />
-        </button>
-      </div>
-
-      {/* Quick Action Button */}
-      <div className="px-3 pb-3">
-        <button
-          onClick={() => {
-            setActiveTab("sales");
-            setSalesSubTab("invoices");
-            setIsCreateInvoiceOpen(true);
-          }}
-          className="w-full bg-[#18181d] hover:bg-[#202026] text-zinc-300 hover:text-white border border-zinc-800/90 rounded-xl py-2 px-3 text-xs font-semibold flex items-center gap-2 transition-all uppercase tracking-wide text-[11px]"
-        >
-          <Plus size={13} className="text-zinc-400" />
-          <span>New Invoice</span>
-        </button>
-      </div>
-
       {/* Navigation Group Header */}
-      <div className="px-4 pt-1 pb-1">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-          Accounting & ERP
+      <div className="px-4 pt-3 pb-1">
+        <span className="text-[11px] font-semibold text-slate-400 dark:text-zinc-500">
+          General
         </span>
       </div>
 
@@ -2836,68 +3228,84 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                 setIsMobileMenuOpen(false);
                 window.history.pushState(null, "", `/${username}-user/${tab.id}`);
               }}
-              className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-all flex items-center justify-between uppercase tracking-wider ${
+              className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-all flex items-center justify-between font-medium cursor-pointer ${
                 isActive
-                  ? "bg-[#1f1f24] text-white border border-zinc-700/80 font-bold shadow-xs"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-[#141418] font-medium"
+                  ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 font-semibold shadow-xs"
+                  : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-zinc-900"
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <tab.icon size={15} className={isActive ? "text-white" : "text-zinc-400"} />
-                <span className="text-[11px]">{tab.label}</span>
+                <tab.icon size={15} className={isActive ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-zinc-500"} />
+                <span>{tab.label}</span>
               </div>
               {tab.id === "compliance-tracker" && (
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
               )}
             </button>
           );
         })}
-      </div>
 
-      {/* Bottom Section */}
-      <div className="p-3 pt-2 border-t border-zinc-800/80 space-y-2">
+        {/* Section: Pages */}
+        <div className="px-1 pt-3 pb-1">
+          <span className="text-[11px] font-semibold text-slate-400 dark:text-zinc-500">
+            Pages
+          </span>
+        </div>
         <button
           onClick={() => setIsCompanyProfileOpen(true)}
-          className="w-full text-left px-3 py-1.5 rounded-lg text-xs text-zinc-400 hover:text-white hover:bg-[#141418] flex items-center gap-2 transition-colors uppercase tracking-wider text-[11px]"
+          className="w-full text-left px-3 py-2 rounded-lg text-xs text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-zinc-900 flex items-center justify-between transition-colors font-medium cursor-pointer"
         >
-          <Settings size={13} />
-          <span>Settings</span>
+          <div className="flex items-center gap-2.5">
+            <Building2 size={15} className="text-slate-400" />
+            <span>Company Profile</span>
+          </div>
+          <ChevronRight size={13} className="text-slate-400" />
         </button>
 
+        {/* Section: Other */}
+        <div className="px-1 pt-3 pb-1">
+          <span className="text-[11px] font-semibold text-slate-400 dark:text-zinc-500">
+            Other
+          </span>
+        </div>
         <button
-          onClick={() => alert("TrioTax GST Support: support@triotax.com | Phone: 1800-TRIOTAX")}
-          className="w-full text-left px-3 py-1.5 rounded-lg text-xs text-zinc-400 hover:text-white hover:bg-[#141418] flex items-center gap-2 transition-colors uppercase tracking-wider text-[11px]"
+          onClick={() => setIsCompanyProfileOpen(true)}
+          className="w-full text-left px-3 py-2 rounded-lg text-xs text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-zinc-900 flex items-center justify-between transition-colors font-medium cursor-pointer"
         >
-          <HelpCircle size={13} />
-          <span>Help & Support</span>
+          <div className="flex items-center gap-2.5">
+            <Settings size={15} className="text-slate-400" />
+            <span>Settings</span>
+          </div>
+          <ChevronRight size={13} className="text-slate-400" />
         </button>
+      </div>
 
-        {/* Progress Card Widget */}
-        <div className="bg-[#121215] border border-zinc-800/80 rounded-xl p-3 space-y-2">
-          <div className="flex items-center justify-between text-[11px]">
-            <span className="text-zinc-400 font-medium">Get Started</span>
-            <span className="text-zinc-500 font-bold">4/5</span>
+      {/* Bottom User Profile Section matching screenshot */}
+      <div className="p-3 border-t border-slate-100 dark:border-zinc-800 space-y-2">
+        <div
+          onClick={() => setIsCompanyProfileOpen(true)}
+          className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-100/80 dark:hover:bg-zinc-900 transition-colors cursor-pointer"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center uppercase shadow-xs">
+              {username.charAt(0)}
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-slate-800 dark:text-zinc-200 truncate">{username}</p>
+              <p className="text-[10px] text-slate-400 dark:text-zinc-500 truncate">{username}@triotax.in</p>
+            </div>
           </div>
-          <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
-            <div className="h-full bg-white rounded-full w-4/5"></div>
-          </div>
-          <button
-            onClick={() => setIsCompanyProfileOpen(true)}
-            className="w-full bg-[#1a1a1f] hover:bg-[#222228] border border-zinc-800 text-zinc-300 hover:text-white rounded-lg py-1.5 px-2 text-[10px] font-semibold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all mt-1"
-          >
-            <Gift size={12} className="text-zinc-400" />
-            <span>FREE PLAN</span>
-          </button>
+          <ChevronUp size={14} className="text-slate-400" />
         </div>
 
-        {/* Logout */}
-        <div className="pt-1 flex items-center justify-between px-1">
+        <div className="flex items-center justify-between px-2 pt-1 border-t border-slate-100 dark:border-zinc-800/80">
           <ThemeToggle />
           <button
             onClick={onLogout}
-            className="text-[11px] text-zinc-500 hover:text-red-400 flex items-center gap-1 font-medium transition-colors"
+            className="text-xs text-slate-500 hover:text-rose-600 flex items-center gap-1.5 transition-colors font-medium cursor-pointer"
           >
-            <LogOut size={12} /> Logout
+            <LogOut size={13} />
+            <span>Logout</span>
           </button>
         </div>
       </div>
@@ -2905,7 +3313,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   );
 
   return (
-    <div className="flex h-screen bg-[#f8f9fb] dark:bg-[#0c0c0e] text-gray-900 dark:text-zinc-100 transition-colors duration-200 overflow-hidden font-sans">
+    <div className="flex h-screen bg-slate-50/70 dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 transition-colors duration-200 overflow-hidden font-sans">
       {/* Desktop Sidebar */}
       <aside className="hidden md:block w-60 h-full flex-shrink-0">
         <SidebarContent />
@@ -2936,10 +3344,10 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#f8f9fb] dark:bg-[#0c0c0e]">
-        {/* Top Header Bar matching reference image */}
-        <header className="h-16 px-6 sm:px-8 bg-[#f8f9fb] dark:bg-[#0c0c0e] flex items-center justify-between flex-shrink-0 border-b border-gray-100 dark:border-zinc-800/80">
-          <div className="flex items-center gap-3">
+      <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/70 dark:bg-zinc-950">
+        {/* Top Header Bar matching reference image & user quick access */}
+        <header className="h-14 px-4 sm:px-8 bg-white dark:bg-zinc-950 flex items-center justify-between flex-shrink-0 border-b border-gray-100 dark:border-zinc-800/80">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg"
@@ -2947,36 +3355,331 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
               <Menu size={20} />
             </button>
 
-            {/* Pill Search Bar */}
-            <div className="relative w-64 sm:w-80">
+            {/* History / Recent Activity Icon matching Reference Image */}
+            <button
+              onClick={() => alert("Recent Activity: System synced with GST Portal & Database.")}
+              className="text-gray-400 hover:text-gray-700 dark:text-zinc-400 dark:hover:text-zinc-200 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors hidden sm:flex items-center justify-center"
+              title="Recent Activity / History"
+            >
+              <History size={16} />
+            </button>
+
+            {/* Search Bar with Dropdown indicator matching Reference Image */}
+            <div className="relative w-56 sm:w-80 md:w-96">
               <div className="flex items-center justify-between w-full bg-white dark:bg-zinc-900 border border-gray-200/90 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs shadow-xs focus-within:border-gray-400 dark:focus-within:border-zinc-600 transition-all">
-                <div className="flex items-center gap-2 flex-1">
-                  <Search size={14} className="text-gray-400" />
+                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                  <Search size={14} className="text-gray-400 flex-shrink-0" />
+                  <ChevronDown size={11} className="text-gray-400 flex-shrink-0 -ml-0.5" />
                   <input
                     type="text"
                     value={mainSearchQuery}
                     onChange={(e) => setMainSearchQuery(e.target.value)}
-                    placeholder="Search leads, campaigns, contacts..."
-                    className="w-full bg-transparent outline-none text-xs text-gray-800 dark:text-zinc-200 placeholder:text-gray-400 dark:placeholder:text-zinc-500"
+                    placeholder={
+                      activeTab === "sales"
+                        ? "Search in Invoices, Quotes, Clients ( / )..."
+                        : activeTab === "payments-tracker"
+                        ? "Search in Payments Received ( / )..."
+                        : "Search in ERP System ( / )..."
+                    }
+                    className="w-full bg-transparent outline-none text-xs text-gray-800 dark:text-zinc-200 placeholder:text-gray-400 dark:placeholder:text-zinc-500 truncate"
                   />
                 </div>
-                <kbd className="text-[10px] font-mono bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded px-1.5 py-0.5 text-gray-400">⌘K</kbd>
+                <kbd className="hidden sm:inline-block text-[10px] font-mono bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded px-1.5 py-0.5 text-gray-400">⌘K</kbd>
               </div>
             </div>
           </div>
 
-          {/* Right Icons & Profile Controls */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            <ThemeToggle />
+          {/* Right Header Navigation & Actions matching Reference Image */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Organization Identifier Pill / Dropdown */}
+            <div className="hidden lg:flex items-center gap-2 text-xs text-gray-500 dark:text-zinc-400">
+              <span>This is a <strong className="text-gray-800 dark:text-zinc-200 font-semibold">Test</strong> organization.</span>
+              <button
+                onClick={() => setIsCompanyProfileOpen(true)}
+                className="flex items-center gap-1 font-semibold text-gray-800 dark:text-zinc-200 hover:text-emerald-600 transition-colors ml-1"
+                title="Switch Organization / Profile"
+              >
+                <span>{companyProfile.tradeName || companyProfile.legalName || "Demo Org"}</span>
+                <ChevronDown size={13} className="text-gray-500" />
+              </button>
+            </div>
 
-            <button
-              onClick={() => setActiveTab("compliance-tracker")}
-              className="p-2 text-gray-400 hover:text-gray-600 dark:text-zinc-400 dark:hover:text-zinc-200 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-              title="Deadlines & Calendar"
-            >
-              <Calendar size={16} />
-            </button>
+            <div className="hidden lg:block h-4 w-px bg-gray-200 dark:bg-zinc-700 mx-1"></div>
 
+            {/* THE GREEN PLUS QUICK ACCESS BUTTON AND DROPDOWN */}
+            <div className="relative" ref={quickAccessRef}>
+              <button
+                onClick={() => setIsQuickAccessOpen(!isQuickAccessOpen)}
+                className="w-8 h-8 rounded-lg bg-[#10b981] hover:bg-[#059669] flex items-center justify-center text-white shadow-xs transition-all active:scale-95 cursor-pointer ring-2 ring-emerald-500/20"
+                title="Quick Create & All Options"
+              >
+                <Plus size={18} strokeWidth={2.5} />
+              </button>
+
+              {/* Quick Access Flyout Dropdown */}
+              <AnimatePresence>
+                {isQuickAccessOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-2 w-[340px] sm:w-[580px] md:w-[680px] bg-white dark:bg-zinc-900 border border-gray-200/90 dark:border-zinc-800 rounded-2xl shadow-2xl p-5 sm:p-6 z-50 text-left select-none"
+                  >
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
+                      {/* Column 1: GENERAL */}
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 pb-2 border-b border-gray-100 dark:border-zinc-800">
+                          <LayoutGrid size={15} className="text-gray-500 dark:text-zinc-400" />
+                          <span className="text-[11px] font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                            GENERAL
+                          </span>
+                        </div>
+                        <div className="space-y-1">
+                          <button
+                            onClick={() => {
+                              setIsQuickAccessOpen(false);
+                              setActiveTab("payroll");
+                              setIsAddEmpOpen(true);
+                            }}
+                            className="group w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-all text-left"
+                          >
+                            <div className="w-4 h-4 rounded-full bg-gray-300/80 dark:bg-zinc-700 flex items-center justify-center text-white text-[10px] font-bold group-hover:bg-emerald-500 transition-colors flex-shrink-0">
+                              <Plus size={10} strokeWidth={3} />
+                            </div>
+                            <span className="group-hover:translate-x-0.5 transition-transform">Add Users</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setIsQuickAccessOpen(false);
+                              setActiveTab("sales");
+                              setSalesSubTab("items");
+                              setIsAddItemOpen(true);
+                            }}
+                            className="group w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-all text-left"
+                          >
+                            <div className="w-4 h-4 rounded-full bg-gray-300/80 dark:bg-zinc-700 flex items-center justify-center text-white text-[10px] font-bold group-hover:bg-emerald-500 transition-colors flex-shrink-0">
+                              <Plus size={10} strokeWidth={3} />
+                            </div>
+                            <span className="group-hover:translate-x-0.5 transition-transform">Item</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setIsQuickAccessOpen(false);
+                              setActiveTab("payroll");
+                            }}
+                            className="group w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-all text-left"
+                          >
+                            <div className="w-4 h-4 rounded-full bg-gray-300/80 dark:bg-zinc-700 flex items-center justify-center text-white text-[10px] font-bold group-hover:bg-emerald-500 transition-colors flex-shrink-0">
+                              <Plus size={10} strokeWidth={3} />
+                            </div>
+                            <span className="group-hover:translate-x-0.5 transition-transform">Log Time</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setIsQuickAccessOpen(false);
+                              setActiveTab("compliance-tracker");
+                            }}
+                            className="group w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-all text-left"
+                          >
+                            <div className="w-4 h-4 rounded-full bg-gray-300/80 dark:bg-zinc-700 flex items-center justify-center text-white text-[10px] font-bold group-hover:bg-emerald-500 transition-colors flex-shrink-0">
+                              <Plus size={10} strokeWidth={3} />
+                            </div>
+                            <span className="group-hover:translate-x-0.5 transition-transform">Weekly Log</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Column 2: SALES */}
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 pb-2 border-b border-gray-100 dark:border-zinc-800">
+                          <ShoppingCart size={15} className="text-gray-500 dark:text-zinc-400" />
+                          <span className="text-[11px] font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                            SALES
+                          </span>
+                        </div>
+                        <div className="space-y-1">
+                          <button
+                            onClick={() => {
+                              setIsQuickAccessOpen(false);
+                              setActiveTab("sales");
+                              setSalesSubTab("clients");
+                              setIsAddClientOpen(true);
+                            }}
+                            className="group w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-all text-left"
+                          >
+                            <div className="w-4 h-4 rounded-full bg-gray-300/80 dark:bg-zinc-700 flex items-center justify-center text-white text-[10px] font-bold group-hover:bg-emerald-500 transition-colors flex-shrink-0">
+                              <Plus size={10} strokeWidth={3} />
+                            </div>
+                            <span className="group-hover:translate-x-0.5 transition-transform">Customer</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setIsQuickAccessOpen(false);
+                              setActiveTab("sales");
+                              setSalesSubTab("quotes");
+                              setIsCreateQuoteOpen(true);
+                            }}
+                            className="group w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-all text-left"
+                          >
+                            <div className="w-4 h-4 rounded-full bg-gray-300/80 dark:bg-zinc-700 flex items-center justify-center text-white text-[10px] font-bold group-hover:bg-emerald-500 transition-colors flex-shrink-0">
+                              <Plus size={10} strokeWidth={3} />
+                            </div>
+                            <span className="group-hover:translate-x-0.5 transition-transform">Quotes</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setIsQuickAccessOpen(false);
+                              setActiveTab("sales");
+                              setSalesSubTab("invoices");
+                              setIsCreateInvoiceOpen(true);
+                            }}
+                            className="group w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-all text-left"
+                          >
+                            <div className="w-4 h-4 rounded-full bg-gray-300/80 dark:bg-zinc-700 flex items-center justify-center text-white text-[10px] font-bold group-hover:bg-emerald-500 transition-colors flex-shrink-0">
+                              <Plus size={10} strokeWidth={3} />
+                            </div>
+                            <span className="group-hover:translate-x-0.5 transition-transform">Delivery Challan</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setIsQuickAccessOpen(false);
+                              setActiveTab("sales");
+                              setSalesSubTab("invoices");
+                              setIsCreateInvoiceOpen(true);
+                            }}
+                            className="group w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-all text-left"
+                          >
+                            <div className="w-4 h-4 rounded-full bg-gray-300/80 dark:bg-zinc-700 flex items-center justify-center text-white text-[10px] font-bold group-hover:bg-emerald-500 transition-colors flex-shrink-0">
+                              <Plus size={10} strokeWidth={3} />
+                            </div>
+                            <span className="group-hover:translate-x-0.5 transition-transform">Invoices</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setIsQuickAccessOpen(false);
+                              setActiveTab("sales");
+                              setSalesSubTab("invoices");
+                              setIsCreateInvoiceOpen(true);
+                            }}
+                            className="group w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-all text-left"
+                          >
+                            <div className="w-4 h-4 rounded-full bg-gray-300/80 dark:bg-zinc-700 flex items-center justify-center text-white text-[10px] font-bold group-hover:bg-emerald-500 transition-colors flex-shrink-0">
+                              <Plus size={10} strokeWidth={3} />
+                            </div>
+                            <span className="group-hover:translate-x-0.5 transition-transform">Recurring Invoice</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setIsQuickAccessOpen(false);
+                              setActiveTab("payments-tracker");
+                              setIsAddPaymentOpen(true);
+                            }}
+                            className="group w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-all text-left"
+                          >
+                            <div className="w-4 h-4 rounded-full bg-gray-300/80 dark:bg-zinc-700 flex items-center justify-center text-white text-[10px] font-bold group-hover:bg-emerald-500 transition-colors flex-shrink-0">
+                              <Plus size={10} strokeWidth={3} />
+                            </div>
+                            <span className="group-hover:translate-x-0.5 transition-transform">Customer Payment</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setIsQuickAccessOpen(false);
+                              setActiveTab("sales");
+                              setSalesSubTab("notes");
+                              setIsAddNoteOpen(true);
+                            }}
+                            className="group w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-all text-left"
+                          >
+                            <div className="w-4 h-4 rounded-full bg-gray-300/80 dark:bg-zinc-700 flex items-center justify-center text-white text-[10px] font-bold group-hover:bg-emerald-500 transition-colors flex-shrink-0">
+                              <Plus size={10} strokeWidth={3} />
+                            </div>
+                            <span className="group-hover:translate-x-0.5 transition-transform">Credit Notes</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Column 3: PURCHASES */}
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 pb-2 border-b border-gray-100 dark:border-zinc-800">
+                          <ShoppingBag size={15} className="text-gray-500 dark:text-zinc-400" />
+                          <span className="text-[11px] font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                            PURCHASES
+                          </span>
+                        </div>
+                        <div className="space-y-1">
+                          <button
+                            onClick={() => {
+                              setIsQuickAccessOpen(false);
+                              setActiveTab("expenses");
+                              setIsAddExpenseOpen(true);
+                            }}
+                            className="group w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-all text-left"
+                          >
+                            <div className="w-4 h-4 rounded-full bg-gray-300/80 dark:bg-zinc-700 flex items-center justify-center text-white text-[10px] font-bold group-hover:bg-emerald-500 transition-colors flex-shrink-0">
+                              <Plus size={10} strokeWidth={3} />
+                            </div>
+                            <span className="group-hover:translate-x-0.5 transition-transform">Expenses</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setIsQuickAccessOpen(false);
+                              setActiveTab("purchases");
+                              setIsAddPurchaseOpen(true);
+                            }}
+                            className="group w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-all text-left"
+                          >
+                            <div className="w-4 h-4 rounded-full bg-gray-300/80 dark:bg-zinc-700 flex items-center justify-center text-white text-[10px] font-bold group-hover:bg-emerald-500 transition-colors flex-shrink-0">
+                              <Plus size={10} strokeWidth={3} />
+                            </div>
+                            <span className="group-hover:translate-x-0.5 transition-transform">Purchase Bills</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setIsQuickAccessOpen(false);
+                              setActiveTab("documents");
+                              setIsAddDocOpen(true);
+                            }}
+                            className="group w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-all text-left"
+                          >
+                            <div className="w-4 h-4 rounded-full bg-gray-300/80 dark:bg-zinc-700 flex items-center justify-center text-white text-[10px] font-bold group-hover:bg-emerald-500 transition-colors flex-shrink-0">
+                              <Plus size={10} strokeWidth={3} />
+                            </div>
+                            <span className="group-hover:translate-x-0.5 transition-transform">Upload Documents</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setIsQuickAccessOpen(false);
+                              setActiveTab("compliance-tracker");
+                            }}
+                            className="group w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-all text-left"
+                          >
+                            <div className="w-4 h-4 rounded-full bg-gray-300/80 dark:bg-zinc-700 flex items-center justify-center text-white text-[10px] font-bold group-hover:bg-emerald-500 transition-colors flex-shrink-0">
+                              <Plus size={10} strokeWidth={3} />
+                            </div>
+                            <span className="group-hover:translate-x-0.5 transition-transform">Compliance Task</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Notification Bell */}
             <button
               onClick={() => alert("All statutory compliances and automated schedules are up to date.")}
               className="p-2 text-gray-400 hover:text-gray-600 dark:text-zinc-400 dark:hover:text-zinc-200 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors relative"
@@ -2986,12 +3689,13 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
             </button>
 
+            {/* Settings Gear */}
             <button
               onClick={() => setIsCompanyProfileOpen(true)}
-              className="hidden sm:flex px-3 py-1.5 bg-white dark:bg-zinc-900 border border-gray-200/90 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 text-xs font-semibold text-gray-800 dark:text-zinc-200 rounded-xl items-center gap-1.5 shadow-xs transition-all"
+              className="p-2 text-gray-400 hover:text-gray-600 dark:text-zinc-400 dark:hover:text-zinc-200 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+              title="Settings & Company Profile"
             >
-              <Gift size={13} className="text-gray-700 dark:text-zinc-300" />
-              <span>FREE PLAN</span>
+              <Settings size={16} />
             </button>
 
             {/* Profile Avatar */}
@@ -3002,6 +3706,17 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
             >
               {username.charAt(0)}
             </div>
+
+            {/* Grid Launcher Icon */}
+            <button
+              onClick={() => setActiveTab("reports")}
+              className="p-2 text-gray-400 hover:text-gray-600 dark:text-zinc-400 dark:hover:text-zinc-200 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors hidden sm:block"
+              title="Overview & Reports"
+            >
+              <LayoutGrid size={16} />
+            </button>
+
+            <ThemeToggle />
           </div>
         </header>
 
