@@ -470,7 +470,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const [invoiceTermsText, setInvoiceTermsText] = useState(
     "1. Payment is strictly due according to agreed credit terms.\n2. In case of delayed settlement, interest @18% p.a. may apply."
   );
-  const [quoteClientId, setQuoteClientId] = useState<number>(1);
   const [quoteValidUntil, setQuoteValidUntil] = useState<string>("");
   const [quoteNotes, setQuoteNotes] = useState<string>("");
   const [clientName, setClientName] = useState<string>("");
@@ -480,9 +479,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const [itemHsn, setItemHsn] = useState<string>("");
   const [itemPrice, setItemPrice] = useState<number | "">("");
   const [itemGst, setItemGst] = useState<number>(18);
-  const [noteType, setNoteType] = useState<"Credit Note" | "Debit Note">("Credit Note");
   const [noteInvoiceId, setNoteInvoiceId] = useState<number>(1);
-  const [noteAmount, setNoteAmount] = useState<number | "">("");
   const invoicePdfRef = useRef<HTMLDivElement>(null);
 
   // --- Credit & Debit Notes State ---
