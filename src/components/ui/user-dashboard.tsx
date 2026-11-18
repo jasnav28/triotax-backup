@@ -4711,7 +4711,6 @@ case "sales":
       }`}>
         {isSidebarCollapsed ? (
           <div className="flex flex-col items-center gap-2 w-full">
-            <img src="/Artboard 3.png" alt="TrioTax" className="h-7 w-auto object-contain flex-shrink-0" />
             <button
               onClick={() => setIsSidebarCollapsed(false)}
               className="p-1.5 text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
@@ -4719,19 +4718,20 @@ case "sales":
             >
               <Menu size={18} />
             </button>
+            <img src="/Artboard 3.png" alt="TrioTax" className="h-6 max-w-full object-contain flex-shrink-0" />
           </div>
         ) : (
           <>
             <div className="flex items-center gap-2">
-              <img src="/Artboard 3.png" alt="TrioTax" className="h-7 w-auto object-contain flex-shrink-0" />
-              {/* 3-lines hamburger menu button right beside the logo */}
+              {/* 3-lines hamburger menu button towards left side of the logo */}
               <button
                 onClick={() => setIsSidebarCollapsed(true)}
-                className="p-1.5 text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer ml-1"
+                className="p-1.5 text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer -ml-1"
                 title="Collapse sidebar"
               >
                 <Menu size={18} />
               </button>
+              <img src="/Artboard 3.png" alt="TrioTax" className="h-7 w-auto object-contain flex-shrink-0" />
             </div>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
