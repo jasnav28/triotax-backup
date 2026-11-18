@@ -14,6 +14,7 @@ import { Chatbot } from "@/app/components/ui/chatbot";
 import TravelConnectSignIn from "@/components/ui/travel-connect-signin-1";
 import AdminPage from "@/components/ui/admin-page";
 import UserDashboard from "@/components/ui/user-dashboard";
+import StaffLoginPage from "@/components/ui/staff-login";
 import { NetworkIndicator } from "@/components/ui/network-indicator";
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
@@ -402,7 +403,7 @@ const TEAM = [
 
 // ─── TYPES & HOOKS ────────────────────────────────────────────────────────────
 
-type Page = "home" | "about" | "services" | "service-detail" | "pricing" | "industries" | "blog" | "contact" | "faq" | "career" | "login" | "admin" | "user";
+type Page = "home" | "about" | "services" | "service-detail" | "pricing" | "industries" | "blog" | "contact" | "faq" | "career" | "login" | "admin" | "user" | "staff";
 
 function useCounter(target: number, active: boolean): number {
   const [count, setCount] = useState(0);
@@ -7080,6 +7081,7 @@ export default function App() {
           return "user";
         }
         if (path === "login") return "login";
+        if (path === "staff") return "staff";
       }
     } catch {}
     return "home";
@@ -7206,7 +7208,7 @@ export default function App() {
   useEffect(() => {
     const handleUrlChange = () => {
       const path = window.location.pathname.replace(/^\/|\/$/g, "");
-      const validPages = ["home", "about", "services", "service-detail", "pricing", "industries", "blog", "contact", "faq", "career", "login", "admin", "user"];
+      const validPages = ["home", "about", "services", "service-detail", "pricing", "industries", "blog", "contact", "faq", "career", "login", "admin", "user", "staff"];
       
       if (path === "trioadmin") {
         setActivePage("admin");
@@ -7235,6 +7237,8 @@ export default function App() {
         }
       } else if (path === "login") {
         setActivePage("login");
+      } else if (path === "staff") {
+        setActivePage("staff");
       } else if (validPages.includes(path || "home")) {
         setActivePage((path || "home") as Page);
       } else {
@@ -7258,6 +7262,7 @@ export default function App() {
       industries: { title: "Industries We Serve | TrioTax", desc: "Discover how TrioTax provides specialized compliance and registration services across various industries and sectors." },
       blog: { title: "Blog & Insights | TrioTax", desc: "Read the latest news, insights, and updates on taxation, compliance, and business growth from TrioTax experts." },
       contact: { title: "Contact Us | TrioTax", desc: "Get in touch with TrioTax for expert advice on business registration, GST, tax filing, and compliance in India." },
+      staff: { title: "Staff Login | TrioTax Internal Portal", desc: "Authorized access portal for TrioTax compliance officers, tax accountants, and administrators." },
       faq: { title: "Frequently Asked Questions | TrioTax", desc: "Find answers to common questions about company registration, GST, trademarks, and more with TrioTax." },
       career: { title: "Careers at TrioTax | Join Our Team", desc: "Build your career with TrioTax. We foster a culture of continuous learning and professional excellence." }
     };
@@ -7318,6 +7323,25 @@ export default function App() {
       case "faq": return <FAQPage setActivePage={navigateToPage} />;
       case "career": return <CareerPage setActivePage={navigateToPage} />;
       case "admin": return <AdminPage isAdminAuth={isAdminAuth} onLogin={handleAdminLogin} onLogout={handleLogout} />;
+            case "staff":
+        if (typeof window !== "undefined" && window.location.pathname !== "/staff") {
+          window.history.replaceState(null, "", "/staff");
+        }
+        return (
+          <StaffLoginPage
+            onStaffLogin={(email) => {
+              const u = email.split("@")[0] || "staff";
+              setUsername(u);
+              setIsUserAuth(true);
+              localStorage.setItem("triotax_is_user_auth", "true");
+              localStorage.setItem("triotax_logged_in_user", u);
+              localStorage.removeItem("triotax_logged_out");
+              window.history.pushState(null, "", `/${u}-user/home`);
+              setActivePage("user");
+            }}
+            onNavigateHome={() => navigateToPage("home")}
+          />
+        );
       case "login":
         if (typeof window !== "undefined" && window.location.pathname !== "/login") {
           window.history.replaceState(null, "", "/login");
@@ -7335,7 +7359,7 @@ export default function App() {
     }
   };
 
-  const isFullPageLayout = activePage === "admin" || activePage === "user";
+  const isFullPageLayout = activePage === "admin" || activePage === "user" || activePage === "staff";
 
   if (isFullPageLayout) {
     return (
