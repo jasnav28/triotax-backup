@@ -414,37 +414,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
 
   // --- Pre-Transaction Masters ---
   // A. Customer / Client Master
-  const defaultClients: ClientRecord[] = [
-    {
-      id: 1,
-      name: "Acme Enterprises India Pvt Ltd",
-      gstTreatment: "Registered Business (B2B)",
-      gstin: "29AABCA1234F1Z5",
-      placeOfSupply: "Karnataka",
-      billingAddress: { street: "Plot 42, Electronic City Phase 1", city: "Bengaluru", state: "Karnataka", pinCode: "560100" },
-      shippingAddress: { street: "Plot 42, Electronic City Phase 1", city: "Bengaluru", state: "Karnataka", pinCode: "560100" },
-      contact: { name: "Ramesh Gupta", email: "finance@acmeindia.com", phone: "+91 98765 43210" }
-    },
-    {
-      id: 2,
-      name: "Nexus Global Technologies LLP",
-      gstTreatment: "Registered Business (B2B)",
-      gstin: "27AAACN9876K1Z9",
-      placeOfSupply: "Maharashtra",
-      billingAddress: { street: "Mindspace Cyber City, Malad West", city: "Mumbai", state: "Maharashtra", pinCode: "400064" },
-      shippingAddress: { street: "Mindspace Cyber City, Malad West", city: "Mumbai", state: "Maharashtra", pinCode: "400064" },
-      contact: { name: "Ananya Deshmukh", email: "accounts@nexusglobal.com", phone: "+91 98220 11223" }
-    },
-    {
-      id: 3,
-      name: "Summit Retail Ventures",
-      gstTreatment: "Unregistered Business (B2C)",
-      placeOfSupply: "Delhi",
-      billingAddress: { street: "14 Connaught Place, Block C", city: "New Delhi", state: "Delhi", pinCode: "110001" },
-      shippingAddress: { street: "14 Connaught Place, Block C", city: "New Delhi", state: "Delhi", pinCode: "110001" },
-      contact: { name: "Vikram Malhotra", email: "vikram@summitretail.in", phone: "+91 98110 55443" }
-    }
-  ];
+  const defaultClients: ClientRecord[] = [];
 
   const [clients, setClients] = useState<ClientRecord[]>(defaultClients);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
@@ -460,13 +430,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const [clientPhoneInput, setClientPhoneInput] = useState("");
 
   // B. Item / Service Master
-  const defaultItems: ItemRecord[] = [
-    { id: 1, name: "Corporate Tax Advisory & Annual Filing", type: "Service", hsnSac: "998231", unit: "Service", rate: 25000, gstRate: 18, description: "Monthly corporate direct & indirect tax advisory" },
-    { id: 2, name: "GST Compliance & Return Preparation", type: "Service", hsnSac: "998232", unit: "Month", rate: 12500, gstRate: 18, description: "GSTR-1, GSTR-3B monthly reconciliation & filing" },
-    { id: 3, name: "Custom ERP & Billing Platform License", type: "Service", hsnSac: "998314", unit: "Annual", rate: 45000, gstRate: 18, description: "Cloud-hosted multi-tenant billing license" },
-    { id: 4, name: "Smart POS Invoicing Terminal", type: "Goods", hsnSac: "8471", unit: "Units", rate: 16500, gstRate: 18, description: "Hardware thermal printer billing device" },
-    { id: 5, name: "Financial Audit & Secretarial Review", type: "Service", hsnSac: "998222", unit: "Audit", rate: 35000, gstRate: 18, description: "Comprehensive statutory audit report" }
-  ];
+  const defaultItems: ItemRecord[] = [];
 
   const [itemsCatalog, setItemsCatalog] = useState<ItemRecord[]>(defaultItems);
   const [isAddItemOpen, setIsAddItemOpen] = useState(false);
@@ -479,44 +443,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const [itemDescInput, setItemDescInput] = useState("");
 
   // --- Quotations / Estimates State ---
-  const defaultQuotations: QuotationRecord[] = [
-    {
-      id: 1,
-      quoteNumber: "QT/26-27/098",
-      clientId: 1,
-      clientName: "Acme Enterprises India Pvt Ltd",
-      clientGstin: "29AABCA1234F1Z5",
-      placeOfSupply: "Karnataka",
-      billingAddress: "Plot 42, Electronic City Phase 1, Bengaluru 560100",
-      quoteDate: "2026-11-05",
-      validUntil: "2026-12-05",
-      items: [
-        {
-          id: 1,
-          description: "Corporate Tax Advisory & Annual Filing",
-          hsnSac: "998231",
-          quantity: 1,
-          rate: 25000,
-          discount: 1000,
-          gstRate: 18,
-          taxableAmount: 24000,
-          cgstAmount: 2160,
-          sgstAmount: 2160,
-          igstAmount: 0,
-          totalAmount: 28320
-        }
-      ],
-      subtotal: 25000,
-      totalDiscount: 1000,
-      cgstTotal: 2160,
-      sgstTotal: 2160,
-      igstTotal: 0,
-      taxTotal: 4320,
-      grandTotal: 28320,
-      terms: "Quotation valid for 30 calendar days from issue date.",
-      status: "Accepted"
-    }
-  ];
+  const defaultQuotations: QuotationRecord[] = [];
 
   const [quotations, setQuotations] = useState<QuotationRecord[]>(defaultQuotations);
   const [isCreateQuoteOpen, setIsCreateQuoteOpen] = useState(false);
@@ -528,94 +455,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const [quoteTerms, setQuoteTerms] = useState("Standard payment terms: 50% advance, balance on delivery.");
 
   // --- Invoices (Tax Invoices) State ---
-  const defaultInvoices: InvoiceRecord[] = [
-    {
-      id: 1,
-      invoiceNumber: "INV/26-27/100",
-      clientId: 1,
-      customer: "Acme Enterprises India Pvt Ltd",
-      clientGstin: "29AABCA1234F1Z5",
-      gstTreatment: "Registered Business (B2B)",
-      placeOfSupply: "Karnataka",
-      billingAddress: "Plot 42, Electronic City Phase 1, Bengaluru 560100",
-      invoiceDate: "2026-11-12",
-      paymentTerms: "Net 30",
-      dueDate: "2026-12-12",
-      poNumber: "PO-ACME-8891",
-      reverseCharge: false,
-      supplyType: "Intra-State (CGST + SGST)",
-      items: [
-        {
-          id: 1,
-          description: "Corporate Tax Advisory & Annual Filing",
-          hsnSac: "998231",
-          quantity: 1,
-          price: 25000,
-          discount: 0,
-          gstRate: 18,
-          taxableAmount: 25000,
-          cgstAmount: 2250,
-          sgstAmount: 2250,
-          igstAmount: 0,
-          total: 29500
-        }
-      ],
-      subtotal: 25000,
-      totalDiscount: 0,
-      cgstTotal: 2250,
-      sgstTotal: 2250,
-      igstTotal: 0,
-      taxTotal: 4500,
-      amount: 29500,
-      amountPaid: 29500,
-      balanceDue: 0,
-      status: "Paid",
-      date: "2026-11-12"
-    },
-    {
-      id: 2,
-      invoiceNumber: "INV/26-27/101",
-      clientId: 2,
-      customer: "Nexus Global Technologies LLP",
-      clientGstin: "27AAACN9876K1Z9",
-      gstTreatment: "Registered Business (B2B)",
-      placeOfSupply: "Maharashtra",
-      billingAddress: "Mindspace Cyber City, Malad West, Mumbai 400064",
-      invoiceDate: "2026-11-15",
-      paymentTerms: "Net 15",
-      dueDate: "2026-11-30",
-      poNumber: "PO-NX-2024-09",
-      reverseCharge: false,
-      supplyType: "Inter-State (IGST)",
-      items: [
-        {
-          id: 1,
-          description: "Custom ERP & Billing Platform License",
-          hsnSac: "998314",
-          quantity: 1,
-          price: 45000,
-          discount: 2000,
-          gstRate: 18,
-          taxableAmount: 43000,
-          cgstAmount: 0,
-          sgstAmount: 0,
-          igstAmount: 7740,
-          total: 50740
-        }
-      ],
-      subtotal: 45000,
-      totalDiscount: 2000,
-      cgstTotal: 0,
-      sgstTotal: 0,
-      igstTotal: 7740,
-      taxTotal: 7740,
-      amount: 50740,
-      amountPaid: 0,
-      balanceDue: 50740,
-      status: "Unpaid",
-      date: "2026-11-15"
-    }
-  ];
+  const defaultInvoices: InvoiceRecord[] = [];
 
   const [billingHistory, setBillingHistory] = useState<InvoiceRecord[]>(defaultInvoices);
   const [isCreateInvoiceOpen, setIsCreateInvoiceOpen] = useState(false);
@@ -627,27 +467,26 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
     { id: 1, itemId: 1, description: "Corporate Tax Advisory & Annual Filing", hsnSac: "998231", quantity: 1, price: 25000, discount: 0, gstRate: 18 }
   ]);
   const [invoiceNotes, setInvoiceNotes] = useState("");
+  const [invoiceTermsText, setInvoiceTermsText] = useState(
+    "1. Payment is strictly due according to agreed credit terms.\n2. In case of delayed settlement, interest @18% p.a. may apply."
+  );
+  const [quoteClientId, setQuoteClientId] = useState<number>(1);
+  const [quoteValidUntil, setQuoteValidUntil] = useState<string>("");
+  const [quoteNotes, setQuoteNotes] = useState<string>("");
+  const [clientName, setClientName] = useState<string>("");
+  const [clientGstin, setClientGstin] = useState<string>("");
+  const [clientPlaceOfSupply, setClientPlaceOfSupply] = useState<string>("Karnataka");
+  const [itemName, setItemName] = useState<string>("");
+  const [itemHsn, setItemHsn] = useState<string>("");
+  const [itemPrice, setItemPrice] = useState<number | "">("");
+  const [itemGst, setItemGst] = useState<number>(18);
+  const [noteType, setNoteType] = useState<"Credit Note" | "Debit Note">("Credit Note");
+  const [noteInvoiceId, setNoteInvoiceId] = useState<number>(1);
+  const [noteAmount, setNoteAmount] = useState<number | "">("");
   const invoicePdfRef = useRef<HTMLDivElement>(null);
 
   // --- Credit & Debit Notes State ---
-  const [creditDebitNotes, setCreditDebitNotes] = useState<CreditDebitNoteRecord[]>([
-    {
-      id: 1,
-      type: "Credit Note",
-      noteNumber: "CN/26-27/001",
-      originalInvoiceNumber: "INV/26-27/100",
-      originalInvoiceDate: "2026-11-12",
-      reason: "Post-sale Discount",
-      clientId: 1,
-      clientName: "Acme Enterprises India Pvt Ltd",
-      date: "2026-11-14",
-      amount: 2000,
-      taxAmount: 360,
-      grandTotal: 2360,
-      status: "Adjusted",
-      notes: "Annual retainer volume concession"
-    }
-  ]);
+  const [creditDebitNotes, setCreditDebitNotes] = useState<CreditDebitNoteRecord[]>([]);
   const [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
   const [noteType, setNoteType] = useState<"Credit Note" | "Debit Note">("Credit Note");
   const [noteOrigInv, setNoteOrigInv] = useState("");
@@ -657,11 +496,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const [noteAmount, setNoteAmount] = useState<number | "">("");
 
   // --- Purchases State ---
-  const [purchases, setPurchases] = useState<any[]>([
-    { id: 1, billNumber: "PUR-2024-001", vendor: "Apex IT Hardware Ltd", category: "Hardware & Equipment", date: "2026-11-10", amount: 45000, gstPaid: 8100, status: "Paid" },
-    { id: 2, billNumber: "PUR-2024-002", vendor: "GreenLine Office Supplies", category: "Office Supplies", date: "2026-11-14", amount: 12500, gstPaid: 2250, status: "Paid" },
-    { id: 3, billNumber: "PUR-2024-003", vendor: "CloudHost Infra Technologies", category: "Cloud & Servers", date: "2026-11-16", amount: 28000, gstPaid: 5040, status: "Pending" },
-  ]);
+  const [purchases, setPurchases] = useState<any[]>([]);
   const [isAddPurchaseOpen, setIsAddPurchaseOpen] = useState(false);
   const [purchaseVendor, setPurchaseVendor] = useState("");
   const [purchaseBillNo, setPurchaseBillNo] = useState("");
@@ -674,13 +509,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const [purchaseSearch, setPurchaseSearch] = useState("");
 
   // --- Expenses State ---
-  const [expenses, setExpenses] = useState<any[]>([
-    { id: 1, title: "Commercial Office Rent - Nov", category: "Rent & Facilities", amount: 35000, date: "2026-11-01", mode: "Bank Transfer", status: "Paid" },
-    { id: 2, title: "High-speed Fiber Internet", category: "Utilities & Internet", amount: 2499, date: "2026-11-05", mode: "UPI", status: "Paid" },
-    { id: 3, title: "Client Business Dinner Meeting", category: "Meals & Entertainment", amount: 4800, date: "2026-11-09", mode: "Credit Card", status: "Paid" },
-    { id: 4, title: "Google Workspace & Software Tools", category: "Software & Subscriptions", amount: 8200, date: "2026-11-12", mode: "Card", status: "Paid" },
-    { id: 5, title: "Digital Marketing Campaign", category: "Marketing & Ads", amount: 15000, date: "2026-11-15", mode: "UPI", status: "Paid" },
-  ]);
+  const [expenses, setExpenses] = useState<any[]>([]);
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [expenseTitle, setExpenseTitle] = useState("");
   const [expenseCategory, setExpenseCategory] = useState("Rent & Facilities");
@@ -690,11 +519,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const [expenseCategoryFilter, setExpenseCategoryFilter] = useState("All");
 
   // --- Payments Tracker State ---
-  const [payments, setPayments] = useState<any[]>([
-    { id: 1, type: "Inflow", title: "Client Invoice Settlement", party: "Acme Enterprises India Pvt Ltd", amount: 29500, date: "2026-11-12", method: "NEFT/RTGS", ref: "UTR983471029", status: "Cleared" },
-    { id: 2, type: "Outflow", title: "Cloud Server Hosting Bill", party: "CloudHost Infra", amount: 28000, date: "2026-11-16", method: "UPI", ref: "UPI88720198", status: "Cleared" },
-    { id: 3, type: "Outflow", title: "Office Rent Payment", party: "Landlord Realty Inc", amount: 35000, date: "2026-11-01", method: "NEFT/RTGS", ref: "UTR658392019", status: "Cleared" },
-  ]);
+  const [payments, setPayments] = useState<any[]>([]);
   const [isAddPaymentOpen, setIsAddPaymentOpen] = useState(false);
   const [paymentType, setPaymentType] = useState<"Inflow" | "Outflow">("Inflow");
   const [paymentTitle, setPaymentTitle] = useState("");
@@ -707,10 +532,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const [paymentFilter, setPaymentFilter] = useState<"All" | "Inflow" | "Outflow" | "Pending">("All");
 
   // --- Payrolls State ---
-  const [employees, setEmployees] = useState<any[]>([
-    { id: 1, name: "Rahul Sharma", role: "Senior Tax Consultant", basic: 55000, hra: 12000, deductions: 3500, netSalary: 63500, status: "Paid", paymentDate: "2026-11-01" },
-    { id: 2, name: "Priya Nair", role: "Junior Legal Associate", basic: 32000, hra: 7000, deductions: 2100, netSalary: 36900, status: "Paid", paymentDate: "2026-11-01" }
-  ]);
+  const [employees, setEmployees] = useState<any[]>([]);
   const [isAddEmpOpen, setIsAddEmpOpen] = useState(false);
   const [empName, setEmpName] = useState("");
   const [empRole, setEmpRole] = useState("");
@@ -731,14 +553,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   ]);
 
   // --- Documents State ---
-  const [documents, setDocuments] = useState<any[]>([
-    { id: 1, name: "GST Registration Certificate (REG-06)", category: "Tax Filings", date: "2026-04-12", size: "1.4 MB", verified: true },
-    { id: 2, name: "Certificate of Incorporation (COI)", category: "Registrations", date: "2026-03-18", size: "2.8 MB", verified: true },
-    { id: 3, name: "Permanent Account Number (Company e-PAN)", category: "Registrations", date: "2026-03-20", size: "680 KB", verified: true },
-    { id: 4, name: "MSME / Udyam Registration Certificate", category: "Registrations", date: "2026-05-02", size: "1.1 MB", verified: true },
-    { id: 5, name: "FY2023-24 Income Tax Acknowledgement (ITR-V)", category: "Tax Filings", date: "2026-07-28", size: "950 KB", verified: true },
-    { id: 6, name: "Trademark Registration Certificate (Form TM-A)", category: "Legal & Licenses", date: "2026-08-15", size: "1.9 MB", verified: true },
-  ]);
+  const [documents, setDocuments] = useState<any[]>([]);
   const [isAddDocOpen, setIsAddDocOpen] = useState(false);
   const [docName, setDocName] = useState("");
   const [docCategory, setDocCategory] = useState("Tax Filings");
@@ -772,6 +587,38 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
     return `${base}/${finalEndpoint}`;
   };
 
+  const isMockRecord = (item: any) => {
+    if (!item) return false;
+    const s = typeof item === "string" ? item : JSON.stringify(item);
+    return (
+      s.includes("Apex IT Hardware") ||
+      s.includes("GreenLine Office") ||
+      s.includes("CloudHost Infra") ||
+      s.includes("PUR-2024-") ||
+      s.includes("Commercial Office Rent - Nov") ||
+      s.includes("High-speed Fiber Internet") ||
+      s.includes("Client Business Dinner Meeting") ||
+      s.includes("Google Workspace & Software Tools") ||
+      s.includes("Digital Marketing Campaign") ||
+      s.includes("UTR983471029") ||
+      s.includes("UPI88720198") ||
+      s.includes("UTR658392019") ||
+      s.includes("Rahul Sharma") ||
+      s.includes("Priya Nair") ||
+      s.includes("INV/26-27/100") ||
+      s.includes("INV/26-27/101") ||
+      s.includes("Acme Enterprises India Pvt Ltd") ||
+      s.includes("Nexus Global Technologies LLP") ||
+      s.includes("Summit Retail Ventures") ||
+      s.includes("GST Registration Certificate (REG-06)") ||
+      s.includes("Certificate of Incorporation (COI)") ||
+      s.includes("Company e-PAN") ||
+      s.includes("Udyam Registration Certificate") ||
+      s.includes("FY2023-24 Income Tax") ||
+      s.includes("Trademark Registration Certificate")
+    );
+  };
+
   const loadUserData = async () => {
     let localData: any = null;
     const local = localStorage.getItem(`triotax_user_data_${username}`);
@@ -791,37 +638,37 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
           setCompanyProfile(prev => ({ ...prev, ...(serverData.companyProfile || localData?.companyProfile) }));
         }
         if (serverData.clientMaster || localData?.clientMaster) {
-          setClients(serverData.clientMaster || localData?.clientMaster);
+          setClients((serverData.clientMaster || localData?.clientMaster || []).filter((x: any) => !isMockRecord(x)));
         }
         if (serverData.itemMaster || localData?.itemMaster) {
-          setItemsCatalog(serverData.itemMaster || localData?.itemMaster);
+          setItemsCatalog((serverData.itemMaster || localData?.itemMaster || []).filter((x: any) => !isMockRecord(x)));
         }
         if (serverData.quotations || localData?.quotations) {
-          setQuotations(serverData.quotations || localData?.quotations);
+          setQuotations((serverData.quotations || localData?.quotations || []).filter((x: any) => !isMockRecord(x)));
         }
         if (serverData.billingHistory || localData?.billingHistory) {
-          setBillingHistory(serverData.billingHistory || localData?.billingHistory);
+          setBillingHistory((serverData.billingHistory || localData?.billingHistory || []).filter((x: any) => !isMockRecord(x)));
         }
         if (serverData.creditDebitNotes || localData?.creditDebitNotes) {
-          setCreditDebitNotes(serverData.creditDebitNotes || localData?.creditDebitNotes);
+          setCreditDebitNotes((serverData.creditDebitNotes || localData?.creditDebitNotes || []).filter((x: any) => !isMockRecord(x)));
         }
         if (serverData.purchases || localData?.purchases) {
-          setPurchases(serverData.purchases || localData?.purchases);
+          setPurchases((serverData.purchases || localData?.purchases || []).filter((x: any) => !isMockRecord(x)));
         }
         if (serverData.expenses || localData?.expenses) {
-          setExpenses(serverData.expenses || localData?.expenses);
+          setExpenses((serverData.expenses || localData?.expenses || []).filter((x: any) => !isMockRecord(x)));
         }
         if (serverData.payments || localData?.payments) {
-          setPayments(serverData.payments || localData?.payments);
+          setPayments((serverData.payments || localData?.payments || []).filter((x: any) => !isMockRecord(x)));
         }
         if (serverData.complianceTasks || localData?.complianceTasks) {
           setComplianceTasks(serverData.complianceTasks || localData?.complianceTasks);
         }
         if (serverData.employees || localData?.employees) {
-          setEmployees(serverData.employees || localData?.employees);
+          setEmployees((serverData.employees || localData?.employees || []).filter((x: any) => !isMockRecord(x)));
         }
         if (serverData.documents || localData?.documents) {
-          setDocuments(serverData.documents || localData?.documents);
+          setDocuments((serverData.documents || localData?.documents || []).filter((x: any) => !isMockRecord(x)));
         }
         return;
       }
@@ -831,17 +678,17 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
 
     if (localData) {
       if (localData.companyProfile) setCompanyProfile(prev => ({ ...prev, ...localData.companyProfile }));
-      if (localData.clientMaster) setClients(localData.clientMaster);
-      if (localData.itemMaster) setItemsCatalog(localData.itemMaster);
-      if (localData.quotations) setQuotations(localData.quotations);
-      if (localData.billingHistory) setBillingHistory(localData.billingHistory);
-      if (localData.creditDebitNotes) setCreditDebitNotes(localData.creditDebitNotes);
-      if (localData.purchases) setPurchases(localData.purchases);
-      if (localData.expenses) setExpenses(localData.expenses);
-      if (localData.payments) setPayments(localData.payments);
+      if (localData.clientMaster) setClients(localData.clientMaster.filter((x: any) => !isMockRecord(x)));
+      if (localData.itemMaster) setItemsCatalog(localData.itemMaster.filter((x: any) => !isMockRecord(x)));
+      if (localData.quotations) setQuotations(localData.quotations.filter((x: any) => !isMockRecord(x)));
+      if (localData.billingHistory) setBillingHistory(localData.billingHistory.filter((x: any) => !isMockRecord(x)));
+      if (localData.creditDebitNotes) setCreditDebitNotes(localData.creditDebitNotes.filter((x: any) => !isMockRecord(x)));
+      if (localData.purchases) setPurchases(localData.purchases.filter((x: any) => !isMockRecord(x)));
+      if (localData.expenses) setExpenses(localData.expenses.filter((x: any) => !isMockRecord(x)));
+      if (localData.payments) setPayments(localData.payments.filter((x: any) => !isMockRecord(x)));
       if (localData.complianceTasks) setComplianceTasks(localData.complianceTasks);
-      if (localData.employees) setEmployees(localData.employees);
-      if (localData.documents) setDocuments(localData.documents);
+      if (localData.employees) setEmployees(localData.employees.filter((x: any) => !isMockRecord(x)));
+      if (localData.documents) setDocuments(localData.documents.filter((x: any) => !isMockRecord(x)));
     }
   };
 
@@ -1019,7 +866,22 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   // ─────────────────────────────────────────────────────────────
   const handleCreateQuotation = (e: React.FormEvent) => {
     e.preventDefault();
-    const client = clients.find(c => c.id === quoteClientId) || clients[0];
+    const defaultFallbackClient: ClientRecord = {
+      id: 0,
+      name: "General Customer",
+      gstin: "URP (Unregistered)",
+      gstTreatment: "Consumer",
+      placeOfSupply: companyProfile.state || "Maharashtra",
+      billingAddress: {
+        street: "Direct Supply",
+        city: companyProfile.city || "Mumbai",
+        state: companyProfile.state || "Maharashtra",
+        pinCode: companyProfile.pinCode || "400001"
+      },
+      email: "billing@client.com",
+      phone: "+91 98000 00000"
+    };
+    const client = clients.find(c => c.id === quoteClientId) || clients[0] || defaultFallbackClient;
     const isInter = isInterStateSupply(client.placeOfSupply, companyProfile.state);
 
     let subtotal = 0;
@@ -1175,7 +1037,22 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   // ─────────────────────────────────────────────────────────────
   const handleCreateTaxInvoice = (e: React.FormEvent) => {
     e.preventDefault();
-    const client = clients.find(c => c.id === invoiceClientId) || clients[0];
+    const defaultFallbackClient: ClientRecord = {
+      id: 0,
+      name: "General Customer",
+      gstin: "URP (Unregistered)",
+      gstTreatment: "Consumer",
+      placeOfSupply: companyProfile.state || "Maharashtra",
+      billingAddress: {
+        street: "Direct Supply",
+        city: companyProfile.city || "Mumbai",
+        state: companyProfile.state || "Maharashtra",
+        pinCode: companyProfile.pinCode || "400001"
+      },
+      email: "billing@client.com",
+      phone: "+91 98000 00000"
+    };
+    const client = clients.find(c => c.id === invoiceClientId) || clients[0] || defaultFallbackClient;
     const isInter = isInterStateSupply(client.placeOfSupply, companyProfile.state);
 
     let subtotal = 0;
@@ -1329,7 +1206,22 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const handleSaveNote = (e: React.FormEvent) => {
     e.preventDefault();
     if (!noteOrigInv || !noteAmount) return;
-    const client = clients.find(c => c.id === noteClientId) || clients[0];
+    const defaultFallbackClient: ClientRecord = {
+      id: 0,
+      name: "General Customer",
+      gstin: "URP (Unregistered)",
+      gstTreatment: "Consumer",
+      placeOfSupply: companyProfile.state || "Maharashtra",
+      billingAddress: {
+        street: "Direct Supply",
+        city: companyProfile.city || "Mumbai",
+        state: companyProfile.state || "Maharashtra",
+        pinCode: companyProfile.pinCode || "400001"
+      },
+      email: "billing@client.com",
+      phone: "+91 98000 00000"
+    };
+    const client = clients.find(c => c.id === noteClientId) || clients[0] || defaultFallbackClient;
     const amt = Number(noteAmount) || 0;
     const tax = Math.round(amt * 0.18);
     const grand = amt + tax;
@@ -1691,54 +1583,155 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
           (i.invoiceNumber + i.customer + (i.clientGstin || "")).toLowerCase().includes(mainSearchQuery.toLowerCase())
         );
 
-        // Real Monthly Aggregates in Indian Rupees (₹)
-        const salesActivityData = [
-          { month: "Jun", sales: 28000, collections: 18000, x: 40, salesY: 105, colY: 140 },
-          { month: "Jul", sales: 52000, collections: 32000, x: 160, salesY: 42, colY: 110 },
-          { month: "Aug", sales: 46000, collections: 26000, x: 280, salesY: 60, colY: 125 },
-          { month: "Sep", sales: 29000, collections: 24000, x: 400, salesY: 102, colY: 118 },
-          { month: "Oct", sales: 38000, collections: 28000, x: 520, salesY: 80, colY: 112 },
-          { month: "Nov", sales: Math.max(totalSales, 45000), collections: Math.max(totalInflow, 35000), x: 640, salesY: 65, colY: 98 },
+        // Real financial totals
+        const realTotalSales = billingHistory.reduce((sum, inv) => sum + (Number(inv.amount) || 0), 0);
+        const realTotalPurchases = purchases.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+        const realTotalExpenses = expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+        const realTotalInflow = payments.filter(p => p.type === "Inflow").reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+        const realTotalOutflow = payments.filter(p => p.type === "Outflow").reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+        const netProfit = realTotalSales - (realTotalPurchases + realTotalExpenses);
+
+        // 6-Month Real Time Series (Jun, Jul, Aug, Sep, Oct, Nov)
+        const monthDefs = [
+          { key: "06", name: "Jun", x: 40 },
+          { key: "07", name: "Jul", x: 160 },
+          { key: "08", name: "Aug", x: 280 },
+          { key: "09", name: "Sep", x: 400 },
+          { key: "10", name: "Oct", x: 520 },
+          { key: "11", name: "Nov", x: 640 },
         ];
 
-        // Real Bar Chart Data for Subscriptions / Monthly Billing Volume
-        const subscriptionsData = [
-          { month: "Jun", bar1: 25, bar2: 35 },
-          { month: "Jul", bar1: 32, bar2: 55 },
-          { month: "Aug", bar1: 40, bar2: 68 },
-          { month: "Sep", bar1: 28, bar2: 45 },
-          { month: "Oct", bar1: 35, bar2: 60 },
-          { month: "Nov", bar1: Math.min(100, Math.max(45, billingHistory.length * 15)), bar2: 90 },
+        const salesActivityData = monthDefs.map((m, idx) => {
+          let s = billingHistory
+            .filter(inv => (inv.date || inv.invoiceDate || "").includes(`-${m.key}-`))
+            .reduce((sum, inv) => sum + (Number(inv.amount) || 0), 0);
+
+          let c = payments
+            .filter(p => p.type === "Inflow" && (p.date || "").includes(`-${m.key}-`))
+            .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+          if (idx === 5) {
+            const untaggedSales = billingHistory
+              .filter(inv => !monthDefs.some(md => (inv.date || inv.invoiceDate || "").includes(`-${md.key}-`)))
+              .reduce((sum, inv) => sum + (Number(inv.amount) || 0), 0);
+            s += untaggedSales;
+
+            const untaggedInflows = payments
+              .filter(p => p.type === "Inflow" && !monthDefs.some(md => (p.date || "").includes(`-${md.key}-`)))
+              .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+            c += untaggedInflows;
+          }
+
+          return {
+            month: m.name,
+            sales: s,
+            collections: c,
+            x: m.x
+          };
+        });
+
+        // Compute dynamic ceiling and Y coordinates for the curve
+        const peakActivity = Math.max(10000, ...salesActivityData.map(d => Math.max(d.sales, d.collections)));
+        const gridCeil = Math.ceil(peakActivity / 10000) * 10000;
+        const gridLabels = [
+          { val: `₹${(gridCeil / 1000).toFixed(0)}K`, y: 20 },
+          { val: `₹${((gridCeil * 5 / 6) / 1000).toFixed(0)}K`, y: 46 },
+          { val: `₹${((gridCeil * 4 / 6) / 1000).toFixed(0)}K`, y: 73 },
+          { val: `₹${((gridCeil * 3 / 6) / 1000).toFixed(0)}K`, y: 100 },
+          { val: `₹${((gridCeil * 2 / 6) / 1000).toFixed(0)}K`, y: 126 },
+          { val: `₹${((gridCeil * 1 / 6) / 1000).toFixed(0)}K`, y: 153 },
+          { val: "₹0", y: 180 },
         ];
 
-        // Real Payments list in Indian Rupees (₹)
+        const chartPoints = salesActivityData.map(d => ({
+          ...d,
+          salesY: Math.round(180 - (d.sales / gridCeil) * 155),
+          colY: Math.round(180 - (d.collections / gridCeil) * 155)
+        }));
+
+        const buildSvgPath = (pts: { x: number; y: number }[]) => {
+          let path = `M ${pts[0].x} ${pts[0].y}`;
+          for (let i = 1; i < pts.length; i++) {
+            const prev = pts[i - 1];
+            const curr = pts[i];
+            const cpX = (prev.x + curr.x) / 2;
+            path += ` C ${cpX} ${prev.y}, ${cpX} ${curr.y}, ${curr.x} ${curr.y}`;
+          }
+          return path;
+        };
+
+        const salesLinePath = buildSvgPath(chartPoints.map(p => ({ x: p.x, y: p.salesY })));
+        const salesAreaPath = `${salesLinePath} L 640 180 L 40 180 Z`;
+
+        const colLinePath = buildSvgPath(chartPoints.map(p => ({ x: p.x, y: p.colY })));
+        const colAreaPath = `${colLinePath} L 640 180 L 40 180 Z`;
+
+        // Monthly Real Bar Chart Data (Inflows vs Outflows)
+        const monthlyFlows = monthDefs.map((m, idx) => {
+          let inf = payments
+            .filter(p => p.type === "Inflow" && (p.date || "").includes(`-${m.key}-`))
+            .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+          let out = payments
+            .filter(p => p.type === "Outflow" && (p.date || "").includes(`-${m.key}-`))
+            .reduce((sum, p) => sum + (Number(p.amount) || 0), 0) +
+            expenses.filter(e => (e.date || "").includes(`-${m.key}-`)).reduce((s, e) => s + (Number(e.amount) || 0), 0) +
+            purchases.filter(pr => (pr.date || "").includes(`-${m.key}-`)).reduce((s, pr) => s + (Number(pr.amount) || 0), 0);
+
+          if (idx === 5) {
+            inf += payments.filter(p => p.type === "Inflow" && !monthDefs.some(md => (p.date || "").includes(`-${md.key}-`))).reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+            inf += billingHistory.reduce((s, i) => s + (Number(i.amountPaid) || 0), 0);
+            out += expenses.filter(e => !monthDefs.some(md => (e.date || "").includes(`-${md.key}-`))).reduce((s, e) => s + (Number(e.amount) || 0), 0);
+            out += purchases.filter(pr => !monthDefs.some(md => (pr.date || "").includes(`-${md.key}-`))).reduce((s, pr) => s + (Number(pr.amount) || 0), 0);
+          }
+
+          return {
+            month: m.name,
+            inflow: inf,
+            outflow: out
+          };
+        });
+
+        const maxFlow = Math.max(5000, ...monthlyFlows.map(f => Math.max(f.inflow, f.outflow)));
+
+        // Real Combined Payment & Transaction Rows
         const realPaymentRows = [
-          ...payments.map((p, idx) => ({
-            id: p.id,
+          ...payments.map(p => ({
+            id: `pay-${p.id}`,
             status: p.status === "Cleared" || p.status === "Paid" ? "Success" : "Processing",
             customer: p.party || p.title,
-            ref: p.ref || (p.method + " Deposit"),
-            method: p.method,
-            amount: p.amount,
-            date: p.date
+            ref: p.ref || (p.type === "Inflow" ? "Customer Collection" : "Vendor Settlement"),
+            method: p.method || "Bank Transfer",
+            amount: Number(p.amount) || 0,
+            date: p.date || new Date().toISOString().split("T")[0]
           })),
-          ...billingHistory.map((inv) => ({
-            id: 1000 + inv.id,
+          ...billingHistory.map(inv => ({
+            id: `inv-${inv.id}`,
             status: inv.status === "Paid" ? "Success" : "Processing",
             customer: inv.customer,
             ref: inv.invoiceNumber,
-            method: "Bank / UPI",
-            amount: inv.amount,
-            date: inv.invoiceDate || inv.date
+            method: "GST Tax Invoice",
+            amount: Number(inv.amount) || 0,
+            date: inv.invoiceDate || inv.date || new Date().toISOString().split("T")[0]
+          })),
+          ...expenses.map(e => ({
+            id: `exp-${e.id}`,
+            status: "Success",
+            customer: e.title,
+            ref: e.category,
+            method: e.mode || "Business Expense",
+            amount: Number(e.amount) || 0,
+            date: e.date || new Date().toISOString().split("T")[0]
           }))
-        ];
+        ].sort((a, b) => (b.date > a.date ? 1 : -1));
 
         return (
           <div className="space-y-6">
-            {/* Page Header (Create Invoice button removed as requested) */}
+            {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Dashboard</h1>
+                <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Real-time enterprise accounting, tax liabilities & liquidity ledger</p>
               </div>
               <div className="flex items-center gap-2.5">
                 <button
@@ -1749,7 +1742,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                   <span>Download</span>
                 </button>
                 <button
-                  onClick={() => alert("Date Range: Current Financial Year 2026-2027")}
+                  onClick={() => alert("Date range: FY 2026-27 (Current Fiscal Year)")}
                   className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 text-xs font-medium px-3.5 py-2 rounded-lg shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
                 >
                   <Calendar size={13} />
@@ -1758,24 +1751,21 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
               </div>
             </div>
 
-            {/* Sub-Navigation Pill Tabs: Overview, Analytics, Reports, Notifications */}
+            {/* Sub-Tabs: Overview, Analytics, Reports, Notifications */}
             <div className="flex items-center gap-2 pb-1">
               {[
-                { id: "overview", label: "Overview", icon: LayoutGrid },
+                { id: "overview", label: "Overview", icon: Layers },
                 { id: "analytics", label: "Analytics", icon: BarChart3 },
                 { id: "reports", label: "Reports", icon: FileText },
                 { id: "notifications", label: "Notifications", icon: Bell },
               ].map(tab => (
                 <button
                   key={tab.id}
-                  onClick={() => {
-                    setActiveSubTab(tab.id as any);
-                    if (tab.id === "reports") setActiveTab("reports");
-                  }}
+                  onClick={() => setActiveSubTab(tab.id as any)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                     activeSubTab === tab.id
-                      ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800 font-semibold shadow-xs"
-                      : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800"
+                      ? "bg-slate-900 text-white shadow-xs font-semibold"
+                      : "bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-50"
                   }`}
                 >
                   <tab.icon size={13} />
@@ -1806,13 +1796,10 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                           <p className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{billingHistory.length}</p>
                           <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5">Realized Invoices • FY 2026-27</p>
                         </div>
-                        <svg className="w-16 h-8 text-rose-500" viewBox="0 0 60 25">
-                          <path d="M 0 16 Q 14 6, 24 18 T 48 8 T 60 12" fill="none" stroke="#f43f5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
                       </div>
                     </div>
                     <div className="flex items-center justify-between pt-3 mt-2 border-t border-slate-100 dark:border-zinc-800 text-[11px]">
-                      <button onClick={() => { setActiveTab("sales"); setSalesSubTab("invoices"); }} className="text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white font-medium flex items-center gap-0.5">
+                      <button onClick={() => { setActiveTab("sales"); setSalesSubTab("invoices"); }} className="text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white font-medium flex items-center gap-0.5 cursor-pointer">
                         <span>Details</span> &gt;
                       </button>
                       <span className="text-emerald-600 font-bold flex items-center gap-0.5">Active FY</span>
@@ -1834,90 +1821,75 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                       <div className="flex items-baseline justify-between mt-3">
                         <div>
                           <p className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                            ₹{totalSales.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            ₹{realTotalSales.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
                           <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5">Cumulative B2B Billings</p>
                         </div>
-                        <svg className="w-16 h-8 text-emerald-500" viewBox="0 0 60 25">
-                          <path d="M 0 18 Q 12 22, 22 10 T 45 16 T 60 6" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
                       </div>
                     </div>
                     <div className="flex items-center justify-between pt-3 mt-2 border-t border-slate-100 dark:border-zinc-800 text-[11px]">
-                      <button onClick={() => { setActiveTab("sales"); setSalesSubTab("invoices"); }} className="text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white font-medium flex items-center gap-0.5">
+                      <button onClick={() => { setActiveTab("sales"); setSalesSubTab("invoices"); }} className="text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white font-medium flex items-center gap-0.5 cursor-pointer">
                         <span>Details</span> &gt;
                       </button>
-                      <span className="text-emerald-600 font-bold flex items-center gap-0.5">↑ 12.4% MoM</span>
+                      <span className="text-emerald-600 font-bold flex items-center gap-0.5">Live GST</span>
                     </div>
                   </div>
 
-                  {/* Card 3: Collections & Inflow */}
+                  {/* Card 3: Total Expenditures */}
                   <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 dark:hover:border-zinc-700 transition-all">
                     <div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                            <Wallet size={13} />
+                            <DollarSign size={13} />
                           </div>
-                          <span className="text-xs font-bold text-slate-800 dark:text-zinc-200">Collections & Inflow</span>
+                          <span className="text-xs font-bold text-slate-800 dark:text-zinc-200">Total Outflow & Expenses</span>
                         </div>
                         <Info size={13} className="text-slate-400 hover:text-slate-600 cursor-pointer" />
                       </div>
                       <div className="flex items-baseline justify-between mt-3">
                         <div>
                           <p className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                            ₹{totalInflow.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            ₹{(realTotalPurchases + realTotalExpenses).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
-                          <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5">Bank & UPI Settlements</p>
+                          <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5">Purchases & Operating Outlays</p>
                         </div>
-                        <svg className="w-16 h-8 text-blue-500" viewBox="0 0 60 25">
-                          <path d="M 0 16 Q 15 8, 26 20 T 48 6 T 60 10" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
                       </div>
                     </div>
                     <div className="flex items-center justify-between pt-3 mt-2 border-t border-slate-100 dark:border-zinc-800 text-[11px]">
-                      <button onClick={() => setActiveTab("payments-tracker")} className="text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white font-medium flex items-center gap-0.5">
+                      <button onClick={() => setActiveTab("expenses")} className="text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white font-medium flex items-center gap-0.5 cursor-pointer">
                         <span>Details</span> &gt;
                       </button>
-                      <span className="text-emerald-600 font-bold flex items-center gap-0.5">Realized Cash</span>
+                      <span className="text-slate-500 font-bold flex items-center gap-0.5">Deductibles</span>
                     </div>
                   </div>
 
-                  {/* Card 4: GST Output Tax (in Indian Rupees ₹) */}
+                  {/* Card 4: Net Operating Profit */}
                   <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 dark:hover:border-zinc-700 transition-all">
                     <div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                            <CreditCard size={13} />
+                          <div className="w-6 h-6 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                            <Wallet size={13} />
                           </div>
-                          <span className="text-xs font-bold text-slate-800 dark:text-zinc-200">GST Output Tax</span>
+                          <span className="text-xs font-bold text-slate-800 dark:text-zinc-200">Net Operating Margin</span>
                         </div>
                         <Info size={13} className="text-slate-400 hover:text-slate-600 cursor-pointer" />
                       </div>
-                      <div className="mt-2">
-                        <p className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                          ₹{totalGstOutput.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </p>
-                        <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5 font-medium">Net Payable: ₹{netGstPayable.toFixed(2)}</p>
+                      <div className="flex items-baseline justify-between mt-3">
+                        <div>
+                          <p className={`text-2xl font-bold tracking-tight ${netProfit >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+                            ₹{netProfit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
+                          <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5">Sales - Operational Costs</p>
+                        </div>
                       </div>
-                      <svg className="w-full h-10 mt-1" viewBox="0 0 180 35">
-                        <defs>
-                          <linearGradient id="blueCardGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.25" />
-                            <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
-                          </linearGradient>
-                        </defs>
-                        <path d="M 5 28 Q 40 18, 70 23 T 125 16 T 175 6 L 175 35 L 5 35 Z" fill="url(#blueCardGrad)" />
-                        <path d="M 5 28 Q 40 18, 70 23 T 125 16 T 175 6" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" />
-                        <circle cx="5" cy="28" r="2.5" fill="#3b82f6" />
-                        <circle cx="45" cy="19" r="2.5" fill="#3b82f6" />
-                        <circle cx="70" cy="23" r="2.5" fill="#3b82f6" />
-                        <circle cx="102" cy="19" r="2.5" fill="#3b82f6" />
-                        <circle cx="125" cy="16" r="2.5" fill="#3b82f6" />
-                        <circle cx="152" cy="12" r="2.5" fill="#3b82f6" />
-                        <circle cx="175" cy="6" r="2.5" fill="#3b82f6" />
-                      </svg>
+                    </div>
+                    <div className="flex items-center justify-between pt-3 mt-2 border-t border-slate-100 dark:border-zinc-800 text-[11px]">
+                      <button onClick={() => setActiveTab("reports")} className="text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white font-medium flex items-center gap-0.5 cursor-pointer">
+                        <span>P&amp;L Report</span> &gt;
+                      </button>
+                      <span className="text-emerald-600 font-bold flex items-center gap-0.5">Real-Time</span>
                     </div>
                   </div>
                 </div>
@@ -1947,15 +1919,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                         </defs>
 
                         {/* Horizontal Grid Lines & Y-Axis Labels in Indian Rupees (₹) */}
-                        {[
-                          { val: "₹60K", y: 20 },
-                          { val: "₹50K", y: 46 },
-                          { val: "₹40K", y: 73 },
-                          { val: "₹30K", y: 100 },
-                          { val: "₹20K", y: 126 },
-                          { val: "₹10K", y: 153 },
-                          { val: "₹0", y: 180 },
-                        ].map(grid => (
+                        {gridLabels.map(grid => (
                           <g key={grid.val}>
                             <text x="5" y={grid.y + 4} className="text-[10px] fill-slate-400 dark:fill-zinc-500 font-medium">
                               {grid.val}
@@ -1965,31 +1929,15 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                         ))}
 
                         {/* Red Area (Sales Revenue Curve) */}
-                        <path
-                          d="M 40 105 C 90 75, 120 42, 160 42 C 210 42, 240 55, 280 60 C 330 65, 360 105, 400 102 C 450 98, 480 82, 520 80 C 570 78, 600 70, 640 68 L 640 180 L 40 180 Z"
-                          fill="url(#redAreaGrad)"
-                        />
-                        <path
-                          d="M 40 105 C 90 75, 120 42, 160 42 C 210 42, 240 55, 280 60 C 330 65, 360 105, 400 102 C 450 98, 480 82, 520 80 C 570 78, 600 70, 640 68"
-                          fill="none"
-                          stroke="#f43f5e"
-                          strokeWidth="2.5"
-                        />
+                        <path d={salesAreaPath} fill="url(#redAreaGrad)" />
+                        <path d={salesLinePath} fill="none" stroke="#f43f5e" strokeWidth="2.5" />
 
                         {/* Green Area (Collections Inflow Curve) */}
-                        <path
-                          d="M 40 150 C 90 145, 120 122, 160 122 C 210 122, 240 135, 280 140 C 330 145, 360 120, 400 118 C 450 116, 480 132, 520 134 C 570 136, 600 126, 640 125 L 640 180 L 40 180 Z"
-                          fill="url(#greenAreaGrad)"
-                        />
-                        <path
-                          d="M 40 150 C 90 145, 120 122, 160 122 C 210 122, 240 135, 280 140 C 330 145, 360 120, 400 118 C 450 116, 480 132, 520 134 C 570 136, 600 126, 640 125"
-                          fill="none"
-                          stroke="#10b981"
-                          strokeWidth="2.5"
-                        />
+                        <path d={colAreaPath} fill="url(#greenAreaGrad)" />
+                        <path d={colLinePath} fill="none" stroke="#10b981" strokeWidth="2.5" />
 
                         {/* X-Axis Month Labels & Interactive Invisible Hover Zones */}
-                        {salesActivityData.map((d, idx) => (
+                        {chartPoints.map((d, idx) => (
                           <g key={d.month} className="cursor-pointer">
                             <text x={d.x} y="196" textAnchor="middle" className="text-[11px] fill-slate-500 dark:fill-zinc-400 font-medium">
                               {d.month}
@@ -2019,65 +1967,81 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                         <div
                           className="absolute bg-slate-900 text-white rounded-lg p-2.5 text-xs shadow-xl pointer-events-none transition-all z-20 border border-slate-700"
                           style={{
-                            left: `${(salesActivityData[activeChartHover].x / 700) * 85 + 5}%`,
+                            left: `${(chartPoints[activeChartHover].x / 700) * 85 + 5}%`,
                             top: "20px"
                           }}
                         >
-                          <p className="font-bold text-slate-200">{salesActivityData[activeChartHover].month} 2026 Breakdown</p>
+                          <p className="font-bold text-slate-200">{chartPoints[activeChartHover].month} 2026 Breakdown</p>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="w-2 h-2 rounded-full bg-rose-500"></span>
-                            <span>Sales: <strong>₹{salesActivityData[activeChartHover].sales.toLocaleString('en-IN')}.00</strong></span>
+                            <span>Sales: <strong>₹{chartPoints[activeChartHover].sales.toLocaleString('en-IN')}.00</strong></span>
                           </div>
                           <div className="flex items-center gap-2 mt-0.5">
                             <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                            <span>Collections: <strong>₹{salesActivityData[activeChartHover].collections.toLocaleString('en-IN')}.00</strong></span>
+                            <span>Collections: <strong>₹{chartPoints[activeChartHover].collections.toLocaleString('en-IN')}.00</strong></span>
                           </div>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Right Chart: Subscriptions & Invoicing Volume */}
+                  {/* Right Chart: Real Monthly Cash Flow Comparison */}
                   <div className="lg:col-span-4 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-5 shadow-xs flex flex-col justify-between">
                     <div>
-                      <h2 className="text-sm font-bold text-slate-900 dark:text-white">Billing Volume</h2>
-                      <div className="mt-1">
-                        <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                          ₹{totalSales.toLocaleString('en-IN', { minimumFractionDigits: 0 })}
-                        </span>
-                        <span className="text-xs text-slate-400 dark:text-zinc-500 font-medium ml-2">Total invoiced</span>
+                      <h2 className="text-sm font-bold text-slate-900 dark:text-white">Monthly Cash Flow</h2>
+                      <p className="text-xs text-slate-400 mt-0.5">Real-time Inflow vs Outflow comparisons</p>
+                      <div className="flex items-center gap-3 mt-3">
+                        <div>
+                          <span className="text-[10px] font-semibold text-emerald-600 block">TOTAL INFLOW</span>
+                          <span className="text-base font-bold text-slate-900 dark:text-white">
+                            ₹{(realTotalSales + realTotalInflow).toLocaleString('en-IN', { minimumFractionDigits: 0 })}
+                          </span>
+                        </div>
+                        <div className="h-6 w-px bg-slate-200 dark:border-zinc-800" />
+                        <div>
+                          <span className="text-[10px] font-semibold text-rose-500 block">TOTAL OUTFLOW</span>
+                          <span className="text-base font-bold text-slate-900 dark:text-white">
+                            ₹{(realTotalPurchases + realTotalExpenses + realTotalOutflow).toLocaleString('en-IN', { minimumFractionDigits: 0 })}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
                     <div className="pt-6 pb-2">
-                      <div className="h-48 flex items-end justify-between gap-1 sm:gap-2 px-1">
-                        {subscriptionsData.map((item, idx) => (
-                          <div
-                            key={idx}
-                            className="flex-1 flex flex-col items-center gap-1 group cursor-pointer"
-                            onMouseEnter={() => setActiveBarHover(idx)}
-                            onMouseLeave={() => setActiveBarHover(null)}
-                          >
-                            <div className="w-full flex items-end justify-center gap-1 h-36">
-                              <div
-                                className="w-2 sm:w-2.5 bg-rose-400 dark:bg-rose-500 rounded-t-sm transition-all group-hover:brightness-110"
-                                style={{ height: `${item.bar1}%` }}
-                              ></div>
-                              <div
-                                className="w-2 sm:w-2.5 bg-emerald-500 dark:bg-emerald-600 rounded-t-sm transition-all group-hover:brightness-110"
-                                style={{ height: `${item.bar2}%` }}
-                              ></div>
+                      <div className="h-44 flex items-end justify-between gap-1 sm:gap-2 px-1">
+                        {monthlyFlows.map((item, idx) => {
+                          const infHeight = maxFlow > 0 && item.inflow > 0 ? Math.max(6, Math.round((item.inflow / maxFlow) * 100)) : 3;
+                          const outHeight = maxFlow > 0 && item.outflow > 0 ? Math.max(6, Math.round((item.outflow / maxFlow) * 100)) : 3;
+                          return (
+                            <div
+                              key={idx}
+                              className="flex-1 flex flex-col items-center gap-1 group cursor-pointer"
+                              onMouseEnter={() => setActiveBarHover(idx)}
+                              onMouseLeave={() => setActiveBarHover(null)}
+                            >
+                              <div className="w-full flex items-end justify-center gap-1 h-32">
+                                <div
+                                  className="w-2.5 sm:w-3 bg-emerald-500 rounded-t-sm transition-all group-hover:brightness-110"
+                                  style={{ height: `${infHeight}%` }}
+                                  title={`Inflow: ₹${item.inflow}`}
+                                ></div>
+                                <div
+                                  className="w-2.5 sm:w-3 bg-rose-400 rounded-t-sm transition-all group-hover:brightness-110"
+                                  style={{ height: `${outHeight}%` }}
+                                  title={`Outflow: ₹${item.outflow}`}
+                                ></div>
+                              </div>
+                              <span className="text-[10px] text-slate-400 font-medium">
+                                {item.month}
+                              </span>
                             </div>
-                            <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">
-                              {item.month}
-                            </span>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
 
                       {activeBarHover !== null && (
                         <div className="mt-2 text-center text-xs text-slate-600 dark:text-zinc-400 font-medium bg-slate-50 dark:bg-zinc-800 rounded-lg py-1">
-                          {subscriptionsData[activeBarHover].month}: <span className="text-rose-500 font-bold">Invoices ({subscriptionsData[activeBarHover].bar1})</span> • <span className="text-emerald-500 font-bold">Collections ({subscriptionsData[activeBarHover].bar2}%)</span>
+                          {monthlyFlows[activeBarHover].month}: <span className="text-emerald-600 font-bold">Inflow ₹{monthlyFlows[activeBarHover].inflow.toLocaleString('en-IN')}</span> • <span className="text-rose-500 font-bold">Outflow ₹{monthlyFlows[activeBarHover].outflow.toLocaleString('en-IN')}</span>
                         </div>
                       )}
                     </div>
@@ -2104,22 +2068,12 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                         className="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-800 dark:text-zinc-200 placeholder:text-slate-400 w-60 sm:w-72 outline-none shadow-xs focus:border-slate-400 transition-all"
                       />
                     </div>
-                    <button
-                      onClick={() => alert("Columns customization: Status, Client/Email, Method & Ref, Amount (₹)")}
-                      className="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 text-xs font-medium px-3 py-1.5 rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <span>Columns</span>
-                      <ChevronDown size={13} />
-                    </button>
                   </div>
 
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
                       <thead className="text-[11px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider border-b border-slate-100 dark:border-zinc-800">
                         <tr>
-                          <th className="py-3 px-3 w-8">
-                            <input type="checkbox" className="rounded text-blue-600 focus:ring-0 cursor-pointer" />
-                          </th>
                           <th className="py-3 px-3">Status</th>
                           <th className="py-3 px-3">
                             <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700 dark:hover:text-white">
@@ -2128,238 +2082,209 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
                             </div>
                           </th>
                           <th className="py-3 px-3">Mode & Method</th>
+                          <th className="py-3 px-3">Date</th>
                           <th className="py-3 px-3 text-right">Amount (₹)</th>
-                          <th className="py-3 px-3 text-right"></th>
+                          <th className="py-3 px-3 text-right">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-50 dark:divide-zinc-800/60 text-slate-700 dark:text-zinc-300">
-                        {realPaymentRows
-                          .filter(p => (p.customer + p.ref + p.status).toLowerCase().includes(mainSearchQuery.toLowerCase()))
-                          .map((row) => (
-                            <tr key={row.id} className="hover:bg-slate-50/70 dark:hover:bg-zinc-800/40 transition-colors">
-                              <td className="py-3.5 px-3">
-                                <input type="checkbox" className="rounded text-blue-600 focus:ring-0 cursor-pointer" />
-                              </td>
-                              <td className="py-3.5 px-3">
-                                <span
-                                  className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                                    row.status === "Success"
-                                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200/60"
-                                      : "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200/60"
-                                  }`}
-                                >
-                                  {row.status}
-                                </span>
-                              </td>
-                              <td className="py-3.5 px-3">
-                                <p className="font-bold text-slate-900 dark:text-white">{row.customer}</p>
-                                <p className="text-[11px] text-slate-400 dark:text-zinc-500">{row.ref}</p>
-                              </td>
-                              <td className="py-3.5 px-3 text-slate-600 dark:text-zinc-400">
-                                {row.method}
-                              </td>
-                              <td className="py-3.5 px-3 font-bold text-slate-900 dark:text-white text-right">
-                                ₹{row.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                              </td>
-                              <td className="py-3.5 px-3 text-right">
-                                <button
-                                  onClick={() => {
-                                    const found = billingHistory.find(b => b.amount === row.amount || b.customer === row.customer) || billingHistory[0];
-                                    if (found) {
-                                      setPreviewInvoice(found);
-                                      setIsInvoicePreviewOpen(true);
-                                    } else {
-                                      alert(`Payment details for ${row.customer}: ₹${row.amount}`);
-                                    }
-                                  }}
-                                  className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
-                                  title="View invoice & receipt"
-                                >
-                                  <MoreHorizontal size={14} />
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
+                        {realPaymentRows.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="py-12 text-center">
+                              <div className="flex flex-col items-center justify-center text-slate-400">
+                                <Wallet size={28} className="mb-2 text-slate-300 dark:text-zinc-600" />
+                                <p className="text-sm font-semibold text-slate-700 dark:text-zinc-300">No transactions recorded yet</p>
+                                <p className="text-xs text-slate-400 mt-0.5">Use the Sales, Purchases, or Expenses tabs to start recording live transactions.</p>
+                              </div>
+                            </td>
+                          </tr>
+                        ) : (
+                          realPaymentRows
+                            .filter(p => (p.customer + p.ref + p.status).toLowerCase().includes(mainSearchQuery.toLowerCase()))
+                            .map((row) => (
+                              <tr key={row.id} className="hover:bg-slate-50/70 dark:hover:bg-zinc-800/40 transition-colors">
+                                <td className="py-3.5 px-3">
+                                  <span
+                                    className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                      row.status === "Success"
+                                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200/60"
+                                        : "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200/60"
+                                    }`}
+                                  >
+                                    {row.status}
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-3">
+                                  <p className="font-bold text-slate-900 dark:text-white">{row.customer}</p>
+                                  <p className="text-[11px] text-slate-400 dark:text-zinc-500">{row.ref}</p>
+                                </td>
+                                <td className="py-3.5 px-3 text-slate-600 dark:text-zinc-400">
+                                  {row.method}
+                                </td>
+                                <td className="py-3.5 px-3 text-slate-500 dark:text-zinc-400">
+                                  {row.date}
+                                </td>
+                                <td className="py-3.5 px-3 font-bold text-slate-900 dark:text-white text-right">
+                                  ₹{row.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </td>
+                                <td className="py-3.5 px-3 text-right">
+                                  <button
+                                    onClick={() => {
+                                      const found = billingHistory.find(b => b.amount === row.amount || b.customer === row.customer) || billingHistory[0];
+                                      if (found) {
+                                        setPreviewInvoice(found);
+                                        setIsInvoicePreviewOpen(true);
+                                      } else {
+                                        alert(`Payment record for ${row.customer}: ₹${row.amount}`);
+                                      }
+                                    }}
+                                    className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
+                                    title="View invoice & receipt"
+                                  >
+                                    <MoreHorizontal size={14} />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                        )}
                       </tbody>
                     </table>
-                  </div>
-
-                  <div className="border-t border-slate-100 dark:border-zinc-800 pt-3 flex items-center justify-between text-xs text-slate-400 dark:text-zinc-500 font-medium">
-                    <span>Showing {realPaymentRows.length} payment records in Indian Rupees (₹).</span>
-                    <div className="flex items-center gap-2">
-                      <button className="px-3 py-1 border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-600 dark:text-zinc-300 hover:bg-slate-50 text-xs">Previous</button>
-                      <button className="px-3 py-1 border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-600 dark:text-zinc-300 hover:bg-slate-50 text-xs">Next</button>
-                    </div>
                   </div>
                 </div>
               </>
             )}
 
-            {/* TAB VIEW 2: ANALYTICS (FIXED & FULLY FUNCTIONAL) */}
+            {/* TAB VIEW 2: ANALYTICS */}
             {activeSubTab === "analytics" && (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-4 shadow-xs">
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Net Operating Profit</p>
-                    <p className="text-2xl font-bold text-emerald-600 mt-2">
-                      ₹{operatingProfit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    <p className={`text-2xl font-bold mt-2 ${netProfit >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                      ₹{netProfit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </p>
-                    <p className="text-[11px] text-slate-400 mt-1">Revenue minus purchases, expenses & payroll</p>
+                    <p className="text-[11px] text-slate-400 mt-1">Real-time revenue minus operational expenditures</p>
                   </div>
                   <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-4 shadow-xs">
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">ITC Claim Efficiency</p>
-                    <p className="text-2xl font-bold text-blue-600 mt-2">
-                      ₹{totalGstItc.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    <p className="text-2xl font-bold mt-2 text-blue-600">
+                      ₹{purchases.reduce((s, p) => s + (Number(p.gstPaid) || 0), 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </p>
-                    <p className="text-[11px] text-slate-400 mt-1">Available GST credit to offset output liability</p>
+                    <p className="text-[11px] text-slate-400 mt-1">Total registered Input Tax Credit under GST</p>
                   </div>
                   <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-4 shadow-xs">
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Average Invoice Value</p>
-                    <p className="text-2xl font-bold text-purple-600 mt-2">
-                      ₹{(billingHistory.length > 0 ? (totalSales / billingHistory.length) : 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    <p className="text-2xl font-bold mt-2 text-indigo-600">
+                      ₹{(billingHistory.length ? (realTotalSales / billingHistory.length) : 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </p>
-                    <p className="text-[11px] text-slate-400 mt-1">Across {billingHistory.length} sales tax invoices</p>
+                    <p className="text-[11px] text-slate-400 mt-1">Realized average value across {billingHistory.length} bills</p>
                   </div>
                   <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-4 shadow-xs">
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Pending Receivables</p>
-                    <p className="text-2xl font-bold text-amber-600 mt-2">
-                      ₹{Math.max(0, totalSales - totalInflow).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    <p className="text-2xl font-bold mt-2 text-amber-600">
+                      ₹{billingHistory.filter(i => i.status === "Unpaid" || i.status === "Overdue" || i.status === "Partial").reduce((s, i) => s + (Number(i.balanceDue) || Number(i.amount) || 0), 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </p>
-                    <p className="text-[11px] text-slate-400 mt-1">Unsettled balance across registered clients</p>
+                    <p className="text-[11px] text-slate-400 mt-1">Unsettled client invoices due</p>
                   </div>
                 </div>
 
-                {/* Comparative Analytics Breakdown */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                   <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-5 shadow-xs space-y-4">
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Revenue vs Expenditure Distribution</h3>
-                    <div className="space-y-3">
+                    <h3 className="font-bold text-sm text-slate-900 dark:text-white">Revenue vs Expenditure Distribution</h3>
+                    <div className="space-y-3 pt-2 text-xs">
                       <div>
-                        <div className="flex justify-between text-xs font-semibold mb-1">
-                          <span>Gross Invoiced Revenue</span>
-                          <span className="text-slate-900 dark:text-white">₹{totalSales.toFixed(2)} (100%)</span>
+                        <div className="flex justify-between font-semibold mb-1">
+                          <span>Total Invoiced Sales</span>
+                          <span className="text-blue-600">₹{realTotalSales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                         </div>
-                        <div className="w-full bg-slate-100 dark:bg-zinc-800 h-2 rounded-full overflow-hidden">
-                          <div className="bg-blue-600 h-full rounded-full" style={{ width: "100%" }}></div>
+                        <div className="h-2.5 rounded-full bg-slate-100 dark:bg-zinc-800 overflow-hidden">
+                          <div className="h-full bg-blue-600 rounded-full" style={{ width: realTotalSales > 0 ? "100%" : "0%" }}></div>
                         </div>
                       </div>
                       <div>
-                        <div className="flex justify-between text-xs font-semibold mb-1">
-                          <span>Purchases & Vendor Bills</span>
-                          <span className="text-slate-900 dark:text-white">₹{totalPurchases.toFixed(2)} ({totalSales > 0 ? ((totalPurchases/totalSales)*100).toFixed(1) : 0}%)</span>
+                        <div className="flex justify-between font-semibold mb-1">
+                          <span>Purchase Inward Bills</span>
+                          <span className="text-emerald-600">₹{realTotalPurchases.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                         </div>
-                        <div className="w-full bg-slate-100 dark:bg-zinc-800 h-2 rounded-full overflow-hidden">
-                          <div className="bg-cyan-500 h-full rounded-full" style={{ width: `${Math.min(100, totalSales > 0 ? (totalPurchases/totalSales)*100 : 0)}%` }}></div>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-xs font-semibold mb-1">
-                          <span>Operating Expenses</span>
-                          <span className="text-slate-900 dark:text-white">₹{totalExpenses.toFixed(2)} ({totalSales > 0 ? ((totalExpenses/totalSales)*100).toFixed(1) : 0}%)</span>
-                        </div>
-                        <div className="w-full bg-slate-100 dark:bg-zinc-800 h-2 rounded-full overflow-hidden">
-                          <div className="bg-amber-500 h-full rounded-full" style={{ width: `${Math.min(100, totalSales > 0 ? (totalExpenses/totalSales)*100 : 0)}%` }}></div>
+                        <div className="h-2.5 rounded-full bg-slate-100 dark:bg-zinc-800 overflow-hidden">
+                          <div className="h-full bg-emerald-500 rounded-full" style={{ width: realTotalSales > 0 ? `${Math.min(100, (realTotalPurchases / realTotalSales) * 100)}%` : "0%" }}></div>
                         </div>
                       </div>
                       <div>
-                        <div className="flex justify-between text-xs font-semibold mb-1">
-                          <span>Monthly Payroll Salaries</span>
-                          <span className="text-slate-900 dark:text-white">₹{totalMonthlyPayroll.toFixed(2)} ({totalSales > 0 ? ((totalMonthlyPayroll/totalSales)*100).toFixed(1) : 0}%)</span>
+                        <div className="flex justify-between font-semibold mb-1">
+                          <span>Direct Business Expenses</span>
+                          <span className="text-rose-500">₹{realTotalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                         </div>
-                        <div className="w-full bg-slate-100 dark:bg-zinc-800 h-2 rounded-full overflow-hidden">
-                          <div className="bg-indigo-500 h-full rounded-full" style={{ width: `${Math.min(100, totalSales > 0 ? (totalMonthlyPayroll/totalSales)*100 : 0)}%` }}></div>
+                        <div className="h-2.5 rounded-full bg-slate-100 dark:bg-zinc-800 overflow-hidden">
+                          <div className="h-full bg-rose-500 rounded-full" style={{ width: realTotalSales > 0 ? `${Math.min(100, (realTotalExpenses / realTotalSales) * 100)}%` : "0%" }}></div>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-5 shadow-xs space-y-4">
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Indian GST Tax Liability Split</h3>
-                    <div className="grid grid-cols-2 gap-3 text-xs">
-                      <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-lg">
-                        <p className="text-slate-400">CGST (Central Tax)</p>
-                        <p className="text-base font-bold text-slate-800 dark:text-zinc-200 mt-1">₹{(totalGstOutput / 2).toFixed(2)}</p>
+                    <h3 className="font-bold text-sm text-slate-900 dark:text-white">GST Liability vs ITC Position</h3>
+                    <div className="p-4 bg-slate-50 dark:bg-zinc-800/60 rounded-xl space-y-3 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-slate-600 dark:text-zinc-400">Total Output GST (Collected on Sales):</span>
+                        <span className="font-bold text-slate-900 dark:text-white">₹{totalGstOutput.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                       </div>
-                      <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-lg">
-                        <p className="text-slate-400">SGST (State Tax)</p>
-                        <p className="text-base font-bold text-slate-800 dark:text-zinc-200 mt-1">₹{(totalGstOutput / 2).toFixed(2)}</p>
+                      <div className="flex justify-between">
+                        <span className="text-slate-600 dark:text-zinc-400">Total Input Tax Credit (Paid on Purchases):</span>
+                        <span className="font-bold text-emerald-600">₹{totalGstItc.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                       </div>
-                      <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-lg">
-                        <p className="text-slate-400">Eligible ITC Offset</p>
-                        <p className="text-base font-bold text-emerald-600 mt-1">₹{totalGstItc.toFixed(2)}</p>
-                      </div>
-                      <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-lg">
-                        <p className="text-slate-400">Net Tax Payable (Cash)</p>
-                        <p className="text-base font-bold text-rose-600 mt-1">₹{netGstPayable.toFixed(2)}</p>
+                      <div className="border-t border-slate-200 dark:border-zinc-700 pt-2 flex justify-between font-bold text-sm">
+                        <span>Net GST Payable / (Credit Carried Forward):</span>
+                        <span className={totalGstOutput >= totalGstItc ? "text-rose-600" : "text-emerald-600"}>
+                          ₹{Math.abs(totalGstOutput - totalGstItc).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        </span>
                       </div>
                     </div>
-                    <button
-                      onClick={() => setActiveTab("reports")}
-                      className="w-full py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold hover:bg-slate-800 transition-colors cursor-pointer"
-                    >
-                      View Comprehensive Audit Reports &gt;
-                    </button>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* TAB VIEW 3: NOTIFICATIONS & COMPLIANCE ALERTS (FIXED & FULLY FUNCTIONAL) */}
+            {/* TAB VIEW 3: REPORTS */}
+            {activeSubTab === "reports" && (
+              <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-6 shadow-xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800">
+                  <h3 className="font-bold text-slate-900 dark:text-white text-sm">Executive Financial Summaries</h3>
+                  <button onClick={() => window.print()} className="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-semibold">
+                    Print Statement
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                  <div className="p-4 border rounded-xl space-y-1">
+                    <p className="text-slate-400 font-medium">Gross Billed Revenue</p>
+                    <p className="text-xl font-bold text-slate-900 dark:text-white">₹{realTotalSales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+                  </div>
+                  <div className="p-4 border rounded-xl space-y-1">
+                    <p className="text-slate-400 font-medium">Realized Operating Cost</p>
+                    <p className="text-xl font-bold text-rose-600">₹{(realTotalPurchases + realTotalExpenses).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+                  </div>
+                  <div className="p-4 border rounded-xl space-y-1">
+                    <p className="text-slate-400 font-medium">Net Operational Profit</p>
+                    <p className="text-xl font-bold text-emerald-600">₹{netProfit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB VIEW 4: NOTIFICATIONS */}
             {activeSubTab === "notifications" && (
               <div className="space-y-4">
                 <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-5 shadow-xs space-y-3">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <Bell size={16} className="text-blue-600" />
-                    <span>Statutory Compliance Alerts & Reminders</span>
-                  </h3>
-                  <div className="divide-y divide-slate-100 dark:divide-zinc-800 text-xs">
-                    <div className="py-3 flex items-start justify-between">
-                      <div>
-                        <p className="font-bold text-slate-900 dark:text-white">GSTR-1 Outward Supplies Monthly Filing</p>
-                        <p className="text-slate-500 mt-0.5">Statutory due date: 11th of every month. Automatic B2B invoice validation active.</p>
-                      </div>
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">On Track</span>
-                    </div>
-                    <div className="py-3 flex items-start justify-between">
-                      <div>
-                        <p className="font-bold text-slate-900 dark:text-white">GSTR-3B Monthly Tax Settlement</p>
-                        <p className="text-slate-500 mt-0.5">Statutory due date: 20th of every month. Net tax payable: ₹{netGstPayable.toFixed(2)}</p>
-                      </div>
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">Upcoming</span>
-                    </div>
-                    <div className="py-3 flex items-start justify-between">
-                      <div>
-                        <p className="font-bold text-slate-900 dark:text-white">TDS Monthly Payment (Form 26Q / 24Q)</p>
-                        <p className="text-slate-500 mt-0.5">Section 194C / 194J contractor payments statutory deposit due date: 7th.</p>
-                      </div>
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">Verified</span>
-                    </div>
-                    <div className="py-3 flex items-start justify-between">
-                      <div>
-                        <p className="font-bold text-slate-900 dark:text-white">Advance Tax 3rd Installment</p>
-                        <p className="text-slate-500 mt-0.5">Mandatory statutory installment (75% cumulative) due on 15th December 2026.</p>
-                      </div>
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700">Scheduled</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-5 shadow-xs">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-2">Invoices Pending Settlement</h3>
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">Statutory Deadlines & Compliance Alerts</h3>
                   <div className="space-y-2 text-xs">
-                    {billingHistory.filter(i => i.status !== "Paid").length > 0 ? (
-                      billingHistory.filter(i => i.status !== "Paid").map(inv => (
-                        <div key={inv.id} className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-lg flex items-center justify-between">
-                          <div>
-                            <p className="font-bold text-slate-900 dark:text-white">{inv.invoiceNumber} - {inv.customer}</p>
-                            <p className="text-slate-400">Due: {inv.dueDate || "Due on receipt"}</p>
-                          </div>
-                          <span className="font-bold text-rose-600">₹{inv.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-slate-400 py-3 text-center">All sales invoices are settled and up to date.</p>
-                    )}
+                    <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl flex items-center justify-between">
+                      <span className="font-semibold text-blue-900">GSTR-1 &amp; GSTR-3B Monthly Filing</span>
+                      <span className="text-blue-700 font-medium">Statutory Due: 20th Nov</span>
+                    </div>
+                    <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl flex items-center justify-between">
+                      <span className="font-semibold text-amber-900">TDS Monthly Payment Deposit</span>
+                      <span className="text-amber-700 font-medium">Statutory Due: 7th Dec</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2440,7 +2365,9 @@ case "sales":
                         onChange={(e) => setInvoiceClientId(Number(e.target.value))}
                         className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-xs font-medium text-slate-800 dark:text-white outline-none focus:border-blue-500"
                       >
-                        {clients.map(c => (
+                        {clients.length === 0 ? (
+                          <option value={0}>General Counter Customer (Register clients in Clients tab)</option>
+                        ) : clients.map(c => (
                           <option key={c.id} value={c.id}>{c.name} ({c.placeOfSupply})</option>
                         ))}
                       </select>
@@ -2760,7 +2687,7 @@ case "sales":
                       onChange={(e) => setQuoteClientId(Number(e.target.value))}
                       className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2 outline-none"
                     >
-                      {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      {clients.length === 0 ? <option value={0}>General Customer</option> : clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
                   </div>
                   <div>
@@ -3005,7 +2932,15 @@ case "sales":
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50 dark:divide-zinc-800/60 text-slate-700 dark:text-zinc-300">
-                      {billingHistory.filter(i => (i.customer + i.invoiceNumber).toLowerCase().includes(mainSearchQuery.toLowerCase())).map((inv) => (
+                      {billingHistory.filter(i => (i.customer + i.invoiceNumber).toLowerCase().includes(mainSearchQuery.toLowerCase())).length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="py-8 text-center text-slate-400">
+                            <FileText size={24} className="mx-auto mb-1 text-slate-300 dark:text-zinc-600" />
+                            <p className="font-semibold text-slate-700 dark:text-zinc-300">No invoices recorded yet</p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">Use the form above to generate and issue your first GST tax invoice.</p>
+                          </td>
+                        </tr>
+                      ) : billingHistory.filter(i => (i.customer + i.invoiceNumber).toLowerCase().includes(mainSearchQuery.toLowerCase())).map((inv) => (
                         <tr key={inv.id} className="hover:bg-slate-50/60 dark:hover:bg-zinc-800/40 transition-colors">
                           <td className="py-3.5 px-3">
                             <div className="flex items-center gap-3">
@@ -3075,7 +3010,15 @@ case "sales":
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50 text-slate-700">
-                      {quotations.map((q) => (
+                      {quotations.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="py-8 text-center text-slate-400">
+                            <FileEdit size={24} className="mx-auto mb-1 text-slate-300 dark:text-zinc-600" />
+                            <p className="font-semibold text-slate-700 dark:text-zinc-300">No quotations created yet</p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">Use the form above to generate a client quotation.</p>
+                          </td>
+                        </tr>
+                      ) : quotations.map((q) => (
                         <tr key={q.id} className="hover:bg-slate-50 transition-colors">
                           <td className="py-3.5 px-3 font-mono font-bold text-slate-900">{q.quoteNumber}</td>
                           <td className="py-3.5 px-3 font-medium text-slate-800">{q.clientName}</td>
@@ -3107,7 +3050,14 @@ case "sales":
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50 text-slate-700">
-                      {creditDebitNotes.map((n) => (
+                      {creditDebitNotes.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="py-8 text-center text-slate-400">
+                            <Receipt size={24} className="mx-auto mb-1 text-slate-300 dark:text-zinc-600" />
+                            <p className="font-semibold text-slate-700 dark:text-zinc-300">No credit or debit notes issued yet</p>
+                          </td>
+                        </tr>
+                      ) : creditDebitNotes.map((n) => (
                         <tr key={n.id} className="hover:bg-slate-50 transition-colors">
                           <td className="py-3.5 px-3 font-mono font-bold text-slate-900">{n.noteNumber}</td>
                           <td className="py-3.5 px-3">
@@ -3138,7 +3088,15 @@ case "sales":
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50 text-slate-700">
-                      {clients.map((c) => (
+                      {clients.length === 0 ? (
+                        <tr>
+                          <td colSpan={4} className="py-8 text-center text-slate-400">
+                            <Users size={24} className="mx-auto mb-1 text-slate-300 dark:text-zinc-600" />
+                            <p className="font-semibold text-slate-700 dark:text-zinc-300">No clients in directory yet</p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">Add a client above for 1-click tax invoicing.</p>
+                          </td>
+                        </tr>
+                      ) : clients.map((c) => (
                         <tr key={c.id} className="hover:bg-slate-50 transition-colors">
                           <td className="py-3.5 px-3 font-bold text-slate-900">{c.name}</td>
                           <td className="py-3.5 px-3 font-mono text-blue-600">{c.gstin}</td>
@@ -3167,7 +3125,15 @@ case "sales":
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50 text-slate-700">
-                      {itemsCatalog.map((item) => (
+                      {itemsCatalog.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="py-8 text-center text-slate-400">
+                            <Package size={24} className="mx-auto mb-1 text-slate-300 dark:text-zinc-600" />
+                            <p className="font-semibold text-slate-700 dark:text-zinc-300">No items in catalog yet</p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">Add your products or services above.</p>
+                          </td>
+                        </tr>
+                      ) : itemsCatalog.map((item) => (
                         <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                           <td className="py-3.5 px-3 font-bold text-slate-900">{item.name}</td>
                           <td className="py-3.5 px-3">{item.type}</td>
@@ -3383,7 +3349,15 @@ case "sales":
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-zinc-800/60 text-slate-700 dark:text-zinc-300">
-                    {purchases
+                    {purchases.length === 0 ? (
+                        <tr>
+                          <td colSpan={8} className="py-8 text-center text-slate-400">
+                            <ShoppingBag size={24} className="mx-auto mb-1 text-slate-300 dark:text-zinc-600" />
+                            <p className="font-semibold text-slate-700 dark:text-zinc-300">No purchase bills recorded yet</p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">Use the form above to record inward supplies & claim ITC.</p>
+                          </td>
+                        </tr>
+                      ) : purchases
                       .filter(p => purchaseFilter === "All" || p.status === purchaseFilter)
                       .filter(p => (p.vendor + (p.billNumber || "")).toLowerCase().includes(mainSearchQuery.toLowerCase()))
                       .map((p) => (
@@ -3569,7 +3543,15 @@ case "sales":
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-zinc-800/60 text-slate-700 dark:text-zinc-300">
-                    {expenses
+                    {expenses.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="py-8 text-center text-slate-400">
+                            <DollarSign size={24} className="mx-auto mb-1 text-slate-300 dark:text-zinc-600" />
+                            <p className="font-semibold text-slate-700 dark:text-zinc-300">No business expenses recorded yet</p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">Use the form above to log operational expenditures.</p>
+                          </td>
+                        </tr>
+                      ) : expenses
                       .filter(e => (e.title + e.category).toLowerCase().includes(mainSearchQuery.toLowerCase()))
                       .map((exp) => (
                         <tr key={exp.id} className="hover:bg-slate-50/60 dark:hover:bg-zinc-800/40 transition-colors">
@@ -3773,7 +3755,15 @@ case "sales":
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-zinc-800/60 text-slate-700 dark:text-zinc-300">
-                    {payments
+                    {payments.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="py-8 text-center text-slate-400">
+                            <Wallet size={24} className="mx-auto mb-1 text-slate-300 dark:text-zinc-600" />
+                            <p className="font-semibold text-slate-700 dark:text-zinc-300">No payment transactions recorded yet</p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">Use the form above to record inward/outward liquidity.</p>
+                          </td>
+                        </tr>
+                      ) : payments
                       .filter(p => (p.title + p.party + (p.ref || "")).toLowerCase().includes(mainSearchQuery.toLowerCase()))
                       .map((pay) => (
                         <tr key={pay.id} className="hover:bg-slate-50/60 dark:hover:bg-zinc-800/40 transition-colors">
@@ -4074,7 +4064,15 @@ case "sales":
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-zinc-800/60 text-slate-700 dark:text-zinc-300">
-                    {employees
+                    {employees.length === 0 ? (
+                        <tr>
+                          <td colSpan={8} className="py-8 text-center text-slate-400">
+                            <Users size={24} className="mx-auto mb-1 text-slate-300 dark:text-zinc-600" />
+                            <p className="font-semibold text-slate-700 dark:text-zinc-300">No employees enrolled in payroll yet</p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">Use the form above to add staff and setup compensation.</p>
+                          </td>
+                        </tr>
+                      ) : employees
                       .filter(e => (e.name + (e.role || "")).toLowerCase().includes(mainSearchQuery.toLowerCase()))
                       .map((emp) => (
                         <tr key={emp.id} className="hover:bg-slate-50/60 dark:hover:bg-zinc-800/40 transition-colors">
@@ -4238,7 +4236,15 @@ case "sales":
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-zinc-800/60 text-slate-700 dark:text-zinc-300">
-                    {documents
+                    {documents.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="py-8 text-center text-slate-400">
+                            <Folder size={24} className="mx-auto mb-1 text-slate-300 dark:text-zinc-600" />
+                            <p className="font-semibold text-slate-700 dark:text-zinc-300">No statutory documents stored yet</p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">Use the form above to archive compliance records & KYC.</p>
+                          </td>
+                        </tr>
+                      ) : documents
                       .filter(d => (d.name + d.category).toLowerCase().includes(mainSearchQuery.toLowerCase()))
                       .map((doc) => (
                         <tr key={doc.id} className="hover:bg-slate-50/60 dark:hover:bg-zinc-800/40 transition-colors">
