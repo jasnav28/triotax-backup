@@ -464,7 +464,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const [invoicePoNumber, setInvoicePoNumber] = useState("");
   const [invoiceReverseCharge, setInvoiceReverseCharge] = useState(false);
   const [invoiceItems, setInvoiceItems] = useState([
-    { id: 1, itemId: 1, description: "Corporate Tax Advisory & Annual Filing", hsnSac: "998231", quantity: 1, price: 25000, discount: 0, gstRate: 18 }
+    { id: 1, itemId: 1, description: "", hsnSac: "", quantity: 1, price: "" as any, discount: 0, gstRate: 18 }
   ]);
   const [invoiceNotes, setInvoiceNotes] = useState("");
   const [invoiceTermsText, setInvoiceTermsText] = useState(
@@ -481,6 +481,52 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const [itemGst, setItemGst] = useState<number>(18);
   const [noteInvoiceId, setNoteInvoiceId] = useState<number>(1);
   const invoicePdfRef = useRef<HTMLDivElement>(null);
+
+  // --- Extended State for Custom Category, Inline Quotes, Filters & HSN Suggestions ---
+  const [customExpenseCategory, setCustomExpenseCategory] = useState("");
+  const [inlineQuoteAmount, setInlineQuoteAmount] = useState<number | "">("");
+  const [isClientFilterOpen, setIsClientFilterOpen] = useState(false);
+  const [clientTypeFilter, setClientTypeFilter] = useState<"all" | "b2b" | "consumer" | "intrastate" | "interstate">("all");
+  const [hsnSacList, setHsnSacList] = useState<{ code: string; desc: string; type: string }[]>([]);
+  const [activeHsnRowIndex, setActiveHsnRowIndex] = useState<number | null>(null);
+  const [hsnSearchQuery, setHsnSearchQuery] = useState("");
+  const [isCatalogHsnOpen, setIsCatalogHsnOpen] = useState(false);
+  const [catalogHsnQuery, setCatalogHsnQuery] = useState("");
+
+  useEffect(() => {
+    fetch("/hsn_sac.json")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setHsnSacList(data);
+      })
+      .catch(err => console.warn("Could not load HSN/SAC master:", err));
+  }, []);
+
+  const hsnSuggestions = useMemo(() => {
+    if (!hsnSearchQuery || hsnSearchQuery.trim().length < 2 || hsnSacList.length === 0) return [];
+    const q = hsnSearchQuery.trim().toLowerCase();
+    const matches: { code: string; desc: string; type: string }[] = [];
+    for (let i = 0; i < hsnSacList.length && matches.length < 8; i++) {
+      const item = hsnSacList[i];
+      if (item.code.toLowerCase().startsWith(q) || item.desc.toLowerCase().includes(q)) {
+        matches.push(item);
+      }
+    }
+    return matches;
+  }, [hsnSearchQuery, hsnSacList]);
+
+  const catalogHsnSuggestions = useMemo(() => {
+    if (!catalogHsnQuery || catalogHsnQuery.trim().length < 2 || hsnSacList.length === 0) return [];
+    const q = catalogHsnQuery.trim().toLowerCase();
+    const matches: { code: string; desc: string; type: string }[] = [];
+    for (let i = 0; i < hsnSacList.length && matches.length < 8; i++) {
+      const item = hsnSacList[i];
+      if (item.code.toLowerCase().startsWith(q) || item.desc.toLowerCase().includes(q)) {
+        matches.push(item);
+      }
+    }
+    return matches;
+  }, [catalogHsnQuery, hsnSacList]);
 
   // --- Credit & Debit Notes State ---
   const [creditDebitNotes, setCreditDebitNotes] = useState<CreditDebitNoteRecord[]>([]);
@@ -772,29 +818,35 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   // ─────────────────────────────────────────────────────────────
   const handleSaveClient = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!clientNameInput) return;
+    const name = clientName.trim() || clientNameInput.trim();
+    if (!name) {
+      alert("Please enter Company / Client Name");
+      return;
+    }
+    const gstin = (clientGstin.trim() || clientGstinInput.trim()).toUpperCase();
+    const state = clientPlaceOfSupply || clientStateInput || companyProfile.state || "Karnataka";
     const newClient: ClientRecord = {
       id: Date.now(),
-      name: clientNameInput,
-      gstTreatment: clientGstTreatment,
-      gstin: clientGstinInput.toUpperCase(),
-      placeOfSupply: clientStateInput,
+      name,
+      gstTreatment: gstin ? (gstin.length === 15 ? "Registered Business (B2B)" : "Consumer") : "Consumer",
+      gstin: gstin || "URP (Unregistered)",
+      placeOfSupply: state,
       billingAddress: {
-        street: clientStreetInput,
-        city: clientCityInput,
-        state: clientStateInput,
-        pinCode: clientPinInput
+        street: clientStreetInput.trim() || "Commercial Premises",
+        city: clientCityInput.trim() || "Bengaluru",
+        state,
+        pinCode: clientPinInput.trim() || "560001"
       },
       shippingAddress: {
-        street: clientStreetInput,
-        city: clientCityInput,
-        state: clientStateInput,
-        pinCode: clientPinInput
+        street: clientStreetInput.trim() || "Commercial Premises",
+        city: clientCityInput.trim() || "Bengaluru",
+        state,
+        pinCode: clientPinInput.trim() || "560001"
       },
       contact: {
-        name: clientContactName,
-        email: clientEmailInput,
-        phone: clientPhoneInput
+        name: clientContactName.trim() || name,
+        email: clientEmailInput.trim() || "",
+        phone: clientPhoneInput.trim() || ""
       }
     };
 
@@ -804,6 +856,8 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
     setIsAddClientOpen(false);
 
     // Reset inputs
+    setClientName("");
+    setClientGstin("");
     setClientNameInput("");
     setClientGstinInput("");
     setClientStreetInput("");
@@ -812,6 +866,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
     setClientContactName("");
     setClientEmailInput("");
     setClientPhoneInput("");
+    alert(`✅ Client "${name}" added to directory successfully!`);
   };
 
   const handleDeleteClient = (id: number) => {
@@ -827,16 +882,24 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   // ─────────────────────────────────────────────────────────────
   const handleSaveItem = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!itemNameInput || !itemRateInput) return;
+    const name = itemName.trim() || itemNameInput.trim();
+    const rate = typeof itemPrice === "number" ? itemPrice : (typeof itemRateInput === "number" ? itemRateInput : parseFloat(String(itemPrice || itemRateInput)) || 0);
+    if (!name || rate <= 0) {
+      alert("Please enter a valid item/service name and selling price.");
+      return;
+    }
+    const hsn = itemHsn.trim() || itemHsnInput.trim() || "998311";
+    const gst = Number(itemGst) || Number(itemGstInput) || 18;
     const newItem: ItemRecord = {
       id: Date.now(),
-      name: itemNameInput,
-      type: itemTypeInput,
-      hsnSac: itemHsnInput,
-      unit: itemUnitInput,
-      rate: Number(itemRateInput) || 0,
-      gstRate: Number(itemGstInput) || 18,
-      description: itemDescInput
+      name,
+      type: itemTypeInput || "Service",
+      hsnSac: hsn,
+      unit: itemUnitInput || "Service",
+      rate,
+      sellingPrice: rate,
+      gstRate: gst,
+      description: itemDescInput.trim() || name
     };
 
     const updated = [newItem, ...itemsCatalog];
@@ -844,10 +907,14 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
     saveAllData({ itemMaster: updated });
     setIsAddItemOpen(false);
 
+    setItemName("");
+    setItemHsn("");
+    setItemPrice("");
     setItemNameInput("");
     setItemHsnInput("9982");
     setItemRateInput("");
     setItemDescInput("");
+    alert(`✅ Item "${name}" added to catalog successfully!`);
   };
 
   const handleDeleteItem = (id: number) => {
@@ -868,12 +935,12 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
       name: "General Customer",
       gstin: "URP (Unregistered)",
       gstTreatment: "Consumer",
-      placeOfSupply: companyProfile.state || "Maharashtra",
+      placeOfSupply: companyProfile.state || "Karnataka",
       billingAddress: {
         street: "Direct Supply",
-        city: companyProfile.city || "Mumbai",
-        state: companyProfile.state || "Maharashtra",
-        pinCode: companyProfile.pinCode || "400001"
+        city: companyProfile.city || "Bengaluru",
+        state: companyProfile.state || "Karnataka",
+        pinCode: companyProfile.pinCode || "560001"
       },
       email: "billing@client.com",
       phone: "+91 98000 00000"
@@ -881,13 +948,32 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
     const client = clients.find(c => c.id === quoteClientId) || clients[0] || defaultFallbackClient;
     const isInter = isInterStateSupply(client.placeOfSupply, companyProfile.state);
 
+    const enteredRate = typeof inlineQuoteAmount === "number" ? inlineQuoteAmount : parseFloat(String(inlineQuoteAmount)) || 0;
+    const descText = quoteNotes.trim() || "Professional Consulting Services";
+
     let subtotal = 0;
     let totalDiscount = 0;
     let cgstTotal = 0;
     let sgstTotal = 0;
     let igstTotal = 0;
 
-    const computedItems = quoteItems.map((it, idx) => {
+    let itemsToCompute = quoteItems;
+    if (enteredRate > 0) {
+      itemsToCompute = [
+        {
+          id: 1,
+          itemId: 1,
+          description: descText,
+          hsnSac: "998311",
+          quantity: 1,
+          rate: enteredRate,
+          discount: 0,
+          gstRate: 18
+        }
+      ];
+    }
+
+    const computedItems = itemsToCompute.map((it, idx) => {
       const taxable = (it.quantity * it.rate) - it.discount;
       subtotal += (it.quantity * it.rate);
       totalDiscount += it.discount;
@@ -932,9 +1018,9 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
       clientName: client.name,
       clientGstin: client.gstin,
       placeOfSupply: client.placeOfSupply,
-      billingAddress: `${client.billingAddress.street}, ${client.billingAddress.city}, ${client.billingAddress.state} - ${client.billingAddress.pinCode}`,
+      billingAddress: `${client.billingAddress?.street || "Commercial Premises"}, ${client.billingAddress?.city || "Bengaluru"}, ${client.billingAddress?.state || "Karnataka"} - ${client.billingAddress?.pinCode || "560001"}`,
       quoteDate: new Date().toISOString().split("T")[0],
-      validUntil: new Date(Date.now() + quoteValidDays * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+      validUntil: quoteValidUntil || new Date(Date.now() + (quoteValidDays || 30) * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
       items: computedItems,
       subtotal,
       totalDiscount,
@@ -943,6 +1029,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
       igstTotal,
       taxTotal,
       grandTotal,
+      amount: grandTotal,
       terms: quoteTerms,
       status: "Sent"
     };
@@ -960,6 +1047,19 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
     setCompanyProfile(updatedProfile);
     saveAllData({ quotations: updatedQuotes, companyProfile: updatedProfile });
     setIsCreateQuoteOpen(false);
+    setQuoteNotes("");
+    setInlineQuoteAmount("");
+    alert(`✅ Quotation ${nextQuoteNum} created successfully for ₹${grandTotal.toFixed(2)}!`);
+  };
+
+  const handleCreateQuote = handleCreateQuotation;
+
+  const handleDeleteQuote = (id: number) => {
+    if (confirm("Delete this quotation?")) {
+      const updated = quotations.filter(q => q.id !== id);
+      setQuotations(updated);
+      saveAllData({ quotations: updated });
+    }
   };
 
   // Convert Quote To Tax Invoice
@@ -1197,41 +1297,57 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
     }, 400);
   };
 
+  const handlePreviewPdf = (inv: InvoiceRecord) => {
+    setPreviewInvoice(inv);
+  };
+
+  const handleDownloadPdf = (inv: InvoiceRecord) => {
+    handleDownloadInvoicePDF(inv);
+  };
+
+  const handleDeleteInvoice = (id: number) => {
+    if (confirm("Delete this invoice record?")) {
+      const updated = billingHistory.filter(i => i.id !== id);
+      setBillingHistory(updated);
+      saveAllData({ billingHistory: updated });
+    }
+  };
+
   // ─────────────────────────────────────────────────────────────
   // CREDIT & DEBIT NOTES ACTIONS
   // ─────────────────────────────────────────────────────────────
   const handleSaveNote = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!noteOrigInv || !noteAmount) return;
-    const defaultFallbackClient: ClientRecord = {
+    const origInv = noteOrigInv.trim() || (billingHistory[0]?.invoiceNumber || "");
+    const amt = typeof noteAmount === "number" ? noteAmount : parseFloat(String(noteAmount)) || 0;
+    if (!origInv || amt <= 0) {
+      alert("Please enter a valid linked invoice and adjustment amount.");
+      return;
+    }
+    const matchedInv = billingHistory.find(b => b.invoiceNumber === origInv);
+    const client = clients.find(c => c.id === (matchedInv?.clientId || noteClientId)) || clients[0] || {
       id: 0,
-      name: "General Customer",
-      gstin: "URP (Unregistered)",
+      name: matchedInv?.customer || "General Customer",
+      gstin: matchedInv?.clientGstin || "URP (Unregistered)",
       gstTreatment: "Consumer",
-      placeOfSupply: companyProfile.state || "Maharashtra",
-      billingAddress: {
-        street: "Direct Supply",
-        city: companyProfile.city || "Mumbai",
-        state: companyProfile.state || "Maharashtra",
-        pinCode: companyProfile.pinCode || "400001"
-      },
-      email: "billing@client.com",
-      phone: "+91 98000 00000"
+      placeOfSupply: companyProfile.state || "Karnataka",
+      billingAddress: { street: "Direct Supply", city: "Bengaluru", state: "Karnataka", pinCode: "560001" },
+      email: "",
+      phone: ""
     };
-    const client = clients.find(c => c.id === noteClientId) || clients[0] || defaultFallbackClient;
-    const amt = Number(noteAmount) || 0;
     const tax = Math.round(amt * 0.18);
     const grand = amt + tax;
-
-    const nextNoteNum = noteType === "Credit Note" ? `CN/26-27/${101 + creditDebitNotes.length}` : `DN/26-27/${101 + creditDebitNotes.length}`;
+    const nextNoteNum = noteType === "Credit Note"
+      ? `CN/26-27/${101 + creditDebitNotes.length}`
+      : `DN/26-27/${101 + creditDebitNotes.length}`;
 
     const newNote: CreditDebitNoteRecord = {
       id: Date.now(),
       type: noteType,
       noteNumber: nextNoteNum,
-      originalInvoiceNumber: noteOrigInv,
-      originalInvoiceDate: noteOrigDate || new Date().toISOString().split("T")[0],
-      reason: noteReason,
+      originalInvoiceNumber: origInv,
+      originalInvoiceDate: noteOrigDate || matchedInv?.invoiceDate || new Date().toISOString().split("T")[0],
+      reason: noteReason || "Sales / Commercial Adjustment",
       clientId: client.id,
       clientName: client.name,
       date: new Date().toISOString().split("T")[0],
@@ -1247,6 +1363,15 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
     setIsAddNoteOpen(false);
     setNoteOrigInv("");
     setNoteAmount("");
+    alert(`✅ ${noteType} ${nextNoteNum} issued against ${origInv} for ₹${amt.toLocaleString('en-IN')}!`);
+  };
+
+  const handleDeleteNote = (id: number) => {
+    if (confirm("Delete this credit/debit note?")) {
+      const updated = creditDebitNotes.filter(n => n.id !== id);
+      setCreditDebitNotes(updated);
+      saveAllData({ creditDebitNotes: updated });
+    }
   };
 
   // ─────────────────────────────────────────────────────────────
@@ -1321,12 +1446,20 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   // ─────────────────────────────────────────────────────────────
   const handleSaveExpense = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!expenseTitle || !expenseAmount) return;
+    const finalAmount = typeof expenseAmount === "number" ? expenseAmount : parseFloat(String(expenseAmount)) || 0;
+    if (!expenseTitle.trim() || finalAmount <= 0) {
+      alert("Please enter expense title and a valid amount.");
+      return;
+    }
+    const finalCategory = expenseCategory === "Others"
+      ? (customExpenseCategory.trim() || "Others")
+      : expenseCategory;
+
     const newExpense = {
       id: Date.now(),
-      title: expenseTitle,
-      category: expenseCategory,
-      amount: Number(expenseAmount),
+      title: expenseTitle.trim(),
+      category: finalCategory,
+      amount: finalAmount,
       date: expenseDate || new Date().toISOString().split("T")[0],
       mode: expenseMode,
       status: "Paid"
@@ -1337,7 +1470,9 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
     setIsAddExpenseOpen(false);
     setExpenseTitle("");
     setExpenseAmount("");
+    setCustomExpenseCategory("");
     setExpenseDate("");
+    alert(`✅ Business Expense of ₹${finalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })} recorded successfully!`);
   };
 
   const handleDeleteExpense = (id: number) => {
@@ -2452,27 +2587,76 @@ case "sales":
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
                           {invoiceItems.map((row, index) => {
-                            const taxable = Math.max(0, (row.quantity * row.price) - row.discount);
+                            const currentPrice = typeof row.price === "number" ? row.price : (parseFloat(String(row.price)) || 0);
+                            const currentQty = typeof row.quantity === "number" ? row.quantity : (parseFloat(String(row.quantity)) || 1);
+                            const currentDisc = typeof row.discount === "number" ? row.discount : (parseFloat(String(row.discount)) || 0);
+                            const taxable = Math.max(0, (currentQty * currentPrice) - currentDisc);
                             const tax = (taxable * row.gstRate) / 100;
                             const total = taxable + tax;
                             return (
                               <tr key={row.id}>
-                                <td className="p-2">
+                                <td className="p-2 relative">
                                   <input
                                     type="text"
                                     value={row.description}
+                                    placeholder="Type service / product name for HSN suggestions..."
                                     onChange={(e) => {
                                       const updated = [...invoiceItems];
                                       updated[index].description = e.target.value;
                                       setInvoiceItems(updated);
+                                      setActiveHsnRowIndex(index);
+                                      setHsnSearchQuery(e.target.value);
+                                    }}
+                                    onFocus={() => {
+                                      if (row.description) {
+                                        setActiveHsnRowIndex(index);
+                                        setHsnSearchQuery(row.description);
+                                      }
                                     }}
                                     className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-2.5 py-1.5 text-xs outline-none focus:border-blue-500"
                                   />
+                                  {/* Floating HSN/SAC Suggestions matching HSN_SAC (1).xlsx */}
+                                  {activeHsnRowIndex === index && hsnSuggestions.length > 0 && (
+                                    <div className="absolute left-2 top-full mt-1 w-80 sm:w-96 bg-white dark:bg-zinc-900 border border-blue-200 dark:border-blue-800 rounded-xl shadow-2xl z-50 overflow-hidden text-xs">
+                                      <div className="p-2 bg-blue-50/90 dark:bg-blue-950/70 border-b border-blue-100 dark:border-blue-900/60 font-semibold text-[11px] text-blue-800 dark:text-blue-300 flex justify-between items-center">
+                                        <span>Suggested HSN/SAC Codes</span>
+                                        <span className="text-[10px] text-blue-600 dark:text-blue-400">Click to autofill code</span>
+                                      </div>
+                                      <div className="max-h-56 overflow-y-auto divide-y divide-slate-100 dark:divide-zinc-800">
+                                        {hsnSuggestions.map((sug, sIdx) => (
+                                          <div
+                                            key={sIdx}
+                                            onMouseDown={() => {
+                                              const updated = [...invoiceItems];
+                                              updated[index].hsnSac = sug.code;
+                                              if (!updated[index].description || updated[index].description === hsnSearchQuery) {
+                                                updated[index].description = sug.desc;
+                                              }
+                                              setInvoiceItems(updated);
+                                              setActiveHsnRowIndex(null);
+                                            }}
+                                            className="p-2.5 hover:bg-blue-50/70 dark:hover:bg-blue-950/40 cursor-pointer transition-colors flex items-start gap-2.5 text-left"
+                                          >
+                                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold flex-shrink-0 ${
+                                              sug.type === 'SAC' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300'
+                                            }`}>
+                                              {sug.code}
+                                            </span>
+                                            <div className="min-w-0 flex-1">
+                                              <p className="font-medium text-slate-900 dark:text-white truncate">{sug.desc}</p>
+                                              <p className="text-[10px] text-slate-400">{sug.type === 'SAC' ? 'Services Accounting Code (SAC)' : 'Goods HSN Code'}</p>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
                                 </td>
                                 <td className="p-2">
                                   <input
                                     type="text"
                                     value={row.hsnSac}
+                                    placeholder="HSN/SAC"
                                     onChange={(e) => {
                                       const updated = [...invoiceItems];
                                       updated[index].hsnSac = e.target.value;
@@ -2497,19 +2681,22 @@ case "sales":
                                 <td className="p-2">
                                   <input
                                     type="number"
+                                    step="any"
                                     min={0}
+                                    placeholder="0.00"
                                     value={row.price}
                                     onChange={(e) => {
                                       const updated = [...invoiceItems];
-                                      updated[index].price = Math.max(0, Number(e.target.value));
+                                      updated[index].price = e.target.value === "" ? "" : Math.max(0, parseFloat(e.target.value));
                                       setInvoiceItems(updated);
                                     }}
-                                    className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-2 py-1.5 text-xs outline-none"
+                                    className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-2 py-1.5 text-xs outline-none font-semibold"
                                   />
                                 </td>
                                 <td className="p-2">
                                   <input
                                     type="number"
+                                    step="any"
                                     min={0}
                                     value={row.discount}
                                     onChange={(e) => {
@@ -2565,7 +2752,7 @@ case "sales":
                           const nextId = invoiceItems.length + 1;
                           setInvoiceItems([
                             ...invoiceItems,
-                            { id: nextId, itemId: 1, description: "Professional Services / Item", hsnSac: "998314", quantity: 1, price: 5000, discount: 0, gstRate: 18 }
+                            { id: nextId, itemId: nextId, description: "", hsnSac: "", quantity: 1, price: "" as any, discount: 0, gstRate: 18 }
                           ]);
                         }}
                         className="px-3 py-1.5 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-blue-600 hover:bg-slate-50 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer"
@@ -2676,7 +2863,7 @@ case "sales":
                     <p className="text-xs text-slate-400">Issue B2B commercial estimates with standard terms</p>
                   </div>
                 </div>
-                <form onSubmit={handleCreateQuote} className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+                <form onSubmit={handleCreateQuote} className="grid grid-cols-1 sm:grid-cols-5 gap-3 text-xs">
                   <div>
                     <label className="block text-slate-700 dark:text-zinc-300 font-semibold mb-1">Client *</label>
                     <select
@@ -2688,6 +2875,30 @@ case "sales":
                     </select>
                   </div>
                   <div>
+                    <label className="block text-slate-700 dark:text-zinc-300 font-semibold mb-1">Quote Description *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Annual IT Consulting & Maintenance"
+                      value={quoteNotes}
+                      onChange={(e) => setQuoteNotes(e.target.value)}
+                      className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-700 dark:text-zinc-300 font-semibold mb-1">Estimated Amount (₹) *</label>
+                    <input
+                      type="number"
+                      step="any"
+                      min={1}
+                      required
+                      placeholder="e.g. 25000"
+                      value={inlineQuoteAmount}
+                      onChange={(e) => setInlineQuoteAmount(e.target.value ? parseFloat(e.target.value) : "")}
+                      className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2 outline-none font-semibold"
+                    />
+                  </div>
+                  <div>
                     <label className="block text-slate-700 dark:text-zinc-300 font-semibold mb-1">Expiry / Valid Till</label>
                     <input
                       type="date"
@@ -2696,18 +2907,8 @@ case "sales":
                       className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2 outline-none"
                     />
                   </div>
-                  <div>
-                    <label className="block text-slate-700 dark:text-zinc-300 font-semibold mb-1">Quote Description</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Annual Cloud Maintenance"
-                      value={quoteNotes}
-                      onChange={(e) => setQuoteNotes(e.target.value)}
-                      className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2 outline-none"
-                    />
-                  </div>
                   <div className="flex items-end">
-                    <button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 px-4 rounded-lg shadow-xs flex items-center justify-center gap-1.5">
+                    <button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 px-4 rounded-lg shadow-xs flex items-center justify-center gap-1.5 cursor-pointer">
                       <Plus size={14} /> Save Quotation
                     </button>
                   </div>
@@ -2737,11 +2938,10 @@ case "sales":
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-700 dark:text-zinc-300 font-semibold mb-1">Client GSTIN *</label>
+                    <label className="block text-slate-700 dark:text-zinc-300 font-semibold mb-1">Client GSTIN</label>
                     <input
                       type="text"
-                      required
-                      placeholder="e.g. 27AAACH7409R1ZZ"
+                      placeholder="e.g. 29AAACH7409R1ZZ (Leave blank if URP)"
                       value={clientGstin}
                       onChange={(e) => setClientGstin(e.target.value.toUpperCase())}
                       className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2 font-mono uppercase outline-none"
@@ -2760,7 +2960,7 @@ case "sales":
                     </select>
                   </div>
                   <div className="flex items-end">
-                    <button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 px-4 rounded-lg shadow-xs flex items-center justify-center gap-1.5">
+                    <button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 px-4 rounded-lg shadow-xs flex items-center justify-center gap-1.5 cursor-pointer">
                       <Plus size={14} /> Add Client
                     </button>
                   </div>
@@ -2774,20 +2974,60 @@ case "sales":
                   <Package className="text-blue-600" size={18} />
                   <div>
                     <h3 className="font-bold text-slate-900 dark:text-white text-sm">Add Item to Catalog</h3>
-                    <p className="text-xs text-slate-400">Save products or service rates with statutory HSN/SAC codes</p>
+                    <p className="text-xs text-slate-400">Save products or service rates with statutory HSN/SAC codes from HSN_SAC (1).xlsx</p>
                   </div>
                 </div>
                 <form onSubmit={handleSaveItem} className="grid grid-cols-1 sm:grid-cols-5 gap-3 text-xs">
-                  <div>
-                    <label className="block text-slate-700 dark:text-zinc-300 font-semibold mb-1">Item Name *</label>
+                  <div className="relative">
+                    <label className="block text-slate-700 dark:text-zinc-300 font-semibold mb-1">Item / Service Name *</label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. IT Consulting"
+                      placeholder="e.g. IT Consulting / Software"
                       value={itemName}
-                      onChange={(e) => setItemName(e.target.value)}
+                      onChange={(e) => {
+                        setItemName(e.target.value);
+                        setCatalogHsnQuery(e.target.value);
+                        setIsCatalogHsnOpen(true);
+                      }}
+                      onFocus={() => {
+                        if (itemName) setIsCatalogHsnOpen(true);
+                      }}
                       className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2 outline-none"
                     />
+                    {isCatalogHsnOpen && catalogHsnSuggestions.length > 0 && (
+                      <div className="absolute left-0 top-full mt-1 w-80 sm:w-96 bg-white dark:bg-zinc-900 border border-blue-200 dark:border-blue-800 rounded-xl shadow-2xl z-50 overflow-hidden text-xs">
+                        <div className="p-2 bg-blue-50/90 dark:bg-blue-950/70 border-b border-blue-100 dark:border-blue-900/60 font-semibold text-[11px] text-blue-800 dark:text-blue-300 flex justify-between items-center">
+                          <span>Suggested HSN/SAC Codes</span>
+                          <span className="text-[10px] text-blue-600 dark:text-blue-400">Click to autofill code</span>
+                        </div>
+                        <div className="max-h-56 overflow-y-auto divide-y divide-slate-100 dark:divide-zinc-800">
+                          {catalogHsnSuggestions.map((sug, sIdx) => (
+                            <div
+                              key={sIdx}
+                              onMouseDown={() => {
+                                setItemHsn(sug.code);
+                                if (!itemName || itemName === catalogHsnQuery) {
+                                  setItemName(sug.desc);
+                                }
+                                setIsCatalogHsnOpen(false);
+                              }}
+                              className="p-2.5 hover:bg-blue-50/70 dark:hover:bg-blue-950/40 cursor-pointer transition-colors flex items-start gap-2.5 text-left"
+                            >
+                              <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold flex-shrink-0 ${
+                                sug.type === 'SAC' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300'
+                              }`}>
+                                {sug.code}
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <p className="font-medium text-slate-900 dark:text-white truncate">{sug.desc}</p>
+                                <p className="text-[10px] text-slate-400">{sug.type === 'SAC' ? 'Services Accounting Code (SAC)' : 'Goods HSN Code'}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-slate-700 dark:text-zinc-300 font-semibold mb-1">HSN / SAC Code *</label>
@@ -2804,11 +3044,13 @@ case "sales":
                     <label className="block text-slate-700 dark:text-zinc-300 font-semibold mb-1">Selling Price (₹) *</label>
                     <input
                       type="number"
+                      step="any"
+                      min={0}
                       required
                       placeholder="e.g. 15000"
                       value={itemPrice}
                       onChange={(e) => setItemPrice(e.target.value ? parseFloat(e.target.value) : "")}
-                      className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2 outline-none"
+                      className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2 outline-none font-semibold"
                     />
                   </div>
                   <div>
@@ -2826,7 +3068,7 @@ case "sales":
                     </select>
                   </div>
                   <div className="flex items-end">
-                    <button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 px-4 rounded-lg shadow-xs flex items-center justify-center gap-1.5">
+                    <button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 px-4 rounded-lg shadow-xs flex items-center justify-center gap-1.5 cursor-pointer">
                       <Plus size={14} /> Add Item
                     </button>
                   </div>
@@ -2857,29 +3099,51 @@ case "sales":
                   </div>
                   <div>
                     <label className="block text-slate-700 dark:text-zinc-300 font-semibold mb-1">Linked Invoice *</label>
-                    <select
-                      value={noteInvoiceId}
-                      onChange={(e) => setNoteInvoiceId(Number(e.target.value))}
-                      className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2 outline-none"
-                    >
-                      {billingHistory.map(b => (
-                        <option key={b.id} value={b.id}>{b.invoiceNumber} - {b.customer} (₹{b.amount})</option>
-                      ))}
-                    </select>
+                    {billingHistory.length > 0 ? (
+                      <select
+                        value={noteOrigInv || billingHistory[0]?.invoiceNumber || ""}
+                        onChange={(e) => {
+                          setNoteOrigInv(e.target.value);
+                          const matched = billingHistory.find(b => b.invoiceNumber === e.target.value);
+                          if (matched) {
+                            setNoteInvoiceId(matched.id);
+                            setNoteClientId(matched.clientId);
+                          }
+                        }}
+                        className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2 outline-none"
+                      >
+                        {billingHistory.map(b => (
+                          <option key={b.id} value={b.invoiceNumber}>
+                            {b.invoiceNumber} - {b.customer} (₹{Number(b.amount).toLocaleString('en-IN')})
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. INV/26-27/101"
+                        value={noteOrigInv}
+                        onChange={(e) => setNoteOrigInv(e.target.value)}
+                        className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2 outline-none font-mono"
+                      />
+                    )}
                   </div>
                   <div>
                     <label className="block text-slate-700 dark:text-zinc-300 font-semibold mb-1">Adjustment Amount (₹) *</label>
                     <input
                       type="number"
+                      step="any"
+                      min={1}
                       required
                       placeholder="e.g. 5000"
                       value={noteAmount}
                       onChange={(e) => setNoteAmount(e.target.value ? parseFloat(e.target.value) : "")}
-                      className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2 outline-none"
+                      className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2 outline-none font-semibold"
                     />
                   </div>
                   <div className="flex items-end">
-                    <button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 px-4 rounded-lg shadow-xs flex items-center justify-center gap-1.5">
+                    <button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 px-4 rounded-lg shadow-xs flex items-center justify-center gap-1.5 cursor-pointer">
                       <Plus size={14} /> Issue Note
                     </button>
                   </div>
@@ -2908,9 +3172,55 @@ case "sales":
                       className="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-800 dark:text-zinc-200 placeholder:text-slate-400 w-52 outline-none shadow-xs"
                     />
                   </div>
-                  <button className="p-2 border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-500 hover:bg-slate-50 shadow-xs">
-                    <SlidersHorizontal size={14} />
-                  </button>
+                  <div className="relative">
+                    <button
+                      onClick={() => setIsClientFilterOpen(!isClientFilterOpen)}
+                      className={`p-2 border rounded-lg transition-colors shadow-xs flex items-center gap-1.5 text-xs cursor-pointer ${
+                        clientTypeFilter !== "all"
+                          ? "bg-blue-50 dark:bg-blue-950/40 border-blue-400 text-blue-600 dark:text-blue-400 font-semibold"
+                          : "border-slate-200 dark:border-zinc-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-zinc-800"
+                      }`}
+                      title="Filter Directory"
+                    >
+                      <SlidersHorizontal size={14} />
+                      {clientTypeFilter !== "all" && (
+                        <span className="capitalize text-[11px] font-bold">{clientTypeFilter}</span>
+                      )}
+                    </button>
+
+                    {/* Filter Dropdown Popover */}
+                    {isClientFilterOpen && (
+                      <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-xl shadow-xl z-50 p-2 space-y-1 text-xs">
+                        <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          Filter Directory
+                        </div>
+                        {[
+                          { id: "all", label: "All Records" },
+                          { id: "b2b", label: "GST Registered (B2B)" },
+                          { id: "consumer", label: "Consumers / Unregistered" },
+                          { id: "intrastate", label: "Intra-State (Local)" },
+                          { id: "interstate", label: "Inter-State (Outside)" },
+                        ].map((opt) => (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => {
+                              setClientTypeFilter(opt.id as any);
+                              setIsClientFilterOpen(false);
+                            }}
+                            className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition-colors cursor-pointer ${
+                              clientTypeFilter === opt.id
+                                ? "bg-blue-600 text-white font-semibold"
+                                : "text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800"
+                            }`}
+                          >
+                            <span>{opt.label}</span>
+                            {clientTypeFilter === opt.id && <Check size={12} />}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -3020,7 +3330,7 @@ case "sales":
                           <td className="py-3.5 px-3 font-mono font-bold text-slate-900">{q.quoteNumber}</td>
                           <td className="py-3.5 px-3 font-medium text-slate-800">{q.clientName}</td>
                           <td className="py-3.5 px-3 text-slate-500">{q.validUntil}</td>
-                          <td className="py-3.5 px-3 font-bold text-slate-900">₹{q.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                          <td className="py-3.5 px-3 font-bold text-slate-900">₹{(Number(q.grandTotal ?? q.amount ?? 0)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                           <td className="py-3.5 px-3">
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">{q.status}</span>
                           </td>
@@ -3064,7 +3374,7 @@ case "sales":
                           </td>
                           <td className="py-3.5 px-3 font-mono text-slate-600">{n.originalInvoiceNumber}</td>
                           <td className="py-3.5 px-3 text-slate-500">{n.date}</td>
-                          <td className="py-3.5 px-3 font-bold text-slate-900">₹{n.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                          <td className="py-3.5 px-3 font-bold text-slate-900">₹{(Number(n.amount ?? n.grandTotal ?? 0)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                           <td className="py-3.5 px-3 text-right">
                             <button onClick={() => handleDeleteNote(n.id)} className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg"><Trash2 size={13} /></button>
                           </td>
@@ -3085,15 +3395,33 @@ case "sales":
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50 text-slate-700">
-                      {clients.length === 0 ? (
+                      {clients.filter(c => {
+                        const q = mainSearchQuery.toLowerCase();
+                        const matchesSearch = (c.name + (c.gstin || "") + (c.placeOfSupply || "")).toLowerCase().includes(q);
+                        if (!matchesSearch) return false;
+                        if (clientTypeFilter === "b2b") return c.gstin && c.gstin !== "URP (Unregistered)" && c.gstin.length === 15;
+                        if (clientTypeFilter === "consumer") return !c.gstin || c.gstin === "URP (Unregistered)" || c.gstin.length < 15;
+                        if (clientTypeFilter === "intrastate") return (c.placeOfSupply || "").toLowerCase() === (companyProfile.state || "karnataka").toLowerCase();
+                        if (clientTypeFilter === "interstate") return (c.placeOfSupply || "").toLowerCase() !== (companyProfile.state || "karnataka").toLowerCase();
+                        return true;
+                      }).length === 0 ? (
                         <tr>
                           <td colSpan={4} className="py-8 text-center text-slate-400">
                             <Users size={24} className="mx-auto mb-1 text-slate-300 dark:text-zinc-600" />
-                            <p className="font-semibold text-slate-700 dark:text-zinc-300">No clients in directory yet</p>
-                            <p className="text-[11px] text-slate-400 mt-0.5">Add a client above for 1-click tax invoicing.</p>
+                            <p className="font-semibold text-slate-700 dark:text-zinc-300">No clients found</p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">Add a client above or adjust the active filter.</p>
                           </td>
                         </tr>
-                      ) : clients.map((c) => (
+                      ) : clients.filter(c => {
+                        const q = mainSearchQuery.toLowerCase();
+                        const matchesSearch = (c.name + (c.gstin || "") + (c.placeOfSupply || "")).toLowerCase().includes(q);
+                        if (!matchesSearch) return false;
+                        if (clientTypeFilter === "b2b") return c.gstin && c.gstin !== "URP (Unregistered)" && c.gstin.length === 15;
+                        if (clientTypeFilter === "consumer") return !c.gstin || c.gstin === "URP (Unregistered)" || c.gstin.length < 15;
+                        if (clientTypeFilter === "intrastate") return (c.placeOfSupply || "").toLowerCase() === (companyProfile.state || "karnataka").toLowerCase();
+                        if (clientTypeFilter === "interstate") return (c.placeOfSupply || "").toLowerCase() !== (companyProfile.state || "karnataka").toLowerCase();
+                        return true;
+                      }).map((c) => (
                         <tr key={c.id} className="hover:bg-slate-50 transition-colors">
                           <td className="py-3.5 px-3 font-bold text-slate-900">{c.name}</td>
                           <td className="py-3.5 px-3 font-mono text-blue-600">{c.gstin}</td>
@@ -3136,7 +3464,7 @@ case "sales":
                           <td className="py-3.5 px-3">{item.type}</td>
                           <td className="py-3.5 px-3 font-mono">{item.hsnSac}</td>
                           <td className="py-3.5 px-3 font-bold text-blue-600">{item.gstRate}%</td>
-                          <td className="py-3.5 px-3 text-right font-bold text-slate-900">₹{item.sellingPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                          <td className="py-3.5 px-3 text-right font-bold text-slate-900">₹{(Number(item.rate ?? item.sellingPrice ?? 0)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                           <td className="py-3.5 px-3 text-right">
                             <button onClick={() => handleDeleteItem(item.id)} className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg">
                               <Trash2 size={13} />
@@ -3420,9 +3748,9 @@ case "sales":
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {renderKpiCard("Total Expenses", `₹${totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, "+8.73%", `${expenses.length} operating line items`, DollarSign)}
-              {renderKpiCard("Active Categories", new Set(expenses.map(e => e.category)).size || 1, "Cost centers", "Audited expense categories", Folder)}
+              {renderKpiCard("Active Categories", new Set(expenses.map(e => e.category)).size, "Cost centers", "Audited expense categories", Folder)}
               {renderKpiCard("Monthly Outflow", `₹${totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, "+12.3%", "Current month realized", Wallet)}
-              {renderKpiCard("Tax Deductible", `₹${(totalExpenses * 0.95).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, "Section 37", "Eligible business deductions", Shield)}
+              {renderKpiCard("Tax Deductible", `₹${totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, "Section 37", "Eligible business deductions", Shield)}
             </div>
 
             {/* TOP CARD: INTERFACE OF THE OPERATION (ADD BUSINESS EXPENSE FORM) */}
@@ -3467,12 +3795,15 @@ case "sales":
                       <option value="Marketing & Advertising">Marketing & Advertising</option>
                       <option value="Office Supplies">Office Supplies</option>
                       <option value="Miscellaneous">Miscellaneous</option>
+                      <option value="Others">Others</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-slate-700 dark:text-zinc-300 font-semibold mb-1">Amount (₹) *</label>
                     <input
                       type="number"
+                      step="any"
+                      min="0"
                       required
                       placeholder="e.g. 18500"
                       value={expenseAmount}
@@ -3495,6 +3826,23 @@ case "sales":
                     </select>
                   </div>
                 </div>
+
+                {/* Conditional Custom Category Input when "Others" is selected */}
+                {expenseCategory === "Others" && (
+                  <div className="p-3 bg-blue-50/60 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800">
+                    <label className="block text-slate-800 dark:text-zinc-200 font-semibold mb-1 text-xs">
+                      Specify Custom Category Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Server Maintenance, Machinery Repairs, Staff Welfare..."
+                      value={customExpenseCategory}
+                      onChange={(e) => setCustomExpenseCategory(e.target.value)}
+                      className="w-full bg-white dark:bg-zinc-800 border border-blue-400 dark:border-blue-600 rounded-lg px-3 py-2 text-xs text-slate-800 dark:text-white outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                )}
 
                 <div className="flex justify-end pt-2">
                   <button
