@@ -103,22 +103,35 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
         try { localData = JSON.parse(local); } catch (e) {}
       }
 
+      const mergedProfile = {
+        username: userToDownload.username,
+        companyName: userToDownload.company_name || userToDownload.companyName || "",
+        ownerName: userToDownload.owner_name || userToDownload.ownerName || "",
+        email: userToDownload.email || "",
+        contact: userToDownload.contact || "",
+        address: userToDownload.address || "",
+        description: userToDownload.description || "",
+        ...(localData?.companyProfile || {}),
+        ...(serverData?.companyProfile || {})
+      };
+
       const payload = {
-        companyProfile: {
-          username: userToDownload.username,
-          companyName: userToDownload.company_name || userToDownload.companyName || "",
-          ownerName: userToDownload.owner_name || userToDownload.ownerName || "",
-          email: userToDownload.email || "",
-          contact: userToDownload.contact || "",
-          address: userToDownload.address || "",
-          description: userToDownload.description || ""
-        },
+        companyProfile: mergedProfile,
         billingHistory: serverData?.billingHistory || localData?.billingHistory || [],
+        clientMaster: serverData?.clientMaster || localData?.clientMaster || [],
+        itemMaster: serverData?.itemMaster || localData?.itemMaster || [],
+        quotations: serverData?.quotations || localData?.quotations || [],
+        creditDebitNotes: serverData?.creditDebitNotes || localData?.creditDebitNotes || [],
+        purchases: serverData?.purchases || localData?.purchases || [],
+        expenses: serverData?.expenses || localData?.expenses || [],
+        payments: serverData?.payments || localData?.payments || [],
+        documents: serverData?.documents || localData?.documents || [],
         employees: serverData?.employees || localData?.employees || [],
         complianceRecords: serverData?.complianceRecords || localData?.complianceRecords || [],
+        complianceTasks: serverData?.complianceTasks || localData?.complianceTasks || [],
         exportedAt: new Date().toISOString(),
         system: "TrioTax Database Engine",
-        version: "1.0"
+        version: "2.0"
       };
 
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
@@ -169,35 +182,64 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
           });
 
           // Also update localStorage cache in append mode
-          let currentLocal: any = { billingHistory: [], employees: [], complianceRecords: [] };
+          let currentLocal: any = {
+            billingHistory: [],
+            clientMaster: [],
+            itemMaster: [],
+            quotations: [],
+            creditDebitNotes: [],
+            purchases: [],
+            expenses: [],
+            payments: [],
+            documents: [],
+            employees: [],
+            complianceRecords: [],
+            companyProfile: {}
+          };
           const rawLocal = localStorage.getItem(`triotax_user_data_${targetUsername}`);
           if (rawLocal) {
             try { currentLocal = JSON.parse(rawLocal); } catch (e) {}
           }
 
-          const mergedLocalBilling = [
-            ...(currentLocal.billingHistory || []),
-            ...(restoredJSON.billingHistory || []).map((item: any, idx: number) => ({ ...item, id: Date.now() + idx + Math.floor(Math.random() * 1000) }))
-          ];
-
-          const mergedLocalEmployees = [
-            ...(currentLocal.employees || []),
-            ...(restoredJSON.employees || []).map((item: any, idx: number) => ({ ...item, id: Date.now() + idx + Math.floor(Math.random() * 1000) }))
+          const appendItems = (existing: any[] = [], incoming: any[] = []) => [
+            ...(existing || []),
+            ...(incoming || []).map((item: any, idx: number) => ({
+              ...item,
+              id: item.id ? (typeof item.id === 'string' ? `${item.id}-restored-${idx + 1}` : Date.now() + idx + Math.floor(Math.random() * 10000)) : (Date.now() + idx + Math.floor(Math.random() * 10000))
+            }))
           ];
 
           const mergedLocalPayload = {
             ...currentLocal,
-            billingHistory: mergedLocalBilling,
-            employees: mergedLocalEmployees
+            companyProfile: {
+              ...(currentLocal.companyProfile || {}),
+              ...(restoredJSON.companyProfile || {})
+            },
+            billingHistory: appendItems(currentLocal.billingHistory, restoredJSON.billingHistory),
+            clientMaster: appendItems(currentLocal.clientMaster, restoredJSON.clientMaster),
+            itemMaster: appendItems(currentLocal.itemMaster, restoredJSON.itemMaster),
+            quotations: appendItems(currentLocal.quotations, restoredJSON.quotations),
+            creditDebitNotes: appendItems(currentLocal.creditDebitNotes, restoredJSON.creditDebitNotes),
+            purchases: appendItems(currentLocal.purchases, restoredJSON.purchases),
+            expenses: appendItems(currentLocal.expenses, restoredJSON.expenses),
+            payments: appendItems(currentLocal.payments, restoredJSON.payments),
+            documents: appendItems(currentLocal.documents, restoredJSON.documents),
+            employees: appendItems(currentLocal.employees, restoredJSON.employees),
+            complianceRecords: appendItems(currentLocal.complianceRecords, restoredJSON.complianceRecords),
+            complianceTasks: restoredJSON.complianceTasks && restoredJSON.complianceTasks.length > 0 ? restoredJSON.complianceTasks : (currentLocal.complianceTasks || []),
+            lastRestoredAt: new Date().toISOString()
           };
 
           localStorage.setItem(`triotax_user_data_${targetUsername}`, JSON.stringify(mergedLocalPayload));
           window.dispatchEvent(new Event("triotax_data_backup_update"));
 
           const numInvoices = restoredJSON.billingHistory?.length || 0;
+          const numClients = restoredJSON.clientMaster?.length || 0;
+          const numQuotes = restoredJSON.quotations?.length || 0;
+          const numNotes = restoredJSON.creditDebitNotes?.length || 0;
           const numEmployees = restoredJSON.employees?.length || 0;
 
-          setBackupStatusMsg(`✅ Successfully uploaded and appended backup data for "${targetUsername}"! Added ${numInvoices} invoice(s) & ${numEmployees} employee record(s). All existing data preserved without overriding.`);
+          setBackupStatusMsg(`✅ Successfully uploaded and appended backup data for "${targetUsername}"! Added ${numInvoices} invoice(s), ${numClients} client(s), ${numQuotes} quotation(s), ${numNotes} note(s), and ${numEmployees} employee record(s). All existing data preserved without overriding.`);
           setBackupJsonFile(null);
         } catch (err: any) {
           setBackupErrorMsg(`Failed to process JSON file: ${err.message}`);
