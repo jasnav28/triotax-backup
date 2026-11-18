@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { Eye, EyeOff, Maximize2, Minimize2, Play, Pause, RotateCcw, Sun, Moon } from "lucide-react";
+import { Eye, EyeOff, Maximize2, Minimize2, Play, Pause, RotateCcw, Sun, Moon, Building2, Receipt, ShieldCheck, Users, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 // Custom Input Component
@@ -151,7 +151,7 @@ const FrameAnimationPlayer = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full overflow-hidden bg-slate-950 flex items-center justify-center select-none"
+      className="relative w-full h-full overflow-hidden bg-transparent flex items-center justify-center select-none"
     >
       <canvas ref={canvasRef} className="w-full h-full block" />
 
@@ -277,9 +277,105 @@ export const SignInCard = ({
         </button>
       </div>
 
-      {/* Left 50% Video Frame Panel */}
-      <div className="w-full md:w-1/2 h-1/2 md:h-full relative overflow-hidden bg-[#f4f6f8] dark:bg-slate-950">
-        <FrameAnimationPlayer isDarkMode={isDark} />
+      {/* Left 50% Video Frame Panel with Services Showcase */}
+      <div className="w-full md:w-1/2 h-full relative overflow-hidden bg-[#f4f6f8] dark:bg-[#090d16] flex flex-col justify-between border-r border-slate-200/80 dark:border-zinc-800/80">
+        {/* TOP SECTION: TrioTax Corporate Services Header & Badges */}
+        <div className="w-full p-6 pb-2 z-20 flex-shrink-0">
+          <div className="flex items-center justify-between mb-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-blue-600/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400 border border-blue-500/20">
+              <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse" />
+              TrioTax Business Suite
+            </span>
+            <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">Enterprise Tax & Corporate Services</span>
+          </div>
+
+          <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+            Comprehensive Tax, Legal & Incorporation Services
+          </h2>
+
+          <div className="flex flex-wrap gap-1.5 mt-3">
+            {[
+              "GST Registration & Monthly Returns",
+              "Private Limited & LLP Incorporation",
+              "Trademark & Brand IP Protection",
+              "Annual ROC Compliance (MGT-7/AOC-4)",
+              "Income Tax Returns (ITR) & TDS",
+              "MSME Udyam & FSSAI Licensing"
+            ].map((srv) => (
+              <span
+                key={srv}
+                className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-white/90 dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 shadow-2xs backdrop-blur-xs flex items-center gap-1.5"
+              >
+                <CheckCircle2 size={12} className="text-emerald-500 flex-shrink-0" />
+                {srv}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* CENTER SECTION: Smooth 3D Animation Video Player */}
+        <div className="flex-1 w-full min-h-[220px] max-h-[380px] relative overflow-hidden flex items-center justify-center my-auto">
+          <FrameAnimationPlayer isDarkMode={isDark} />
+        </div>
+
+        {/* BOTTOM SECTION: Core Services 4-Pillar Grid & Trust Indicators */}
+        <div className="w-full p-6 pt-2 z-20 flex-shrink-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="p-3 rounded-xl bg-white/95 dark:bg-zinc-900/95 border border-slate-200/80 dark:border-zinc-800 shadow-2xs backdrop-blur-xs">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-6 h-6 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
+                  <Building2 size={14} />
+                </div>
+                <span className="text-xs font-bold text-slate-900 dark:text-white">Business Incorporation</span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-snug">
+                Pvt Ltd, LLP, OPC, Section 8, Trust & Partnership setup with DIN & DSC.
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-white/95 dark:bg-zinc-900/95 border border-slate-200/80 dark:border-zinc-800 shadow-2xs backdrop-blur-xs">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-6 h-6 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+                  <Receipt size={14} />
+                </div>
+                <span className="text-xs font-bold text-slate-900 dark:text-white">GST & Tax Invoicing</span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-snug">
+                GSTR-1 & 3B filings, automated tax invoices, ITC reconciliation & e-way bills.
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-white/95 dark:bg-zinc-900/95 border border-slate-200/80 dark:border-zinc-800 shadow-2xs backdrop-blur-xs">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-6 h-6 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                  <ShieldCheck size={14} />
+                </div>
+                <span className="text-xs font-bold text-slate-900 dark:text-white">ROC Compliance & IP</span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-snug">
+                Annual ROC (AOC-4, MGT-7), Director KYC, Trademark objection & registration.
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-white/95 dark:bg-zinc-900/95 border border-slate-200/80 dark:border-zinc-800 shadow-2xs backdrop-blur-xs">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-6 h-6 rounded-md bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center flex-shrink-0">
+                  <Users size={14} />
+                </div>
+                <span className="text-xs font-bold text-slate-900 dark:text-white">Payroll & Tax Audits</span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-snug">
+                PF, ESIC remittance, payslips, TDS 24Q/26Q quarterly returns & Advance Tax.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 dark:text-zinc-500 border-t border-slate-200/60 dark:border-zinc-800/80 pt-2.5">
+            <span className="flex items-center gap-1 font-medium">✓ 100% Government Portal Synced</span>
+            <span className="flex items-center gap-1 font-medium">✓ Verified CA & Legal Experts</span>
+            <span className="flex items-center gap-1 font-medium">✓ Bank-Grade 256-Bit SSL</span>
+          </div>
+        </div>
       </div>
 
       {/* Right 50% Sign In Form Panel */}

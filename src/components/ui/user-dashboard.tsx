@@ -4998,20 +4998,7 @@ case "sales":
 
           {/* Right Header Navigation & Actions matching Reference Image */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Organization Identifier Pill / Dropdown */}
-            <div className="hidden lg:flex items-center gap-2 text-xs text-gray-500 dark:text-zinc-400">
-              <span>This is a <strong className="text-gray-800 dark:text-zinc-200 font-semibold">Test</strong> organization.</span>
-              <button
-                onClick={() => setIsCompanyProfileOpen(true)}
-                className="flex items-center gap-1 font-semibold text-gray-800 dark:text-zinc-200 hover:text-emerald-600 transition-colors ml-1"
-                title="Switch Organization / Profile"
-              >
-                <span>{companyProfile.tradeName || companyProfile.legalName || "Demo Org"}</span>
-                <ChevronDown size={13} className="text-gray-500" />
-              </button>
-            </div>
 
-            <div className="hidden lg:block h-4 w-px bg-gray-200 dark:bg-zinc-700 mx-1"></div>
 
             {/* THE GREEN PLUS QUICK ACCESS BUTTON AND DROPDOWN */}
             <div className="relative" ref={quickAccessRef}>

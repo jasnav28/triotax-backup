@@ -7120,12 +7120,15 @@ export default function App() {
   const handleLogout = () => {
     setIsAdminAuth(false);
     setIsUserAuth(false);
+    setUsername("");
     try {
       localStorage.removeItem("triotax_is_admin_auth");
       localStorage.removeItem("triotax_is_user_auth");
       localStorage.removeItem("triotax_logged_in_user");
     } catch {}
-    navigateToPage("home");
+    window.history.pushState(null, "", "/login");
+    setActivePage("login");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Watch for dark mode changes on <html> element
@@ -7167,15 +7170,22 @@ export default function App() {
         const parts = path.split("/");
         const userPart = parts[0];
         const userClean = userPart.replace("-user", "");
-        setUsername(userClean);
-        const tabPart = parts.length > 1 ? parts.slice(1).join("/") : "home";
-        setUserTab(tabPart === "dashboard" ? "home" : tabPart);
-        setIsUserAuth(true);
-        try {
-          localStorage.setItem("triotax_is_user_auth", "true");
-          localStorage.setItem("triotax_logged_in_user", userClean);
-        } catch {}
-        setActivePage("user");
+        const savedAuth = localStorage.getItem("triotax_is_user_auth") === "true";
+        if (savedAuth) {
+          setUsername(userClean);
+          const tabPart = parts.length > 1 ? parts.slice(1).join("/") : "home";
+          setUserTab(tabPart === "dashboard" ? "home" : tabPart);
+          setIsUserAuth(true);
+          setActivePage("user");
+        } else {
+          // If not logged in, force URL strictly to /login
+          setUsername("");
+          setIsUserAuth(false);
+          window.history.replaceState(null, "", "/login");
+          setActivePage("login");
+        }
+      } else if (path === "login") {
+        setActivePage("login");
       } else if (validPages.includes(path || "home")) {
         setActivePage((path || "home") as Page);
       } else {
@@ -7258,10 +7268,17 @@ export default function App() {
       case "contact": return <ContactPage />;
       case "faq": return <FAQPage setActivePage={navigateToPage} />;
       case "career": return <CareerPage setActivePage={navigateToPage} />;
-      case "login": return <TravelConnectSignIn onLogin={handleUserLogin} />;
       case "admin": return <AdminPage isAdminAuth={isAdminAuth} onLogin={handleAdminLogin} onLogout={handleLogout} />;
+      case "login":
+        if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+          window.history.replaceState(null, "", "/login");
+        }
+        return <TravelConnectSignIn onLogin={handleUserLogin} />;
       case "user":
         if (!isUserAuth) {
+          if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+            window.history.replaceState(null, "", "/login");
+          }
           return <TravelConnectSignIn onLogin={handleUserLogin} />;
         }
         return <UserDashboard onLogout={handleLogout} username={username} initialTab={userTab} />;
