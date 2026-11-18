@@ -339,6 +339,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
   const [activeTab, setActiveTab] = useState(normalizeTab(initialTab));
   const [salesSubTab, setSalesSubTab] = useState<"invoices" | "quotes" | "notes" | "clients" | "items">("invoices");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isCompanyProfileOpen, setIsCompanyProfileOpen] = useState(false);
   const [isInvoicePreviewOpen, setIsInvoicePreviewOpen] = useState(false);
   const [previewInvoice, setPreviewInvoice] = useState<InvoiceRecord | null>(null);
@@ -4695,34 +4696,67 @@ case "sales":
   };
 
   // ─────────────────────────────────────────────────────────────
-  // SIDEBAR NAVIGATION (STRICTLY MATCHING USER'S ATTACHED IMAGE)
+  // SIDEBAR NAVIGATION (WITH 3-LINE HAMBURGER TOGGLE & SHRINK MODE)
   // ─────────────────────────────────────────────────────────────
   const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-white dark:bg-zinc-950 text-slate-700 dark:text-zinc-200 border-r border-slate-200/80 dark:border-zinc-800 transition-colors select-none font-sans">
-      {/* Brand Header with Artboard 3.png */}
-      <div className="p-4 pb-3 flex items-center justify-between border-b border-slate-100 dark:border-zinc-800/80">
-        <div className="flex items-center gap-2.5">
-          <img src="/Artboard 3.png" alt="TrioTax" className="h-7 w-auto object-contain" />
-          <span className="text-base font-bold text-slate-900 dark:text-white tracking-tight">TrioTax</span>
-        </div>
-        <button
-          onClick={() => setIsMobileMenuOpen(false)}
-          className="md:hidden text-slate-400 hover:text-slate-600 p-1 rounded-md transition-colors"
-          title="Toggle Sidebar"
-        >
-          <PanelLeftClose size={16} />
-        </button>
+    <div className={`flex flex-col h-full bg-white dark:bg-zinc-950 text-slate-700 dark:text-zinc-200 border-r border-slate-200/80 dark:border-zinc-800 transition-all duration-300 select-none font-sans ${
+      isSidebarCollapsed ? "w-[68px]" : "w-60"
+    }`}>
+      {/* Brand Header with Artboard 3.png and 3-lines hamburger menu right beside it */}
+      <div className={`p-3.5 pb-3 flex items-center border-b border-slate-100 dark:border-zinc-800/80 transition-all ${
+        isSidebarCollapsed ? "justify-center flex-col gap-2 px-2" : "justify-between px-4"
+      }`}>
+        {isSidebarCollapsed ? (
+          <div className="flex flex-col items-center gap-2 w-full">
+            <img src="/Artboard 3.png" alt="TrioTax" className="h-7 w-auto object-contain flex-shrink-0" />
+            <button
+              onClick={() => setIsSidebarCollapsed(false)}
+              className="p-1.5 text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
+              title="Expand sidebar"
+            >
+              <Menu size={18} />
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center gap-2">
+              <img src="/Artboard 3.png" alt="TrioTax" className="h-7 w-auto object-contain flex-shrink-0" />
+              <span className="text-base font-bold text-slate-900 dark:text-white tracking-tight whitespace-nowrap">
+                TrioTax
+              </span>
+              {/* 3-lines hamburger menu button right beside the logo */}
+              <button
+                onClick={() => setIsSidebarCollapsed(true)}
+                className="p-1.5 text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer ml-1"
+                title="Collapse sidebar"
+              >
+                <Menu size={18} />
+              </button>
+            </div>
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="md:hidden text-slate-400 hover:text-slate-600 p-1 rounded-md transition-colors"
+              title="Close Sidebar"
+            >
+              <PanelLeftClose size={16} />
+            </button>
+          </>
+        )}
       </div>
 
       {/* Navigation Group Header */}
-      <div className="px-4 pt-3 pb-1">
-        <span className="text-[11px] font-semibold text-slate-400 dark:text-zinc-500">
-          General
-        </span>
-      </div>
+      {isSidebarCollapsed ? (
+        <div className="my-2 mx-3 h-px bg-slate-100 dark:bg-zinc-800/80" />
+      ) : (
+        <div className="px-4 pt-3 pb-1">
+          <span className="text-[11px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
+            General
+          </span>
+        </div>
+      )}
 
       {/* The 9 Tabs */}
-      <div className="flex-1 px-3 space-y-1 overflow-y-auto">
+      <div className={`flex-1 space-y-1 overflow-y-auto ${isSidebarCollapsed ? "px-2" : "px-3"}`}>
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -4733,45 +4767,69 @@ case "sales":
                 setIsMobileMenuOpen(false);
                 window.history.pushState(null, "", `/${username}-user/${tab.id}`);
               }}
-              className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-all flex items-center justify-between font-medium cursor-pointer ${
+              title={tab.label}
+              className={`w-full transition-all flex items-center font-medium cursor-pointer rounded-lg ${
+                isSidebarCollapsed
+                  ? "justify-center p-2.5"
+                  : "justify-between px-3 py-2 text-xs"
+              } ${
                 isActive
                   ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 font-semibold shadow-xs"
                   : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-zinc-900"
               }`}
             >
-              <div className="flex items-center gap-2.5">
-                <tab.icon size={15} className={isActive ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-zinc-500"} />
-                <span>{tab.label}</span>
+              <div className={`flex items-center ${isSidebarCollapsed ? "justify-center relative" : "gap-2.5"}`}>
+                <tab.icon
+                  size={isSidebarCollapsed ? 18 : 15}
+                  className={isActive ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-zinc-500"}
+                />
+                {!isSidebarCollapsed && <span>{tab.label}</span>}
+                {tab.id === "compliance-tracker" && isSidebarCollapsed && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-zinc-950" />
+                )}
               </div>
-              {tab.id === "compliance-tracker" && (
+              {!isSidebarCollapsed && tab.id === "compliance-tracker" && (
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
               )}
             </button>
           );
         })}
 
-        {/* Section: Pages / Profile */}
-        <div className="px-1 pt-3 pb-1">
-          <span className="text-[11px] font-semibold text-slate-400 dark:text-zinc-500">
-            Administration
-          </span>
-        </div>
+        {/* Section: Administration */}
+        {isSidebarCollapsed ? (
+          <div className="my-2 mx-3 h-px bg-slate-100 dark:bg-zinc-800/80" />
+        ) : (
+          <div className="px-1 pt-3 pb-1">
+            <span className="text-[11px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
+              Administration
+            </span>
+          </div>
+        )}
+
         <button
           onClick={() => {
             setActiveTab("company-profile");
             setIsMobileMenuOpen(false);
           }}
-          className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-all flex items-center justify-between font-medium cursor-pointer ${
+          title="Company Profile"
+          className={`w-full transition-all flex items-center font-medium cursor-pointer rounded-lg ${
+            isSidebarCollapsed
+              ? "justify-center p-2.5"
+              : "justify-between px-3 py-2 text-xs"
+          } ${
             activeTab === "company-profile"
               ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 font-semibold shadow-xs"
               : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-zinc-900"
           }`}
         >
-          <div className="flex items-center gap-2.5">
-            <Building2 size={15} className={activeTab === "company-profile" ? "text-blue-600 dark:text-blue-400" : "text-slate-400"} />
-            <span>Company Profile</span>
+          <div className={`flex items-center ${isSidebarCollapsed ? "justify-center" : "gap-2.5"}`}>
+            <Building2
+              size={isSidebarCollapsed ? 18 : 15}
+              className={activeTab === "company-profile" ? "text-blue-600 dark:text-blue-400" : "text-slate-400"}
+            />
+            {!isSidebarCollapsed && <span>Company Profile</span>}
           </div>
-          <ChevronRight size={13} className="text-slate-400" />
+          {!isSidebarCollapsed && <ChevronRight size={13} className="text-slate-400" />}
         </button>
 
         <button
@@ -4779,56 +4837,92 @@ case "sales":
             setActiveTab("settings");
             setIsMobileMenuOpen(false);
           }}
-          className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-all flex items-center justify-between font-medium cursor-pointer ${
+          title="Settings"
+          className={`w-full transition-all flex items-center font-medium cursor-pointer rounded-lg ${
+            isSidebarCollapsed
+              ? "justify-center p-2.5"
+              : "justify-between px-3 py-2 text-xs"
+          } ${
             activeTab === "settings"
               ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 font-semibold shadow-xs"
               : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-zinc-900"
           }`}
         >
-          <div className="flex items-center gap-2.5">
-            <Settings size={15} className={activeTab === "settings" ? "text-blue-600 dark:text-blue-400" : "text-slate-400"} />
-            <span>Settings</span>
+          <div className={`flex items-center ${isSidebarCollapsed ? "justify-center" : "gap-2.5"}`}>
+            <Settings
+              size={isSidebarCollapsed ? 18 : 15}
+              className={activeTab === "settings" ? "text-blue-600 dark:text-blue-400" : "text-slate-400"}
+            />
+            {!isSidebarCollapsed && <span>Settings</span>}
           </div>
-          <ChevronRight size={13} className="text-slate-400" />
+          {!isSidebarCollapsed && <ChevronRight size={13} className="text-slate-400" />}
         </button>
       </div>
 
-      {/* Bottom User Profile Section matching screenshot */}
-      <div className="p-3 border-t border-slate-100 dark:border-zinc-800 space-y-2">
-        <div
-          onClick={() => setIsCompanyProfileOpen(true)}
-          className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-100/80 dark:hover:bg-zinc-900 transition-colors cursor-pointer"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center uppercase shadow-xs">
+      {/* Bottom User Profile Section */}
+      <div className={`border-t border-slate-100 dark:border-zinc-800 ${
+        isSidebarCollapsed ? "p-2 space-y-2 flex flex-col items-center" : "p-3 space-y-2"
+      }`}>
+        {isSidebarCollapsed ? (
+          <>
+            <div
+              onClick={() => setActiveTab("company-profile")}
+              className="w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center uppercase shadow-xs cursor-pointer hover:ring-2 hover:ring-blue-500/20"
+              title={`${username} (${username}@triotax.in)`}
+            >
               {username.charAt(0)}
             </div>
-            <div className="truncate">
-              <p className="text-xs font-bold text-slate-800 dark:text-zinc-200 truncate">{username}</p>
-              <p className="text-[10px] text-slate-400 dark:text-zinc-500 truncate">{username}@triotax.in</p>
+            <div className="flex flex-col items-center gap-1.5 pt-1 w-full border-t border-slate-100 dark:border-zinc-800/80">
+              <ThemeToggle />
+              <button
+                onClick={onLogout}
+                className="p-1.5 text-slate-500 hover:text-rose-600 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                title="Logout"
+              >
+                <LogOut size={15} />
+              </button>
             </div>
-          </div>
-          <ChevronUp size={14} className="text-slate-400" />
-        </div>
+          </>
+        ) : (
+          <>
+            <div
+              onClick={() => setActiveTab("company-profile")}
+              className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-100/80 dark:hover:bg-zinc-900 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center uppercase shadow-xs">
+                  {username.charAt(0)}
+                </div>
+                <div className="truncate">
+                  <p className="text-xs font-bold text-slate-800 dark:text-zinc-200 truncate">{username}</p>
+                  <p className="text-[10px] text-slate-400 dark:text-zinc-500 truncate">{username}@triotax.in</p>
+                </div>
+              </div>
+              <ChevronUp size={14} className="text-slate-400" />
+            </div>
 
-        <div className="flex items-center justify-between px-2 pt-1 border-t border-slate-100 dark:border-zinc-800/80">
-          <ThemeToggle />
-          <button
-            onClick={onLogout}
-            className="text-xs text-slate-500 hover:text-rose-600 flex items-center gap-1.5 transition-colors font-medium cursor-pointer"
-          >
-            <LogOut size={13} />
-            <span>Logout</span>
-          </button>
-        </div>
+            <div className="flex items-center justify-between px-2 pt-1 border-t border-slate-100 dark:border-zinc-800/80">
+              <ThemeToggle />
+              <button
+                onClick={onLogout}
+                className="text-xs text-slate-500 hover:text-rose-600 flex items-center gap-1.5 transition-colors font-medium cursor-pointer"
+              >
+                <LogOut size={13} />
+                <span>Logout</span>
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 
   return (
     <div className="flex h-screen bg-slate-50/70 dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 transition-colors duration-200 overflow-hidden font-sans">
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:block w-60 h-full flex-shrink-0">
+      {/* Desktop Sidebar with dynamic width and smooth transition */}
+      <aside className={`hidden md:block h-full flex-shrink-0 transition-all duration-300 ease-in-out ${
+        isSidebarCollapsed ? "w-[68px]" : "w-60"
+      }`}>
         <SidebarContent />
       </aside>
 
