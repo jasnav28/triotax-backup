@@ -4724,9 +4724,6 @@ case "sales":
           <>
             <div className="flex items-center gap-2">
               <img src="/Artboard 3.png" alt="TrioTax" className="h-7 w-auto object-contain flex-shrink-0" />
-              <span className="text-base font-bold text-slate-900 dark:text-white tracking-tight whitespace-nowrap">
-                TrioTax
-              </span>
               {/* 3-lines hamburger menu button right beside the logo */}
               <button
                 onClick={() => setIsSidebarCollapsed(true)}

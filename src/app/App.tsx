@@ -7074,13 +7074,30 @@ export default function App() {
     () => (document.documentElement.classList.contains("dark") ? "dark" : "light")
   );
   
-  // Auth state
-  const [isAdminAuth, setIsAdminAuth] = useState(false);
-  const [isUserAuth, setIsUserAuth] = useState(false);
+  // Auth state persisted across page reloads & refreshes
+  const [isAdminAuth, setIsAdminAuth] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("triotax_is_admin_auth") === "true";
+    } catch {
+      return false;
+    }
+  });
+  const [isUserAuth, setIsUserAuth] = useState<boolean>(() => {
+    try {
+      const savedAuth = localStorage.getItem("triotax_is_user_auth") === "true";
+      const path = typeof window !== "undefined" ? window.location.pathname : "";
+      return savedAuth || path.includes("-user");
+    } catch {
+      return false;
+    }
+  });
 
   const handleAdminLogin = (password: string, username: string) => {
     if (username === "admin" && password === "admin123") {
       setIsAdminAuth(true);
+      try {
+        localStorage.setItem("triotax_is_admin_auth", "true");
+      } catch {}
       return true;
     }
     return false;
@@ -7089,6 +7106,10 @@ export default function App() {
   const handleUserLogin = (username?: string, _password?: string) => {
     if (!username) return;
     setIsUserAuth(true);
+    try {
+      localStorage.setItem("triotax_is_user_auth", "true");
+      localStorage.setItem("triotax_logged_in_user", username);
+    } catch {}
     setUsername(username);
     setUserTab("home");
     window.history.pushState(null, "", `/${username}-user/home`);
@@ -7099,6 +7120,11 @@ export default function App() {
   const handleLogout = () => {
     setIsAdminAuth(false);
     setIsUserAuth(false);
+    try {
+      localStorage.removeItem("triotax_is_admin_auth");
+      localStorage.removeItem("triotax_is_user_auth");
+      localStorage.removeItem("triotax_logged_in_user");
+    } catch {}
     navigateToPage("home");
   };
 
@@ -7140,9 +7166,15 @@ export default function App() {
       } else if (path.includes("-user")) {
         const parts = path.split("/");
         const userPart = parts[0];
-        setUsername(userPart.replace("-user", ""));
+        const userClean = userPart.replace("-user", "");
+        setUsername(userClean);
         const tabPart = parts.length > 1 ? parts.slice(1).join("/") : "home";
         setUserTab(tabPart === "dashboard" ? "home" : tabPart);
+        setIsUserAuth(true);
+        try {
+          localStorage.setItem("triotax_is_user_auth", "true");
+          localStorage.setItem("triotax_logged_in_user", userClean);
+        } catch {}
         setActivePage("user");
       } else if (validPages.includes(path || "home")) {
         setActivePage((path || "home") as Page);
