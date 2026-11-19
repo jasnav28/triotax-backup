@@ -6281,23 +6281,26 @@ case "sales":
   // SIDEBAR NAVIGATION (WITH 3-LINE HAMBURGER TOGGLE & SHRINK MODE)
   // ─────────────────────────────────────────────────────────────
   const SidebarContent = () => (
-    <div className={`flex flex-col h-full bg-white dark:bg-zinc-950 text-slate-700 dark:text-zinc-200 border-r border-slate-200/80 dark:border-zinc-800 transition-all duration-300 select-none font-sans ${
-      isSidebarCollapsed ? "w-[68px]" : "w-60"
-    }`}>
-      {/* Brand Header with Artboard 3.png and 3-lines hamburger menu right beside it */}
-      <div className={`p-3.5 pb-3 flex items-center border-b border-slate-100 dark:border-zinc-800/80 transition-all ${
+    <div
+      style={{ backgroundColor: "#003153" }}
+      className={`flex flex-col h-full text-white border-r border-[#00223a] transition-all duration-300 select-none font-sans ${
+        isSidebarCollapsed ? "w-[68px]" : "w-60"
+      }`}
+    >
+      {/* Brand Header with Artboard.png and 3-lines hamburger menu right beside it */}
+      <div className={`p-3.5 pb-3 flex items-center border-b border-white/10 transition-all ${
         isSidebarCollapsed ? "justify-center flex-col gap-2 px-2" : "justify-between px-4"
       }`}>
         {isSidebarCollapsed ? (
           <div className="flex flex-col items-center gap-2 w-full">
             <button
               onClick={() => setIsSidebarCollapsed(false)}
-              className="p-1.5 text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
+              className="p-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
               title="Expand sidebar"
             >
               <Menu size={18} />
             </button>
-            <img src="/Artboard 3.png" alt="TrioTax" className="h-6 max-w-full object-contain flex-shrink-0" />
+            <img src="/Artboard.png" alt="TrioTax" className="h-6 max-w-full object-contain flex-shrink-0" />
           </div>
         ) : (
           <>
@@ -6305,16 +6308,16 @@ case "sales":
               {/* 3-lines hamburger menu button towards left side of the logo */}
               <button
                 onClick={() => setIsSidebarCollapsed(true)}
-                className="p-1.5 text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer -ml-1"
+                className="p-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer -ml-1"
                 title="Collapse sidebar"
               >
                 <Menu size={18} />
               </button>
-              <img src="/Artboard 3.png" alt="TrioTax" className="h-7 w-auto object-contain flex-shrink-0" />
+              <img src="/Artboard.png" alt="TrioTax" className="h-7 w-auto object-contain flex-shrink-0" />
             </div>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
-              className="md:hidden text-slate-400 hover:text-slate-600 p-1 rounded-md transition-colors"
+              className="md:hidden text-white/70 hover:text-white p-1 rounded-md transition-colors"
               title="Close Sidebar"
             >
               <PanelLeftClose size={16} />
@@ -6325,10 +6328,10 @@ case "sales":
 
       {/* Navigation Group Header */}
       {isSidebarCollapsed ? (
-        <div className="my-2 mx-3 h-px bg-slate-100 dark:bg-zinc-800/80" />
+        <div className="my-2 mx-3 h-px bg-white/10" />
       ) : (
         <div className="px-4 pt-3 pb-1">
-          <span className="text-[11px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
+          <span className="text-[11px] font-semibold text-white/50 uppercase tracking-wider">
             General
           </span>
         </div>
@@ -6353,22 +6356,22 @@ case "sales":
                   : "justify-between px-3 py-2 text-xs"
               } ${
                 isActive
-                  ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 font-semibold shadow-xs"
-                  : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-zinc-900"
+                  ? "bg-white/15 text-white font-bold shadow-xs backdrop-blur-xs"
+                  : "text-white/75 hover:text-white hover:bg-white/10"
               }`}
             >
               <div className={`flex items-center ${isSidebarCollapsed ? "justify-center relative" : "gap-2.5"}`}>
                 <tab.icon
                   size={isSidebarCollapsed ? 18 : 15}
-                  className={isActive ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-zinc-500"}
+                  className={isActive ? "text-sky-300" : "text-white/60"}
                 />
                 {!isSidebarCollapsed && <span>{tab.label}</span>}
                 {tab.id === "compliance-tracker" && isSidebarCollapsed && (
-                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-zinc-950" />
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-[#003153]" />
                 )}
               </div>
               {!isSidebarCollapsed && tab.id === "compliance-tracker" && (
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
               )}
             </button>
           );
@@ -6376,10 +6379,10 @@ case "sales":
 
         {/* Section: Administration */}
         {isSidebarCollapsed ? (
-          <div className="my-2 mx-3 h-px bg-slate-100 dark:bg-zinc-800/80" />
+          <div className="my-2 mx-3 h-px bg-white/10" />
         ) : (
           <div className="px-1 pt-3 pb-1">
-            <span className="text-[11px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
+            <span className="text-[11px] font-semibold text-white/50 uppercase tracking-wider">
               Administration
             </span>
           </div>
@@ -6397,18 +6400,18 @@ case "sales":
               : "justify-between px-3 py-2 text-xs"
           } ${
             activeTab === "company-profile"
-              ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 font-semibold shadow-xs"
-              : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-zinc-900"
+              ? "bg-white/15 text-white font-bold shadow-xs backdrop-blur-xs"
+              : "text-white/75 hover:text-white hover:bg-white/10"
           }`}
         >
           <div className={`flex items-center ${isSidebarCollapsed ? "justify-center" : "gap-2.5"}`}>
             <Building2
               size={isSidebarCollapsed ? 18 : 15}
-              className={activeTab === "company-profile" ? "text-blue-600 dark:text-blue-400" : "text-slate-400"}
+              className={activeTab === "company-profile" ? "text-sky-300" : "text-white/60"}
             />
             {!isSidebarCollapsed && <span>Company Profile</span>}
           </div>
-          {!isSidebarCollapsed && <ChevronRight size={13} className="text-slate-400" />}
+          {!isSidebarCollapsed && <ChevronRight size={13} className="text-white/40" />}
         </button>
 
         <button
@@ -6423,39 +6426,39 @@ case "sales":
               : "justify-between px-3 py-2 text-xs"
           } ${
             activeTab === "settings"
-              ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 font-semibold shadow-xs"
-              : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-zinc-900"
+              ? "bg-white/15 text-white font-bold shadow-xs backdrop-blur-xs"
+              : "text-white/75 hover:text-white hover:bg-white/10"
           }`}
         >
           <div className={`flex items-center ${isSidebarCollapsed ? "justify-center" : "gap-2.5"}`}>
             <Settings
               size={isSidebarCollapsed ? 18 : 15}
-              className={activeTab === "settings" ? "text-blue-600 dark:text-blue-400" : "text-slate-400"}
+              className={activeTab === "settings" ? "text-sky-300" : "text-white/60"}
             />
             {!isSidebarCollapsed && <span>Settings</span>}
           </div>
-          {!isSidebarCollapsed && <ChevronRight size={13} className="text-slate-400" />}
+          {!isSidebarCollapsed && <ChevronRight size={13} className="text-white/40" />}
         </button>
       </div>
 
       {/* Bottom User Profile Section */}
-      <div className={`border-t border-slate-100 dark:border-zinc-800 ${
+      <div className={`border-t border-white/10 ${
         isSidebarCollapsed ? "p-2 space-y-2 flex flex-col items-center" : "p-3 space-y-2"
       }`}>
         {isSidebarCollapsed ? (
           <>
             <div
               onClick={() => setActiveTab("company-profile")}
-              className="w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center uppercase shadow-xs cursor-pointer hover:ring-2 hover:ring-blue-500/20"
+              className="w-8 h-8 rounded-full bg-white/20 text-white font-bold text-xs flex items-center justify-center uppercase shadow-xs cursor-pointer hover:ring-2 hover:ring-sky-400/40"
               title={`${username} (${username}@triotax.in)`}
             >
               {username.charAt(0)}
             </div>
-            <div className="flex flex-col items-center gap-1.5 pt-1 w-full border-t border-slate-100 dark:border-zinc-800/80">
+            <div className="flex flex-col items-center gap-1.5 pt-1 w-full border-t border-white/10">
               <ThemeToggle />
               <button
                 onClick={onLogout}
-                className="p-1.5 text-slate-500 hover:text-rose-600 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                className="p-1.5 text-white/70 hover:text-rose-300 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
                 title="Logout"
               >
                 <LogOut size={15} />
@@ -6466,25 +6469,25 @@ case "sales":
           <>
             <div
               onClick={() => setActiveTab("company-profile")}
-              className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-100/80 dark:hover:bg-zinc-900 transition-colors cursor-pointer"
+              className="flex items-center justify-between p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center uppercase shadow-xs">
+                <div className="w-8 h-8 rounded-full bg-white/20 text-white font-bold text-xs flex items-center justify-center uppercase shadow-xs border border-white/20">
                   {username.charAt(0)}
                 </div>
                 <div className="truncate">
-                  <p className="text-xs font-bold text-slate-800 dark:text-zinc-200 truncate">{username}</p>
-                  <p className="text-[10px] text-slate-400 dark:text-zinc-500 truncate">{username}@triotax.in</p>
+                  <p className="text-xs font-bold text-white truncate">{username}</p>
+                  <p className="text-[10px] text-white/60 truncate">{username}@triotax.in</p>
                 </div>
               </div>
-              <ChevronUp size={14} className="text-slate-400" />
+              <ChevronUp size={14} className="text-white/50" />
             </div>
 
-            <div className="flex items-center justify-between px-2 pt-1 border-t border-slate-100 dark:border-zinc-800/80">
+            <div className="flex items-center justify-between px-2 pt-1 border-t border-white/10">
               <ThemeToggle />
               <button
                 onClick={onLogout}
-                className="text-xs text-slate-500 hover:text-rose-600 flex items-center gap-1.5 transition-colors font-medium cursor-pointer"
+                className="text-xs text-white/70 hover:text-rose-300 flex items-center gap-1.5 transition-colors font-medium cursor-pointer"
               >
                 <LogOut size={13} />
                 <span>Logout</span>
@@ -6499,9 +6502,12 @@ case "sales":
   return (
     <div className="flex h-screen bg-slate-50/70 dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 transition-colors duration-200 overflow-hidden font-sans">
       {/* Desktop Sidebar with dynamic width and smooth transition */}
-      <aside className={`hidden md:block h-full flex-shrink-0 transition-all duration-300 ease-in-out ${
-        isSidebarCollapsed ? "w-[68px]" : "w-60"
-      }`}>
+      <aside
+        style={{ backgroundColor: "#003153" }}
+        className={`hidden md:block h-full flex-shrink-0 transition-all duration-300 ease-in-out ${
+          isSidebarCollapsed ? "w-[68px]" : "w-60"
+        }`}
+      >
         <SidebarContent />
       </aside>
 
@@ -6521,6 +6527,7 @@ case "sales":
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="w-60 h-full"
+              style={{ backgroundColor: "#003153" }}
               onClick={(e) => e.stopPropagation()}
             >
               <SidebarContent />
