@@ -6316,7 +6316,7 @@ case "sales":
         isSidebarCollapsed ? "w-[68px]" : "w-60"
       }`}
     >
-      {/* Brand Header with Artboard.png and 3-lines hamburger menu right beside it */}
+      {/* Brand Header with Artboard.png (expanded) or logo.png without background (collapsed) */}
       <div className={`p-4 pb-3 flex items-center border-b border-white/10 transition-all ${
         isSidebarCollapsed ? "justify-center flex-col gap-2 px-2" : "justify-between px-4"
       }`}>
@@ -6329,7 +6329,11 @@ case "sales":
             >
               <Menu size={18} />
             </button>
-            <img src="/Artboard.png" alt="TrioTax" className="h-6 max-w-full object-contain flex-shrink-0" />
+            <img
+              src="/logo.png"
+              alt="TrioTax"
+              className="h-8 w-8 object-contain flex-shrink-0 drop-shadow-sm"
+            />
           </div>
         ) : (
           <>
