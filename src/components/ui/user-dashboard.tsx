@@ -6280,6 +6280,35 @@ case "sales":
   // ─────────────────────────────────────────────────────────────
   // SIDEBAR NAVIGATION (WITH 3-LINE HAMBURGER TOGGLE & SHRINK MODE)
   // ─────────────────────────────────────────────────────────────
+  const navSections = [
+    {
+      title: "MAIN",
+      items: [
+        { id: "home", label: "DASHBOARD", icon: Home },
+        { id: "sales", label: "SALES", icon: CreditCard },
+        { id: "purchases", label: "PURCHASES", icon: ShoppingCart },
+        { id: "expenses", label: "EXPENSES", icon: DollarSign },
+      ],
+    },
+    {
+      title: "CONFIGURATION",
+      items: [
+        { id: "payments-tracker", label: "PAYMENTS", icon: Wallet },
+        { id: "compliance-tracker", label: "COMPLIANCE", icon: FileText },
+        { id: "payroll", label: "PAYROLL", icon: Users },
+        { id: "documents", label: "DOCUMENTS", icon: Folder },
+        { id: "reports", label: "REPORTS", icon: BarChart3 },
+      ],
+    },
+    {
+      title: "WORKSPACE",
+      items: [
+        { id: "company-profile", label: "COMPANY PROFILE", icon: Building2 },
+        { id: "settings", label: "SETTINGS", icon: Settings },
+      ],
+    },
+  ];
+
   const SidebarContent = () => (
     <div
       style={{ backgroundColor: "#003153" }}
@@ -6288,7 +6317,7 @@ case "sales":
       }`}
     >
       {/* Brand Header with Artboard.png and 3-lines hamburger menu right beside it */}
-      <div className={`p-3.5 pb-3 flex items-center border-b border-white/10 transition-all ${
+      <div className={`p-4 pb-3 flex items-center border-b border-white/10 transition-all ${
         isSidebarCollapsed ? "justify-center flex-col gap-2 px-2" : "justify-between px-4"
       }`}>
         {isSidebarCollapsed ? (
@@ -6304,7 +6333,7 @@ case "sales":
           </div>
         ) : (
           <>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               {/* 3-lines hamburger menu button towards left side of the logo */}
               <button
                 onClick={() => setIsSidebarCollapsed(true)}
@@ -6326,133 +6355,75 @@ case "sales":
         )}
       </div>
 
-      {/* Navigation Group Header */}
-      {isSidebarCollapsed ? (
-        <div className="my-2 mx-3 h-px bg-white/10" />
-      ) : (
-        <div className="px-4 pt-3 pb-1">
-          <span className="text-[11px] font-semibold text-white/50 uppercase tracking-wider">
-            General
-          </span>
-        </div>
-      )}
-
-      {/* The 9 Tabs */}
-      <div className={`flex-1 space-y-1 overflow-y-auto ${isSidebarCollapsed ? "px-2" : "px-3"}`}>
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id);
-                setIsMobileMenuOpen(false);
-                window.history.pushState(null, "", `/${username}-user/${tab.id}`);
-              }}
-              title={tab.label}
-              className={`w-full transition-all flex items-center font-medium cursor-pointer rounded-lg ${
-                isSidebarCollapsed
-                  ? "justify-center p-2.5"
-                  : "justify-between px-3 py-2 text-xs"
-              } ${
-                isActive
-                  ? "bg-white/15 text-white font-bold shadow-xs backdrop-blur-xs"
-                  : "text-white/75 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              <div className={`flex items-center ${isSidebarCollapsed ? "justify-center relative" : "gap-2.5"}`}>
-                <tab.icon
-                  size={isSidebarCollapsed ? 18 : 15}
-                  className={isActive ? "text-sky-300" : "text-white/60"}
-                />
-                {!isSidebarCollapsed && <span>{tab.label}</span>}
-                {tab.id === "compliance-tracker" && isSidebarCollapsed && (
-                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-[#003153]" />
-                )}
+      {/* Categorized Nav Sections matching Synapse layout (MAIN, CONFIGURATION, WORKSPACE) */}
+      <div className={`flex-1 space-y-4 overflow-y-auto pt-2 ${isSidebarCollapsed ? "px-2" : "px-3"}`}>
+        {navSections.map((section) => (
+          <div key={section.title} className="space-y-1">
+            {isSidebarCollapsed ? (
+              <div className="my-2 mx-3 h-px bg-white/10" />
+            ) : (
+              <div className="px-3 pt-2 pb-1">
+                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest select-none">
+                  {section.title}
+                </span>
               </div>
-              {!isSidebarCollapsed && tab.id === "compliance-tracker" && (
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-              )}
-            </button>
-          );
-        })}
+            )}
 
-        {/* Section: Administration */}
-        {isSidebarCollapsed ? (
-          <div className="my-2 mx-3 h-px bg-white/10" />
-        ) : (
-          <div className="px-1 pt-3 pb-1">
-            <span className="text-[11px] font-semibold text-white/50 uppercase tracking-wider">
-              Administration
-            </span>
+            {section.items.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setIsMobileMenuOpen(false);
+                    if (tab.id !== "company-profile" && tab.id !== "settings") {
+                      window.history.pushState(null, "", `/${username}-user/${tab.id}`);
+                    }
+                  }}
+                  title={tab.label}
+                  className={`w-full transition-all flex items-center font-medium cursor-pointer rounded-xl ${
+                    isSidebarCollapsed
+                      ? "justify-center p-2.5"
+                      : "justify-between px-3.5 py-2 text-xs uppercase tracking-wider"
+                  } ${
+                    isActive
+                      ? "bg-white/15 text-white font-bold shadow-xs backdrop-blur-xs"
+                      : "text-white/70 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  <div className={`flex items-center ${isSidebarCollapsed ? "justify-center relative" : "gap-3"}`}>
+                    <tab.icon
+                      size={isSidebarCollapsed ? 18 : 16}
+                      className={isActive ? "text-white" : "text-white/60"}
+                    />
+                    {!isSidebarCollapsed && <span className="truncate">{tab.label}</span>}
+                    {tab.id === "compliance-tracker" && isSidebarCollapsed && (
+                      <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-[#003153]" />
+                    )}
+                  </div>
+                  {!isSidebarCollapsed && tab.id === "compliance-tracker" && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  )}
+                </button>
+              );
+            })}
           </div>
-        )}
-
-        <button
-          onClick={() => {
-            setActiveTab("company-profile");
-            setIsMobileMenuOpen(false);
-          }}
-          title="Company Profile"
-          className={`w-full transition-all flex items-center font-medium cursor-pointer rounded-lg ${
-            isSidebarCollapsed
-              ? "justify-center p-2.5"
-              : "justify-between px-3 py-2 text-xs"
-          } ${
-            activeTab === "company-profile"
-              ? "bg-white/15 text-white font-bold shadow-xs backdrop-blur-xs"
-              : "text-white/75 hover:text-white hover:bg-white/10"
-          }`}
-        >
-          <div className={`flex items-center ${isSidebarCollapsed ? "justify-center" : "gap-2.5"}`}>
-            <Building2
-              size={isSidebarCollapsed ? 18 : 15}
-              className={activeTab === "company-profile" ? "text-sky-300" : "text-white/60"}
-            />
-            {!isSidebarCollapsed && <span>Company Profile</span>}
-          </div>
-          {!isSidebarCollapsed && <ChevronRight size={13} className="text-white/40" />}
-        </button>
-
-        <button
-          onClick={() => {
-            setActiveTab("settings");
-            setIsMobileMenuOpen(false);
-          }}
-          title="Settings"
-          className={`w-full transition-all flex items-center font-medium cursor-pointer rounded-lg ${
-            isSidebarCollapsed
-              ? "justify-center p-2.5"
-              : "justify-between px-3 py-2 text-xs"
-          } ${
-            activeTab === "settings"
-              ? "bg-white/15 text-white font-bold shadow-xs backdrop-blur-xs"
-              : "text-white/75 hover:text-white hover:bg-white/10"
-          }`}
-        >
-          <div className={`flex items-center ${isSidebarCollapsed ? "justify-center" : "gap-2.5"}`}>
-            <Settings
-              size={isSidebarCollapsed ? 18 : 15}
-              className={activeTab === "settings" ? "text-sky-300" : "text-white/60"}
-            />
-            {!isSidebarCollapsed && <span>Settings</span>}
-          </div>
-          {!isSidebarCollapsed && <ChevronRight size={13} className="text-white/40" />}
-        </button>
+        ))}
       </div>
 
-      {/* Bottom User Profile Section */}
+      {/* Bottom User Profile Section matching Synapse layout */}
       <div className={`border-t border-white/10 ${
-        isSidebarCollapsed ? "p-2 space-y-2 flex flex-col items-center" : "p-3 space-y-2"
+        isSidebarCollapsed ? "p-2 space-y-2 flex flex-col items-center" : "p-3 space-y-2.5"
       }`}>
         {isSidebarCollapsed ? (
           <>
             <div
               onClick={() => setActiveTab("company-profile")}
-              className="w-8 h-8 rounded-full bg-white/20 text-white font-bold text-xs flex items-center justify-center uppercase shadow-xs cursor-pointer hover:ring-2 hover:ring-sky-400/40"
+              className="w-9 h-9 rounded-full bg-white/20 text-white font-bold text-xs flex items-center justify-center uppercase shadow-xs cursor-pointer hover:ring-2 hover:ring-sky-400/40 border border-white/20"
               title={`${username} (${username}@triotax.in)`}
             >
-              {username.charAt(0)}
+              {username.slice(0, 2).toUpperCase()}
             </div>
             <div className="flex flex-col items-center gap-1.5 pt-1 w-full border-t border-white/10">
               <ThemeToggle />
@@ -6461,7 +6432,7 @@ case "sales":
                 className="p-1.5 text-white/70 hover:text-rose-300 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
                 title="Logout"
               >
-                <LogOut size={15} />
+                <LogOut size={16} />
               </button>
             </div>
           </>
@@ -6469,30 +6440,29 @@ case "sales":
           <>
             <div
               onClick={() => setActiveTab("company-profile")}
-              className="flex items-center justify-between p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+              className="flex items-center justify-between p-2 rounded-xl hover:bg-white/10 transition-colors cursor-pointer"
             >
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-white/20 text-white font-bold text-xs flex items-center justify-center uppercase shadow-xs border border-white/20">
-                  {username.charAt(0)}
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-full bg-white/20 text-white font-bold text-xs flex items-center justify-center uppercase shadow-xs border border-white/20 flex-shrink-0">
+                  {username.slice(0, 2).toUpperCase()}
                 </div>
                 <div className="truncate">
-                  <p className="text-xs font-bold text-white truncate">{username}</p>
-                  <p className="text-[10px] text-white/60 truncate">{username}@triotax.in</p>
+                  <p className="text-xs font-bold text-white uppercase tracking-wider truncate">{username}</p>
+                  <p className="text-[10px] text-white/50 font-medium tracking-wide truncate">PRO USER</p>
                 </div>
               </div>
-              <ChevronUp size={14} className="text-white/50" />
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <ThemeToggle />
+              </div>
             </div>
 
-            <div className="flex items-center justify-between px-2 pt-1 border-t border-white/10">
-              <ThemeToggle />
-              <button
-                onClick={onLogout}
-                className="text-xs text-white/70 hover:text-rose-300 flex items-center gap-1.5 transition-colors font-medium cursor-pointer"
-              >
-                <LogOut size={13} />
-                <span>Logout</span>
-              </button>
-            </div>
+            <button
+              onClick={onLogout}
+              className="w-full border border-white/20 hover:border-white/40 hover:bg-white/10 text-white text-[11px] font-semibold tracking-wider uppercase rounded-xl py-2 px-3 text-center transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.99]"
+            >
+              <LogOut size={13} />
+              <span>LOGOUT</span>
+            </button>
           </>
         )}
       </div>
@@ -6538,20 +6508,28 @@ case "sales":
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/70 dark:bg-zinc-950">
-        {/* Top Header Bar matching reference image & user quick access */}
-        <header className="h-14 px-4 sm:px-8 bg-[#09090b] text-white flex items-center justify-between flex-shrink-0 border-b border-zinc-800 shadow-sm">
+        {/* Top Header Bar styled with #003153 matching reference image */}
+        <header
+          style={{ backgroundColor: "#003153" }}
+          className="h-14 px-4 sm:px-8 text-white flex items-center justify-between flex-shrink-0 border-b border-[#00223a] shadow-sm select-none"
+        >
           <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-zinc-400 hover:text-white hover:bg-zinc-800/80 rounded-lg transition-colors"
+              className="md:hidden p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
             >
               <Menu size={20} />
             </button>
 
+            {/* Mobile Brand Logo with Artboard.png */}
+            <div className="md:hidden flex items-center">
+              <img src="/Artboard.png" alt="TrioTax" className="h-6 w-auto object-contain" />
+            </div>
+
             {/* History / Recent Activity Icon matching Reference Image */}
             <button
               onClick={() => alert("Recent Activity: System synced with GST Portal & Database.")}
-              className="text-zinc-400 hover:text-white p-1.5 rounded-lg hover:bg-zinc-800/80 transition-colors hidden sm:flex items-center justify-center"
+              className="text-white/70 hover:text-white p-2 rounded-xl hover:bg-white/10 transition-colors hidden sm:flex items-center justify-center"
               title="Recent Activity / History"
             >
               <History size={16} />
@@ -6559,10 +6537,10 @@ case "sales":
 
             {/* Search Bar with Dropdown indicator matching Reference Image */}
             <div className="relative w-56 sm:w-80 md:w-96">
-              <div className="flex items-center justify-between w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs shadow-inner focus-within:border-zinc-600 transition-all">
+              <div className="flex items-center justify-between w-full bg-white/10 border border-white/15 rounded-xl px-3 py-2 text-xs backdrop-blur-xs focus-within:border-white/30 focus-within:bg-white/15 transition-all">
                 <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                  <Search size={14} className="text-zinc-400 flex-shrink-0" />
-                  <ChevronDown size={11} className="text-zinc-400 flex-shrink-0 -ml-0.5" />
+                  <Search size={14} className="text-white/60 flex-shrink-0" />
+                  <ChevronDown size={11} className="text-white/60 flex-shrink-0 -ml-0.5" />
                   <input
                     type="text"
                     value={mainSearchQuery}
@@ -6574,10 +6552,10 @@ case "sales":
                         ? "Search in Payments Received ( / )..."
                         : "Search in ERP System ( / )..."
                     }
-                    className="w-full bg-transparent outline-none text-xs text-zinc-100 placeholder:text-zinc-500 truncate"
+                    className="w-full bg-transparent outline-none text-xs text-white placeholder:text-white/50 truncate"
                   />
                 </div>
-                <kbd className="hidden sm:inline-block text-[10px] font-mono bg-zinc-800 border border-zinc-700 rounded px-1.5 py-0.5 text-zinc-400">⌘K</kbd>
+                <kbd className="hidden sm:inline-block text-[10px] font-mono bg-white/10 border border-white/20 rounded px-1.5 py-0.5 text-white/70">⌘K</kbd>
               </div>
             </div>
           </div>
@@ -6590,7 +6568,7 @@ case "sales":
             <div className="relative" ref={quickAccessRef}>
               <button
                 onClick={() => setIsQuickAccessOpen(!isQuickAccessOpen)}
-                className="w-8 h-8 rounded-lg bg-[#10b981] hover:bg-[#059669] flex items-center justify-center text-white shadow-xs transition-all active:scale-95 cursor-pointer ring-2 ring-emerald-500/20"
+                className="w-8 h-8 rounded-xl bg-emerald-500 hover:bg-emerald-600 flex items-center justify-center text-white shadow-xs transition-all active:scale-95 cursor-pointer ring-2 ring-emerald-400/30"
                 title="Quick Create & All Options"
               >
                 <Plus size={18} strokeWidth={2.5} />
@@ -6862,17 +6840,17 @@ case "sales":
             {/* Notification Bell */}
             <button
               onClick={() => alert("All statutory compliances and automated schedules are up to date.")}
-              className="p-2 text-gray-400 hover:text-gray-600 dark:text-zinc-400 dark:hover:text-zinc-200 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors relative"
+              className="p-2 text-white/75 hover:text-white rounded-xl hover:bg-white/10 transition-colors relative"
               title="Notifications"
             >
               <Bell size={16} />
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
             </button>
 
             {/* Settings Gear */}
             <button
               onClick={() => setIsCompanyProfileOpen(true)}
-              className="p-2 text-gray-400 hover:text-gray-600 dark:text-zinc-400 dark:hover:text-zinc-200 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+              className="p-2 text-white/75 hover:text-white rounded-xl hover:bg-white/10 transition-colors"
               title="Settings & Company Profile"
             >
               <Settings size={16} />
@@ -6881,7 +6859,7 @@ case "sales":
             {/* Profile Avatar */}
             <div
               onClick={() => setIsCompanyProfileOpen(true)}
-              className="w-8 h-8 rounded-full border border-gray-200 dark:border-zinc-700 overflow-hidden bg-slate-900 text-white font-bold text-xs flex items-center justify-center cursor-pointer shadow-xs hover:ring-2 hover:ring-gray-300 dark:hover:ring-zinc-600 transition-all uppercase"
+              className="w-8 h-8 rounded-full border border-white/25 overflow-hidden bg-white/20 text-white font-bold text-xs flex items-center justify-center cursor-pointer shadow-xs hover:ring-2 hover:ring-white/30 transition-all uppercase"
               title="Profile Settings"
             >
               {username.charAt(0)}
@@ -6890,7 +6868,7 @@ case "sales":
             {/* Grid Launcher Icon */}
             <button
               onClick={() => setActiveTab("reports")}
-              className="p-2 text-gray-400 hover:text-gray-600 dark:text-zinc-400 dark:hover:text-zinc-200 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors hidden sm:block"
+              className="p-2 text-white/75 hover:text-white rounded-xl hover:bg-white/10 transition-colors hidden sm:block"
               title="Overview & Reports"
             >
               <LayoutGrid size={16} />
