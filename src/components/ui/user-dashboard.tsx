@@ -6312,7 +6312,7 @@ case "sales":
   const SidebarContent = () => (
     <div
       style={{ backgroundColor: "#003153" }}
-      className={`flex flex-col h-full text-white border-r border-[#00223a] transition-all duration-300 select-none font-sans ${
+      className={`flex flex-col h-full text-white border-r border-white/10 transition-all duration-300 select-none font-sans ${
         isSidebarCollapsed ? "w-[68px]" : "w-60"
       }`}
     >
@@ -6470,7 +6470,10 @@ case "sales":
   );
 
   return (
-    <div className="flex h-screen bg-slate-50/70 dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 transition-colors duration-200 overflow-hidden font-sans">
+    <div
+      style={{ backgroundColor: "#003153" }}
+      className="flex h-screen text-gray-900 dark:text-zinc-100 transition-colors duration-200 overflow-hidden font-sans"
+    >
       {/* Desktop Sidebar with dynamic width and smooth transition */}
       <aside
         style={{ backgroundColor: "#003153" }}
@@ -6507,11 +6510,14 @@ case "sales":
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/70 dark:bg-zinc-950">
+      <div
+        style={{ backgroundColor: "#003153" }}
+        className="flex-1 flex flex-col h-full overflow-hidden"
+      >
         {/* Top Header Bar styled with #003153 matching reference image */}
         <header
           style={{ backgroundColor: "#003153" }}
-          className="h-14 px-4 sm:px-8 text-white flex items-center justify-between flex-shrink-0 border-b border-[#00223a] shadow-sm select-none"
+          className="h-14 px-4 sm:px-8 text-white flex items-center justify-between flex-shrink-0 select-none"
         >
           <div className="flex items-center gap-2 sm:gap-3">
             <button
@@ -6878,8 +6884,8 @@ case "sales":
           </div>
         </header>
 
-        {/* Dynamic Page Content */}
-        <main className="flex-1 overflow-y-auto px-6 sm:px-8 py-5">
+        {/* Dynamic Page Content with blunt/rounded top-left corner */}
+        <main className="flex-1 overflow-y-auto px-6 sm:px-8 py-5 bg-slate-50/70 dark:bg-zinc-950 rounded-tl-[28px] shadow-sm">
           {renderContent()}
         </main>
       </div>
