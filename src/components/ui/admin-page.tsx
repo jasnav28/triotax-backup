@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Lock, User, ArrowRight, LayoutDashboard, Users, Settings, LogOut, UserPlus, FileCheck, X, Trash2, ExternalLink, RefreshCw, CheckCircle2, AlertCircle, Megaphone, Play, Pause, Plus, Image as ImageIcon, Link as LinkIcon, Database, Download, Upload, FileText, HardDrive, Search } from "lucide-react";
+import { Shield, Lock, User, ArrowRight, LayoutDashboard, Users, Settings, LogOut, UserPlus, FileCheck, X, Trash2, ExternalLink, RefreshCw, CheckCircle2, AlertCircle, Megaphone, Play, Pause, Plus, Image as ImageIcon, Link as LinkIcon, Database, Download, Upload, FileText, HardDrive, Search, Target } from "lucide-react";
 import { ThemeToggle } from "@/app/components/ui/theme-toggle";
 import { getAdsConfig, DEFAULT_ADS, AdItem } from "@/components/ui/scrolling-ad-banner";
+import { AdminMarketingData } from "@/components/ui/admin-marketing-data";
 
 interface AdminPageProps {
   isAdminAuth: boolean;
@@ -1204,6 +1205,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
             </div>
           </div>
         );
+      case "marketing-data":
+        return <AdminMarketingData />;
       default:
         return null;
     }
@@ -1214,6 +1217,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
     { id: "create-user", label: "Create User", icon: UserPlus },
     { id: "gst-tracking", label: "GST Tracking", icon: FileCheck },
     { id: "manage-users", label: "Manage Users", icon: Users },
+    { id: "marketing-data", label: "Marketing Data", icon: Target },
     { id: "data-backup", label: "Data Backup", icon: Database },
     ...(showPlayAds ? [{ id: "play-ads", label: "Play Ads", icon: Megaphone }] : []),
     { id: "settings", label: "System Settings", icon: Settings },

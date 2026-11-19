@@ -52,7 +52,7 @@ export const StaffLoginPage: React.FC<StaffLoginProps> = ({
       localStorage.setItem("triotax_is_user_auth", "true");
       localStorage.setItem("triotax_logged_in_user", email.split("@")[0] || "staff");
       localStorage.removeItem("triotax_logged_out");
-      window.location.href = `/${email.split("@")[0] || "staff"}-user/home`;
+      window.location.href = `/${email.split("@")[0] || "staff"}-user/marketing-leads`;
     }
   };
 

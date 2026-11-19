@@ -7333,10 +7333,11 @@ export default function App() {
               const u = email.split("@")[0] || "staff";
               setUsername(u);
               setIsUserAuth(true);
+              setUserTab("marketing-leads");
               localStorage.setItem("triotax_is_user_auth", "true");
               localStorage.setItem("triotax_logged_in_user", u);
               localStorage.removeItem("triotax_logged_out");
-              window.history.pushState(null, "", `/${u}-user/home`);
+              window.history.pushState(null, "", `/${u}-user/marketing-leads`);
               setActivePage("user");
             }}
             onNavigateHome={() => navigateToPage("home")}

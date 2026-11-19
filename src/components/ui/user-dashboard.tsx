@@ -78,11 +78,14 @@ import {
   History,
   Info,
   LayoutDashboard,
-  ChevronUp
+  ChevronUp,
+  Target,
+  PhoneCall
 } from "lucide-react";
 import { ThemeToggle } from "@/app/components/ui/theme-toggle";
 import { StockTicker } from "./stock-ticker";
 import { ScrollingAdBanner } from "./scrolling-ad-banner";
+import { MarketingStaffPortal } from "./marketing-staff-portal";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -1809,6 +1812,9 @@ const [customExpenseCategory, setCustomExpenseCategory] = useState("");
     switch (activeTab) {
       case "home":
         return "Create Scheduled";
+      case "marketing-leads":
+      case "marketing":
+        return "Tele-Calling Desk";
       case "sales":
         if (salesSubTab === "quotes") return "Create Quotation";
         if (salesSubTab === "clients") return "Add Client";
@@ -6471,6 +6477,10 @@ case "sales":
           </div>
         );
 
+      case "marketing-leads":
+      case "marketing":
+        return <MarketingStaffPortal username={username} />;
+
       default:
         return null;
     }
@@ -6502,6 +6512,7 @@ case "sales":
     {
       title: "WORKSPACE",
       items: [
+        { id: "marketing-leads", label: "MARKETING LEADS", icon: Target },
         { id: "company-profile", label: "COMPANY PROFILE", icon: Building2 },
         { id: "settings", label: "SETTINGS", icon: Settings },
       ],
@@ -6799,6 +6810,20 @@ case "sales":
                           </span>
                         </div>
                         <div className="space-y-1">
+                          <button
+                            onClick={() => {
+                              setIsQuickAccessOpen(false);
+                              setActiveTab("marketing-leads");
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                            className="group w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-all text-left"
+                          >
+                            <div className="w-4 h-4 rounded-full bg-gray-300/80 dark:bg-zinc-700 flex items-center justify-center text-white text-[10px] font-bold group-hover:bg-emerald-500 transition-colors flex-shrink-0">
+                              <Plus size={10} strokeWidth={3} />
+                            </div>
+                            <span className="group-hover:translate-x-0.5 transition-transform">Marketing Calling Desk</span>
+                          </button>
+
                           <button
                             onClick={() => {
                               setIsQuickAccessOpen(false);
