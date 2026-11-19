@@ -6429,8 +6429,7 @@ case "sales":
             >
               {username.slice(0, 2).toUpperCase()}
             </div>
-            <div className="flex flex-col items-center gap-1.5 pt-1 w-full border-t border-white/10">
-              <ThemeToggle />
+            <div className="pt-1 w-full border-t border-white/10 flex justify-center">
               <button
                 onClick={onLogout}
                 className="p-1.5 text-white/70 hover:text-rose-300 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
@@ -6454,9 +6453,6 @@ case "sales":
                   <p className="text-xs font-bold text-white uppercase tracking-wider truncate">{username}</p>
                   <p className="text-[10px] text-white/50 font-medium tracking-wide truncate">PRO USER</p>
                 </div>
-              </div>
-              <div className="flex items-center gap-1 flex-shrink-0">
-                <ThemeToggle />
               </div>
             </div>
 
