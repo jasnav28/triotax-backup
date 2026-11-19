@@ -525,8 +525,14 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout, username
     "terms"
   ]);
   const [activeCanvaBlock, setActiveCanvaBlock] = useState<string | null>(null);
-  const [canvaZoom, setCanvaZoom] = useState<number>(100);
+  const [canvaZoom, setCanvaZoom] = useState<number>(110);
   const [canvaAccentColor, setCanvaAccentColor] = useState<string>("#0f172a");
+  const [canvaInvoiceTitle, setCanvaInvoiceTitle] = useState<string>("TAX INVOICE");
+  const [canvaInvoiceSubtitle, setCanvaInvoiceSubtitle] = useState<string>("ORIGINAL FOR RECIPIENT");
+  const [canvaCustomInvoiceNo, setCanvaCustomInvoiceNo] = useState<string>("");
+  const [canvaCustomTexts, setCanvaCustomTexts] = useState<Array<{ id: string; text: string; x: number; y: number }>>([]);
+  const [invoiceStatusEdits, setInvoiceStatusEdits] = useState<{ [id: number]: string }>({});
+  const [quoteStatusEdits, setQuoteStatusEdits] = useState<{ [id: number]: string }>({});
   const [invoiceDateInput, setInvoiceDateInput] = useState<string>(new Date().toISOString().split("T")[0]);
   const [invoiceDueDateInput, setInvoiceDueDateInput] = useState<string>(
     new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
@@ -1398,6 +1404,56 @@ const [customExpenseCategory, setCustomExpenseCategory] = useState("");
     setPayments(updatedPayments);
 
     saveAllData({ billingHistory: updated, payments: updatedPayments });
+  };
+
+  const handleSaveInvoiceStatus = (invId: number) => {
+    const newStatus = invoiceStatusEdits[invId];
+    if (!newStatus) return;
+
+    const updated = billingHistory.map(inv => {
+      if (inv.id === invId) {
+        let updatedPaid = inv.amountPaid;
+        let updatedBal = inv.balanceDue;
+        if (newStatus === "Paid") {
+          updatedPaid = inv.amount;
+          updatedBal = 0;
+        } else if (newStatus === "Unpaid") {
+          updatedPaid = 0;
+          updatedBal = inv.amount;
+        }
+        return {
+          ...inv,
+          status: newStatus as any,
+          amountPaid: updatedPaid,
+          balanceDue: updatedBal,
+        };
+      }
+      return inv;
+    });
+
+    setBillingHistory(updated);
+    saveAllData({ billingHistory: updated });
+    setInvoiceStatusEdits(prev => {
+      const copy = { ...prev };
+      delete copy[invId];
+      return copy;
+    });
+    alert(`Invoice status updated to "${newStatus}" and saved!`);
+  };
+
+  const handleSaveQuoteStatus = (quoteId: number) => {
+    const newStatus = quoteStatusEdits[quoteId];
+    if (!newStatus) return;
+
+    const updated = quotations.map(q => q.id === quoteId ? { ...q, status: newStatus as any } : q);
+    setQuotations(updated);
+    saveAllData({ quotations: updated });
+    setQuoteStatusEdits(prev => {
+      const copy = { ...prev };
+      delete copy[quoteId];
+      return copy;
+    });
+    alert(`Quotation status updated to "${newStatus}" and saved!`);
   };
 
   const handleDownloadInvoicePDF = async (inv: InvoiceRecord) => {
@@ -3186,7 +3242,7 @@ case "sales":
                         </div>
                         <div>
                           <span className="font-bold text-slate-900 dark:text-white text-xs block">Canva Live Studio Canvas</span>
-                          <span className="text-[10px] text-slate-500 dark:text-zinc-400">Click any text on the paper to edit directly • Drag ⠿ handles to move</span>
+                          <span className="text-[10px] text-slate-500 dark:text-zinc-400">Double-click any text to edit directly • Double-click canvas to drop live note • Drag ⠿ handles to move</span>
                         </div>
                       </div>
 
@@ -3196,16 +3252,23 @@ case "sales":
                           <button
                             type="button"
                             onClick={() => setCanvaZoom(Math.max(60, canvaZoom - 10))}
-                            className="px-2 py-0.5 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded font-bold"
+                            className="px-2 py-0.5 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded font-bold cursor-pointer"
                             title="Zoom Out"
                           >
                             -
                           </button>
-                          <span className="px-2 font-mono text-[11px] text-slate-700 dark:text-zinc-200">{canvaZoom}%</span>
                           <button
                             type="button"
-                            onClick={() => setCanvaZoom(Math.min(140, canvaZoom + 10))}
-                            className="px-2 py-0.5 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded font-bold"
+                            onClick={() => setCanvaZoom(110)}
+                            className="px-2 font-mono text-[11px] text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded cursor-pointer"
+                            title="Reset to default 110%"
+                          >
+                            {canvaZoom}%
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setCanvaZoom(Math.min(160, canvaZoom + 10))}
+                            className="px-2 py-0.5 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded font-bold cursor-pointer"
                             title="Zoom In"
                           >
                             +
@@ -3242,10 +3305,61 @@ case "sales":
                         ref={canvaPaperRef}
                         style={{
                           transform: `scale(${canvaZoom / 100})`,
-                          transformOrigin: "top center"
+                          transformOrigin: "top center",
+                          position: "relative"
                         }}
-                        className="w-[794px] min-h-[1123px] bg-white text-slate-900 shadow-2xl rounded-sm border border-slate-300 p-8 sm:p-10 text-xs font-sans space-y-4 select-text transition-transform flex-shrink-0"
+                        onDoubleClick={(e) => {
+                          const tag = (e.target as HTMLElement).tagName;
+                          if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'BUTTON') {
+                            const rect = canvaPaperRef.current?.getBoundingClientRect();
+                            if (rect) {
+                              const scale = canvaZoom / 100;
+                              const x = Math.max(20, Math.min(Math.round((e.clientX - rect.left) / scale), 600));
+                              const y = Math.max(20, Math.min(Math.round((e.clientY - rect.top) / scale), 1000));
+                              const newText = {
+                                id: `txt_${Date.now()}`,
+                                text: "Double-click to edit note...",
+                                x,
+                                y
+                              };
+                              setCanvaCustomTexts(prev => [...prev, newText]);
+                            }
+                          }
+                        }}
+                        className="w-[794px] min-h-[1123px] bg-white text-slate-900 shadow-2xl rounded-sm border border-slate-300 p-8 sm:p-10 text-xs font-sans space-y-4 select-text transition-transform flex-shrink-0 cursor-text"
+                        title="Double-click any text or blank space to edit live directly"
                       >
+                        {/* Custom Live Notes dropped via double-click on blank canvas */}
+                        {canvaCustomTexts.map((ct) => (
+                          <div
+                            key={ct.id}
+                            style={{ position: "absolute", left: ct.x, top: ct.y }}
+                            className="group/ct z-30 flex items-center gap-1 bg-white/95 border-2 border-indigo-500 rounded-lg p-1.5 shadow-lg select-none"
+                          >
+                            <GripVertical size={12} className="text-indigo-400 cursor-grab" />
+                            <input
+                              type="text"
+                              autoFocus
+                              value={ct.text}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setCanvaCustomTexts(prev => prev.map(t => t.id === ct.id ? { ...t, text: val } : t));
+                              }}
+                              onDoubleClick={(e) => { e.stopPropagation(); (e.target as HTMLInputElement).select(); }}
+                              className="font-bold text-xs outline-none bg-transparent text-[#003153] min-w-[140px]"
+                              title="Double-click to edit note text"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setCanvaCustomTexts(prev => prev.filter(t => t.id !== ct.id))}
+                              className="text-slate-400 hover:text-rose-600 text-xs px-1 rounded hover:bg-slate-100 cursor-pointer"
+                              title="Delete note"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+
                         {/* Dynamic Draggable Sections based on canvaSectionOrder */}
                         {canvaSectionOrder.map((sectionKey, secIndex) => {
                           const isFirst = secIndex === 0;
@@ -3418,19 +3532,35 @@ case "sales":
 
                                   {/* Right: TAX INVOICE & Meta */}
                                   <div className="text-right space-y-1 min-w-[240px]">
-                                    <h1 className="text-2xl font-black uppercase tracking-wider text-slate-900" style={{ color: canvaAccentColor }}>
-                                      TAX INVOICE
-                                    </h1>
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 pb-2">
-                                      ORIGINAL FOR RECIPIENT
-                                    </p>
+                                    <input
+                                      type="text"
+                                      value={canvaInvoiceTitle}
+                                      onChange={(e) => setCanvaInvoiceTitle(e.target.value.toUpperCase())}
+                                      onDoubleClick={(e) => { e.stopPropagation(); (e.target as HTMLInputElement).select(); }}
+                                      className="text-2xl font-black uppercase tracking-wider text-right w-full bg-transparent hover:bg-blue-50/60 focus:bg-white focus:ring-1 focus:ring-blue-500 rounded px-1 outline-none transition-all cursor-text"
+                                      style={{ color: canvaAccentColor }}
+                                      title="Double-click to edit invoice title"
+                                    />
+                                    <input
+                                      type="text"
+                                      value={canvaInvoiceSubtitle}
+                                      onChange={(e) => setCanvaInvoiceSubtitle(e.target.value.toUpperCase())}
+                                      onDoubleClick={(e) => { e.stopPropagation(); (e.target as HTMLInputElement).select(); }}
+                                      className="text-[10px] font-bold uppercase tracking-widest text-slate-500 text-right w-full bg-transparent hover:bg-blue-50/60 focus:bg-white focus:ring-1 focus:ring-blue-500 rounded px-1 outline-none transition-all pb-2 cursor-text"
+                                      title="Double-click to edit copy subtitle"
+                                    />
 
                                     <div className="border border-slate-300 rounded-lg overflow-hidden text-xs text-left bg-slate-50/50">
                                       <div className="grid grid-cols-2 p-1.5 border-b border-slate-200">
                                         <span className="font-bold text-slate-600">Invoice No.:</span>
-                                        <span className="font-mono font-bold text-slate-900 text-right">
-                                          {companyProfile.numberingConfig.invoicePrefix}{companyProfile.numberingConfig.invoiceNext}
-                                        </span>
+                                        <input
+                                          type="text"
+                                          value={canvaCustomInvoiceNo !== "" ? canvaCustomInvoiceNo : `${companyProfile.numberingConfig.invoicePrefix}${companyProfile.numberingConfig.invoiceNext}`}
+                                          onChange={(e) => setCanvaCustomInvoiceNo(e.target.value)}
+                                          onDoubleClick={(e) => { e.stopPropagation(); (e.target as HTMLInputElement).select(); }}
+                                          className="font-mono font-bold text-slate-900 text-right bg-transparent hover:bg-blue-50/60 focus:bg-white rounded px-1 outline-none cursor-text w-full"
+                                          title="Double-click to edit invoice number"
+                                        />
                                       </div>
                                       <div className="grid grid-cols-2 p-1.5 border-b border-slate-200">
                                         <span className="font-semibold text-slate-600">Invoice Date:</span>
@@ -3695,10 +3825,12 @@ case "sales":
                                                 value={it.description}
                                                 onChange={(e) => {
                                                   const updated = [...invoiceItems];
-                                                  updated[index].description = e.target.value;
+                                                  updated[idx].description = e.target.value;
                                                   setInvoiceItems(updated);
                                                 }}
-                                                className="w-full bg-transparent hover:bg-blue-50/60 focus:bg-white rounded px-1 -mx-1 outline-none font-semibold text-slate-900"
+                                                onDoubleClick={(e) => { e.stopPropagation(); (e.target as HTMLInputElement).select(); }}
+                                                className="w-full bg-transparent hover:bg-blue-50/60 focus:bg-white rounded px-1 -mx-1 outline-none font-semibold text-slate-900 cursor-text"
+                                                title="Double-click to edit description"
                                               />
                                             </td>
                                             <td className="p-2 border-r border-slate-300 text-center">
@@ -3710,7 +3842,9 @@ case "sales":
                                                   updated[idx].hsnSac = e.target.value;
                                                   setInvoiceItems(updated);
                                                 }}
-                                                className="w-full text-center font-mono font-bold bg-transparent hover:bg-blue-50/60 focus:bg-white rounded outline-none"
+                                                onDoubleClick={(e) => { e.stopPropagation(); (e.target as HTMLInputElement).select(); }}
+                                                className="w-full text-center font-mono font-bold bg-transparent hover:bg-blue-50/60 focus:bg-white rounded outline-none cursor-text"
+                                                title="Double-click to edit HSN"
                                               />
                                             </td>
                                             <td className="p-2 border-r border-slate-300 text-center">
@@ -3723,7 +3857,9 @@ case "sales":
                                                   updated[idx].quantity = parseFloat(e.target.value) || 1;
                                                   setInvoiceItems(updated);
                                                 }}
-                                                className="w-full text-center bg-transparent hover:bg-blue-50/60 focus:bg-white rounded outline-none font-semibold"
+                                                onDoubleClick={(e) => { e.stopPropagation(); (e.target as HTMLInputElement).select(); }}
+                                                className="w-full text-center bg-transparent hover:bg-blue-50/60 focus:bg-white rounded outline-none font-semibold cursor-text"
+                                                title="Double-click to edit quantity"
                                               />
                                             </td>
                                             <td className="p-2 border-r border-slate-300 text-right">
@@ -3735,7 +3871,9 @@ case "sales":
                                                   updated[idx].price = e.target.value === "" ? ("" as any) : parseFloat(e.target.value);
                                                   setInvoiceItems(updated);
                                                 }}
-                                                className="w-full text-right bg-transparent hover:bg-blue-50/60 focus:bg-white rounded outline-none font-semibold"
+                                                onDoubleClick={(e) => { e.stopPropagation(); (e.target as HTMLInputElement).select(); }}
+                                                className="w-full text-right bg-transparent hover:bg-blue-50/60 focus:bg-white rounded outline-none font-semibold cursor-text"
+                                                title="Double-click to edit rate"
                                               />
                                             </td>
                                             <td className="p-2 border-r border-slate-300 text-right">
@@ -3747,7 +3885,9 @@ case "sales":
                                                   updated[idx].discount = parseFloat(e.target.value) || 0;
                                                   setInvoiceItems(updated);
                                                 }}
-                                                className="w-full text-right bg-transparent hover:bg-blue-50/60 focus:bg-white rounded outline-none text-slate-600"
+                                                onDoubleClick={(e) => { e.stopPropagation(); (e.target as HTMLInputElement).select(); }}
+                                                className="w-full text-right bg-transparent hover:bg-blue-50/60 focus:bg-white rounded outline-none text-slate-600 cursor-text"
+                                                title="Double-click to edit discount"
                                               />
                                             </td>
                                             <td className="p-2 border-r border-slate-300 text-center font-semibold">
@@ -4456,18 +4596,47 @@ case "sales":
                             <span className="text-[11px] text-slate-400">{inv.paymentTerms || "Due on Receipt"}</span>
                           </td>
                           <td className="py-3.5 px-3">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
-                              inv.status === "Paid"
-                                ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
-                                : inv.status === "Partial"
-                                ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
-                                : inv.status === "Overdue"
-                                ? "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
-                                : "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
-                            }`}>
-                              <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                              {inv.status}
-                            </span>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <select
+                                value={invoiceStatusEdits[inv.id] !== undefined ? invoiceStatusEdits[inv.id] : inv.status}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setInvoiceStatusEdits(prev => ({ ...prev, [inv.id]: val }));
+                                }}
+                                className={`text-[11px] font-semibold px-2 py-1 rounded-lg border outline-none cursor-pointer transition-all shadow-2xs ${
+                                  (invoiceStatusEdits[inv.id] !== undefined ? invoiceStatusEdits[inv.id] : inv.status) === "Paid"
+                                    ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700"
+                                    : (invoiceStatusEdits[inv.id] !== undefined ? invoiceStatusEdits[inv.id] : inv.status) === "Partially Paid" || (invoiceStatusEdits[inv.id] !== undefined ? invoiceStatusEdits[inv.id] : inv.status) === "Partial"
+                                    ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-700"
+                                    : (invoiceStatusEdits[inv.id] !== undefined ? invoiceStatusEdits[inv.id] : inv.status) === "Overdue"
+                                    ? "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-700"
+                                    : "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700"
+                                }`}
+                              >
+                                <option value="Paid">Paid</option>
+                                <option value="Unpaid">Unpaid</option>
+                                <option value="Partially Paid">Partially Paid</option>
+                                <option value="Overdue">Overdue</option>
+                                <option value="Draft">Draft</option>
+                                <option value="Cancelled">Cancelled</option>
+                              </select>
+
+                              {/* Save Button */}
+                              <button
+                                type="button"
+                                onClick={() => handleSaveInvoiceStatus(inv.id)}
+                                disabled={invoiceStatusEdits[inv.id] === undefined || invoiceStatusEdits[inv.id] === inv.status}
+                                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase transition-all flex items-center gap-1 ${
+                                  invoiceStatusEdits[inv.id] !== undefined && invoiceStatusEdits[inv.id] !== inv.status
+                                    ? "bg-[#003153] hover:bg-[#00223a] text-white shadow-xs cursor-pointer ring-1 ring-blue-400"
+                                    : "bg-slate-100 dark:bg-zinc-800 text-slate-400 dark:text-zinc-500 cursor-not-allowed opacity-60"
+                                }`}
+                                title={invoiceStatusEdits[inv.id] !== undefined && invoiceStatusEdits[inv.id] !== inv.status ? "Click to save updated status" : "Select a new status to enable save"}
+                              >
+                                <Check size={11} strokeWidth={2.5} />
+                                <span>Save</span>
+                              </button>
+                            </div>
                           </td>
                           <td className="py-3.5 px-3 font-semibold text-slate-900 dark:text-white">
                             ₹{inv.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
@@ -4519,7 +4688,37 @@ case "sales":
                           <td className="py-3.5 px-3 text-slate-500">{q.validUntil}</td>
                           <td className="py-3.5 px-3 font-bold text-slate-900">₹{(Number(q.grandTotal ?? q.amount ?? 0)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                           <td className="py-3.5 px-3">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">{q.status}</span>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <select
+                                value={quoteStatusEdits[q.id] !== undefined ? quoteStatusEdits[q.id] : q.status}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setQuoteStatusEdits(prev => ({ ...prev, [q.id]: val }));
+                                }}
+                                className="text-[11px] font-semibold px-2 py-1 rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-800 dark:text-zinc-200 outline-none cursor-pointer shadow-2xs"
+                              >
+                                <option value="Draft">Draft</option>
+                                <option value="Sent">Sent</option>
+                                <option value="Accepted">Accepted</option>
+                                <option value="Declined">Declined</option>
+                                <option value="Invoiced">Invoiced</option>
+                                <option value="Expired">Expired</option>
+                              </select>
+                              <button
+                                type="button"
+                                onClick={() => handleSaveQuoteStatus(q.id)}
+                                disabled={quoteStatusEdits[q.id] === undefined || quoteStatusEdits[q.id] === q.status}
+                                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase transition-all flex items-center gap-1 ${
+                                  quoteStatusEdits[q.id] !== undefined && quoteStatusEdits[q.id] !== q.status
+                                    ? "bg-[#003153] hover:bg-[#00223a] text-white shadow-xs cursor-pointer ring-1 ring-blue-400"
+                                    : "bg-slate-100 dark:bg-zinc-800 text-slate-400 dark:text-zinc-500 cursor-not-allowed opacity-60"
+                                }`}
+                                title="Save updated status"
+                              >
+                                <Check size={11} strokeWidth={2.5} />
+                                <span>Save</span>
+                              </button>
+                            </div>
                           </td>
                           <td className="py-3.5 px-3 text-right">
                             <button onClick={() => handleConvertQuoteToInvoice(q)} className="text-xs text-blue-600 hover:underline font-semibold mr-2">Convert to Invoice</button>
