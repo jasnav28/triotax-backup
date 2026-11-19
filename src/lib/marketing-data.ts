@@ -360,6 +360,7 @@ export function saveCampaigns(campaigns: Campaign[]): void {
   try {
     localStorage.setItem(CAMPAIGNS_KEY, JSON.stringify(campaigns));
     window.dispatchEvent(new CustomEvent("triotax_marketing_updated"));
+    pushMarketingToDatabase().catch(() => {});
   } catch (e) {
     console.error("Failed to save marketing campaigns:", e);
   }
@@ -386,6 +387,7 @@ export function saveLeads(leads: Lead[]): void {
     // recalculate campaign lead counts
     recalculateCampaignStats(leads);
     window.dispatchEvent(new CustomEvent("triotax_marketing_updated"));
+    pushMarketingToDatabase().catch(() => {});
   } catch (e) {
     console.error("Failed to save marketing leads:", e);
   }
@@ -429,6 +431,7 @@ export function saveStaff(staff: StaffMember[]): void {
   try {
     localStorage.setItem(STAFF_KEY, JSON.stringify(staff));
     window.dispatchEvent(new CustomEvent("triotax_marketing_updated"));
+    pushMarketingToDatabase().catch(() => {});
   } catch (e) {
     console.error("Failed to save marketing staff:", e);
   }
@@ -712,4 +715,130 @@ export function deleteLead(leadId: string): void {
 export function deleteCampaign(campaignId: string): void {
   const campaigns = getStoredCampaigns();
   saveCampaigns(campaigns.filter((c) => c.id !== campaignId));
+}
+
+// ─────────────────────────────────────────────────────────────
+// DATABASE PERSISTENCE & CLOUD DUAL-SYNC ENGINE
+// ─────────────────────────────────────────────────────────────
+
+export function getMarketingApiCandidates(endpoint: string = "marketing/data"): string[] {
+  const cleanEndpoint = endpoint.replace(/^\/+/, "");
+  const finalEndpoint = cleanEndpoint.startsWith("api/") ? cleanEndpoint : `api/${cleanEndpoint}`;
+
+  const candidates: string[] = [];
+  const custom = (import.meta as any).env?.VITE_API_URL;
+  if (custom) {
+    let base = custom.trim().replace(/\/+$/, "");
+    if (base.endsWith("/api")) base = base.substring(0, base.length - 4);
+    candidates.push(`${base}/${finalEndpoint}`);
+  }
+
+  // If running on localhost, prioritize local backend server
+  if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
+    candidates.push(`http://localhost:3001/${finalEndpoint}`);
+    candidates.push(`http://localhost:5000/${finalEndpoint}`);
+  }
+
+  // Deployed cloud database backend
+  candidates.push(`https://triotax-backend-production.up.railway.app/${finalEndpoint}`);
+
+  return Array.from(new Set(candidates));
+}
+
+export function getMarketingApiUrl(endpoint: string = "marketing/data"): string {
+  const candidates = getMarketingApiCandidates(endpoint);
+  return candidates[0] || "http://localhost:3001/api/marketing/data";
+}
+
+export async function pushMarketingToDatabase(): Promise<{ success: boolean; message?: string }> {
+  try {
+    const campaigns = getStoredCampaigns();
+    const leads = getStoredLeads();
+    const staff = getStoredStaff();
+
+    const payload = JSON.stringify({
+      campaigns,
+      leads,
+      staff,
+    });
+
+    const candidates = getMarketingApiCandidates("marketing/data");
+    let lastError = "Unable to connect to database";
+
+    for (const url of candidates) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const res = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: payload,
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const data = await res.json();
+          return {
+            success: true,
+            message: data.message || `Saved to ${data.mode || "database"} (${new URL(url).host})`,
+          };
+        } else {
+          lastError = `Status ${res.status} from ${new URL(url).host}`;
+        }
+      } catch (err: any) {
+        lastError = err.message || "Connection refused";
+      }
+    }
+
+    return { success: false, message: lastError };
+  } catch (err: any) {
+    console.warn("Could not sync marketing data to database:", err);
+    return { success: false, message: err.message || "Network / connection error" };
+  }
+}
+
+export async function syncMarketingWithDatabase(): Promise<boolean> {
+  try {
+    const candidates = getMarketingApiCandidates("marketing/data");
+
+    for (const url of candidates) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) continue;
+        const data = await res.json();
+        if (data.success && (data.leads?.length > 0 || data.campaigns?.length > 0 || data.staff?.length > 0)) {
+          if (Array.isArray(data.campaigns) && data.campaigns.length > 0) {
+            localStorage.setItem(CAMPAIGNS_KEY, JSON.stringify(data.campaigns));
+          }
+          if (Array.isArray(data.leads) && data.leads.length > 0) {
+            localStorage.setItem(LEADS_KEY, JSON.stringify(data.leads));
+          }
+          if (Array.isArray(data.staff) && data.staff.length > 0) {
+            localStorage.setItem(STAFF_KEY, JSON.stringify(data.staff));
+          }
+          window.dispatchEvent(new CustomEvent("triotax_marketing_updated"));
+          return true;
+        }
+
+        // If backend was empty or fresh, seed it with current local state
+        if (data.success && (!data.leads || data.leads.length === 0)) {
+          pushMarketingToDatabase().catch(() => {});
+          return true;
+        }
+      } catch {
+        // try next candidate
+      }
+    }
+    return false;
+  } catch (err) {
+    console.warn("Marketing data cloud fetch error:", err);
+    return false;
+  }
 }

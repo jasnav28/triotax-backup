@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Lock, User, ArrowRight, LayoutDashboard, Users, Settings, LogOut, UserPlus, FileCheck, X, Trash2, ExternalLink, RefreshCw, CheckCircle2, AlertCircle, Megaphone, Play, Pause, Plus, Image as ImageIcon, Link as LinkIcon, Database, Download, Upload, FileText, HardDrive, Search, Target } from "lucide-react";
+import { Shield, Lock, User, ArrowRight, LayoutDashboard, Users, Settings, LogOut, UserPlus, FileCheck, X, Trash2, ExternalLink, RefreshCw, CheckCircle2, AlertCircle, Megaphone, Play, Pause, Plus, Image as ImageIcon, Link as LinkIcon, Database, Download, Upload, FileText, HardDrive, Search, Target, TrendingUp } from "lucide-react";
 import { ThemeToggle } from "@/app/components/ui/theme-toggle";
 import { getAdsConfig, DEFAULT_ADS, AdItem } from "@/components/ui/scrolling-ad-banner";
 import { AdminMarketingData } from "@/components/ui/admin-marketing-data";
+import { AdminStaffProgress } from "@/components/ui/admin-staff-progress";
 
 interface AdminPageProps {
   isAdminAuth: boolean;
@@ -1207,6 +1208,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
         );
       case "marketing-data":
         return <AdminMarketingData />;
+      case "staff-progress":
+        return <AdminStaffProgress />;
       default:
         return null;
     }
@@ -1218,6 +1221,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
     { id: "gst-tracking", label: "GST Tracking", icon: FileCheck },
     { id: "manage-users", label: "Manage Users", icon: Users },
     { id: "marketing-data", label: "Marketing Data", icon: Target },
+    { id: "staff-progress", label: "Staff Progress", icon: TrendingUp },
     { id: "data-backup", label: "Data Backup", icon: Database },
     ...(showPlayAds ? [{ id: "play-ads", label: "Play Ads", icon: Megaphone }] : []),
     { id: "settings", label: "System Settings", icon: Settings },
