@@ -77,12 +77,21 @@ export const MarketingStaffPortal: React.FC<MarketingStaffPortalProps> = ({ user
     setCampaigns(c);
     setStaffList(s);
 
-    // If current staff not set, find match by username or pick first staff
-    if (!currentStaffId && s.length > 0) {
+    // If current staff not set, find match by stored staff ID/empId or username
+    const storedStaffId = typeof window !== "undefined" ? localStorage.getItem("triotax_current_staff_id") : null;
+    const storedEmpId = typeof window !== "undefined" ? localStorage.getItem("triotax_current_staff_emp_id") : null;
+
+    if (storedStaffId && s.some((m) => m.id === storedStaffId)) {
+      setCurrentStaffId(storedStaffId);
+    } else if (storedEmpId && s.some((m) => m.employeeId === storedEmpId)) {
+      const match = s.find((m) => m.employeeId === storedEmpId);
+      if (match) setCurrentStaffId(match.id);
+    } else if (!currentStaffId && s.length > 0) {
       const match = s.find(
         (member) =>
           member.email.toLowerCase().includes(username.toLowerCase()) ||
-          member.name.toLowerCase().includes(username.toLowerCase())
+          member.name.toLowerCase().includes(username.toLowerCase()) ||
+          (member.employeeId && member.employeeId.toLowerCase().includes(username.toLowerCase()))
       );
       setCurrentStaffId(match ? match.id : s[0].id);
     }
@@ -258,10 +267,13 @@ export const MarketingStaffPortal: React.FC<MarketingStaffPortalProps> = ({ user
 
   return (
     <div className="space-y-5 font-sans pb-12">
-      {/* Top Banner / Calling Header */}
+      {/* Top Banner / Calling Header in Prussian Blue #003153 */}
       <div className="bg-[#003153] text-white rounded-2xl p-5 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 border border-white/10">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span className="font-mono font-bold text-xs px-2.5 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 border border-cyan-400/35">
+              {currentStaff?.employeeId || "TX-M-00020"}
+            </span>
             <span className="px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/30 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1">
               <PhoneCall size={12} /> Marketing Tele-Calling Desk
             </span>
@@ -285,7 +297,7 @@ export const MarketingStaffPortal: React.FC<MarketingStaffPortalProps> = ({ user
             >
               {staffList.map((s) => (
                 <option key={s.id} value={s.id} className="text-slate-900 bg-white">
-                  {s.name}
+                  [{s.employeeId || "TX-M-00020"}] {s.name}
                 </option>
               ))}
             </select>

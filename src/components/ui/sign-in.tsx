@@ -27,6 +27,11 @@ export interface SignInPageProps {
   description?: React.ReactNode;
   heroImageSrc?: string;
   testimonials?: Testimonial[];
+  identifierLabel?: string;
+  identifierPlaceholder?: string;
+  identifierType?: string;
+  themeColor?: string;
+  errorMessage?: string;
   onSignIn?: (event: React.FormEvent<HTMLFormElement>) => void;
   onGoogleSignIn?: () => void;
   onResetPassword?: () => void;
@@ -59,6 +64,11 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   description = "Access your account and continue your journey with us",
   heroImageSrc,
   testimonials = [],
+  identifierLabel = "Email Address",
+  identifierPlaceholder = "Enter your email address",
+  identifierType = "text",
+  themeColor = "#003153",
+  errorMessage,
   onSignIn,
   onGoogleSignIn,
   onResetPassword,
@@ -75,11 +85,23 @@ export const SignInPage: React.FC<SignInPageProps> = ({
             <h1 className="animate-element animate-delay-100 text-4xl md:text-5xl font-semibold leading-tight">{title}</h1>
             <p className="animate-element animate-delay-200 text-muted-foreground">{description}</p>
 
+            {errorMessage && (
+              <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl text-rose-700 dark:text-rose-300 text-xs font-semibold">
+                {errorMessage}
+              </div>
+            )}
+
             <form className="space-y-5" onSubmit={onSignIn}>
               <div className="animate-element animate-delay-300">
-                <label className="text-sm font-medium text-muted-foreground">Email Address</label>
+                <label className="text-sm font-medium text-muted-foreground">{identifierLabel}</label>
                 <GlassInputWrapper>
-                  <input name="email" type="email" placeholder="Enter your email address" className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none" />
+                  <input
+                    name="email"
+                    type={identifierType}
+                    placeholder={identifierPlaceholder}
+                    className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none"
+                    required
+                  />
                 </GlassInputWrapper>
               </div>
 
@@ -87,7 +109,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                 <label className="text-sm font-medium text-muted-foreground">Password</label>
                 <GlassInputWrapper>
                   <div className="relative">
-                    <input name="password" type={showPassword ? 'text' : 'password'} placeholder="Enter your password" className="w-full bg-transparent text-sm p-4 pr-12 rounded-2xl focus:outline-none" />
+                    <input name="password" type={showPassword ? 'text' : 'password'} placeholder="Enter your password" className="w-full bg-transparent text-sm p-4 pr-12 rounded-2xl focus:outline-none" required />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-3 flex items-center cursor-pointer">
                       {showPassword ? <EyeOff className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" /> : <Eye className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" />}
                     </button>
@@ -100,10 +122,14 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                   <input type="checkbox" name="rememberMe" className="custom-checkbox" />
                   <span className="text-foreground/90">Keep me signed in</span>
                 </label>
-                <a href="#" onClick={(e) => { e.preventDefault(); onResetPassword?.(); }} className="hover:underline text-violet-400 transition-colors">Reset password</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); onResetPassword?.(); }} className="hover:underline text-sky-500 transition-colors">Reset password</a>
               </div>
 
-              <button type="submit" className="animate-element animate-delay-600 w-full rounded-2xl bg-primary py-4 font-medium text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer">
+              <button
+                type="submit"
+                style={{ backgroundColor: themeColor }}
+                className="animate-element animate-delay-600 w-full rounded-2xl py-4 font-bold text-white hover:opacity-90 transition-all cursor-pointer shadow-md"
+              >
                 Sign In
               </button>
             </form>

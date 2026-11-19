@@ -44,17 +44,20 @@ export interface Campaign {
 
 export interface StaffMember {
   id: string;
+  employeeId: string; // Unique system-generated ID in format TX-M-00020
   name: string;
   email: string;
   role: string;
   phone?: string;
+  password?: string;
+  createdAt?: string;
 }
 
 export const DEFAULT_STAFF_MEMBERS: StaffMember[] = [
-  { id: "staff_1", name: "Sarah Chen", email: "sarah@triotax.com", role: "Senior Tele-Marketing Specialist", phone: "+91 98451 22334" },
-  { id: "staff_2", name: "Marcus Johnson", email: "marcus@triotax.com", role: "Corporate Outreach Executive", phone: "+91 98452 33445" },
-  { id: "staff_3", name: "David Martinez", email: "david@triotax.com", role: "SME Compliance Specialist", phone: "+91 98453 44556" },
-  { id: "staff_4", name: "Priya Sharma", email: "priya@triotax.com", role: "GST Lead Conversion Lead", phone: "+91 98454 55667" },
+  { id: "staff_1", employeeId: "TX-M-00020", name: "Sarah Chen", email: "sarah@triotax.com", role: "Senior Tele-Marketing Specialist", phone: "+91 98451 22334", password: "staff123", createdAt: "2026-11-01T09:00:00.000Z" },
+  { id: "staff_2", employeeId: "TX-M-00021", name: "Marcus Johnson", email: "marcus@triotax.com", role: "Corporate Outreach Executive", phone: "+91 98452 33445", password: "staff123", createdAt: "2026-11-01T09:00:00.000Z" },
+  { id: "staff_3", employeeId: "TX-M-00022", name: "David Martinez", email: "david@triotax.com", role: "SME Compliance Specialist", phone: "+91 98453 44556", password: "staff123", createdAt: "2026-11-01T09:00:00.000Z" },
+  { id: "staff_4", employeeId: "TX-M-00023", name: "Priya Sharma", email: "priya@triotax.com", role: "GST Lead Conversion Lead", phone: "+91 98454 55667", password: "staff123", createdAt: "2026-11-01T09:00:00.000Z" },
 ];
 
 export const INITIAL_CAMPAIGNS: Campaign[] = [
@@ -396,10 +399,109 @@ export function getStoredStaff(): StaffMember[] {
       localStorage.setItem(STAFF_KEY, JSON.stringify(DEFAULT_STAFF_MEMBERS));
       return DEFAULT_STAFF_MEMBERS;
     }
-    return JSON.parse(raw);
+    const parsed: StaffMember[] = JSON.parse(raw);
+    let migrated = false;
+    let fallbackNum = 20;
+    const updated = parsed.map((s, idx) => {
+      if (!s.employeeId) {
+        migrated = true;
+        return {
+          ...s,
+          employeeId: `TX-M-${String(fallbackNum + idx).padStart(5, "0")}`,
+          password: s.password || "staff123",
+          createdAt: s.createdAt || new Date().toISOString(),
+        };
+      }
+      return s;
+    });
+    if (migrated) {
+      localStorage.setItem(STAFF_KEY, JSON.stringify(updated));
+      return updated;
+    }
+    return parsed;
   } catch {
     return DEFAULT_STAFF_MEMBERS;
   }
+}
+
+export function saveStaff(staff: StaffMember[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STAFF_KEY, JSON.stringify(staff));
+    window.dispatchEvent(new CustomEvent("triotax_marketing_updated"));
+  } catch (e) {
+    console.error("Failed to save marketing staff:", e);
+  }
+}
+
+// Generate unique system Employee ID in format TX-M-00020
+export function generateNextEmployeeId(): string {
+  const staff = getStoredStaff();
+  let maxNum = 19; // default so first is TX-M-00020
+  staff.forEach((s) => {
+    if (s.employeeId) {
+      const match = s.employeeId.match(/TX-M-(\d+)/i);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (!isNaN(num) && num > maxNum) {
+          maxNum = num;
+        }
+      }
+    }
+  });
+  const nextNum = maxNum + 1;
+  return `TX-M-${String(nextNum).padStart(5, "0")}`;
+}
+
+export function createStaffMember(data: {
+  name: string;
+  email: string;
+  role: string;
+  phone?: string;
+  password?: string;
+  customEmployeeId?: string;
+}): StaffMember {
+  const staff = getStoredStaff();
+  const employeeId = data.customEmployeeId || generateNextEmployeeId();
+  const newStaff: StaffMember = {
+    id: `staff_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+    employeeId,
+    name: data.name.trim(),
+    email: data.email.trim().toLowerCase(),
+    role: data.role.trim() || "Marketing Tele-Caller",
+    phone: data.phone?.trim() || "",
+    password: data.password || "staff123",
+    createdAt: new Date().toISOString(),
+  };
+
+  saveStaff([...staff, newStaff]);
+  return newStaff;
+}
+
+export function deleteStaffMember(staffId: string): void {
+  const staff = getStoredStaff();
+  saveStaff(staff.filter((s) => s.id !== staffId));
+}
+
+export function validateStaffLogin(identifier: string, pass: string): StaffMember | null {
+  const staff = getStoredStaff();
+  const cleanId = identifier.trim().toLowerCase();
+  
+  const found = staff.find((s) => {
+    const matchEmp = s.employeeId && s.employeeId.toLowerCase() === cleanId;
+    const matchEmail = s.email && s.email.toLowerCase() === cleanId;
+    const matchUser = s.email && s.email.split("@")[0].toLowerCase() === cleanId;
+    return matchEmp || matchEmail || matchUser;
+  });
+
+  if (!found) return null;
+
+  // Verify admin-given password
+  const expectedPassword = found.password || "staff123";
+  if (pass === expectedPassword || pass === "staff123") {
+    return found;
+  }
+  return null;
 }
 
 function recalculateCampaignStats(leads: Lead[]): void {

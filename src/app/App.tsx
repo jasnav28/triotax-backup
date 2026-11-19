@@ -7329,13 +7329,15 @@ export default function App() {
         }
         return (
           <StaffLoginPage
-            onStaffLogin={(email) => {
-              const u = email.split("@")[0] || "staff";
+            onStaffLogin={(email, staffId, employeeId) => {
+              const u = email.split("@")[0] || employeeId || "staff";
               setUsername(u);
               setIsUserAuth(true);
               setUserTab("marketing-leads");
               localStorage.setItem("triotax_is_user_auth", "true");
               localStorage.setItem("triotax_logged_in_user", u);
+              if (staffId) localStorage.setItem("triotax_current_staff_id", staffId);
+              if (employeeId) localStorage.setItem("triotax_current_staff_emp_id", employeeId);
               localStorage.removeItem("triotax_logged_out");
               window.history.pushState(null, "", `/${u}-user/marketing-leads`);
               setActivePage("user");
