@@ -572,7 +572,15 @@ export const AdminStaffProgress: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
-                    {staffProgressList.map((item) => {
+                    {staffProgressList.length === 0 ? (
+                      <tr>
+                        <td colSpan={11} className="p-8 text-center text-slate-400 dark:text-zinc-500">
+                          <p className="font-semibold text-slate-700 dark:text-zinc-300 mb-1">No marketing staff enrolled yet</p>
+                          <p className="text-xs">Use the &quot;Create Staff Portal&quot; tab above to provision employee credentials (e.g. TX-M-00020).</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      staffProgressList.map((item) => {
                       const isSelected = item.staff.id === selectedStaffId;
                       return (
                         <tr
@@ -646,7 +654,7 @@ export const AdminStaffProgress: React.FC = () => {
                           </td>
                         </tr>
                       );
-                    })}
+                    }))}
                   </tbody>
                 </table>
               </div>

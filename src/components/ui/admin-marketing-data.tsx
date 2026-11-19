@@ -35,6 +35,7 @@ import {
   Eye,
   EyeOff,
   Check,
+  Megaphone,
 } from "lucide-react";
 import {
   Lead,
@@ -846,76 +847,84 @@ export const AdminMarketingData: React.FC = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {campaigns.map((camp) => {
-              const campLeads = leads.filter(
-                (l) => l.campaignName.toLowerCase() === camp.name.toLowerCase()
-              );
-              const completed = campLeads.filter(
-                (l) => l.status === "COMPLETED" || l.outcome === "CLOSED"
-              ).length;
-              const percent = campLeads.length > 0 ? Math.round((completed / campLeads.length) * 100) : 0;
+          {campaigns.length === 0 ? (
+            <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-8 text-center text-slate-400 dark:text-zinc-500 shadow-xs">
+              <Megaphone size={36} className="mx-auto mb-2 text-slate-300 dark:text-zinc-600" />
+              <p className="text-sm font-bold text-slate-700 dark:text-zinc-300">No campaigns created yet</p>
+              <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1">Click &quot;+ Create Campaign&quot; or upload leads with a campaign name to organize records.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {campaigns.map((camp) => {
+                const campLeads = leads.filter(
+                  (l) => l.campaignName.toLowerCase() === camp.name.toLowerCase()
+                );
+                const completed = campLeads.filter(
+                  (l) => l.status === "COMPLETED" || l.outcome === "CLOSED"
+                ).length;
+                const percent = campLeads.length > 0 ? Math.round((completed / campLeads.length) * 100) : 0;
 
-              return (
-                <div
-                  key={camp.id}
-                  className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-5 shadow-xs flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
-                        Campaign
-                      </span>
-                      {camp.name !== "General" && (
-                        <button
-                          onClick={() => {
-                            if (confirm(`Delete campaign "${camp.name}"?`)) {
-                              deleteCampaign(camp.id);
-                            }
-                          }}
-                          className="text-slate-300 hover:text-rose-500 transition-colors cursor-pointer"
-                          title="Delete Campaign"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      )}
+                return (
+                  <div
+                    key={camp.id}
+                    className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 p-5 shadow-xs flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
+                          Campaign
+                        </span>
+                        {camp.name !== "General" && (
+                          <button
+                            onClick={() => {
+                              if (confirm(`Delete campaign "${camp.name}"?`)) {
+                                deleteCampaign(camp.id);
+                              }
+                            }}
+                            className="text-slate-300 hover:text-rose-500 transition-colors cursor-pointer"
+                            title="Delete Campaign"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                      <h4 className="text-base font-bold text-slate-900 dark:text-white mb-2">{camp.name}</h4>
+                      <p className="text-xs text-slate-500 dark:text-zinc-400 mb-4">
+                        Uploaded by <span className="font-semibold">{camp.uploadedById}</span> on{" "}
+                        {new Date(camp.createdAt).toLocaleDateString()}
+                      </p>
                     </div>
-                    <h4 className="text-base font-bold text-slate-900 dark:text-white mb-2">{camp.name}</h4>
-                    <p className="text-xs text-slate-500 dark:text-zinc-400 mb-4">
-                      Uploaded by <span className="font-semibold">{camp.uploadedById}</span> on{" "}
-                      {new Date(camp.createdAt).toLocaleDateString()}
-                    </p>
+
+                    <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-zinc-800">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-600 dark:text-zinc-400">Campaign Completion</span>
+                        <span className="font-bold text-slate-900 dark:text-white">
+                          {completed} / {campLeads.length} leads ({percent}%)
+                        </span>
+                      </div>
+
+                      <div className="w-full bg-slate-100 dark:bg-zinc-800 h-2 rounded-full overflow-hidden">
+                        <div
+                          className="bg-sky-500 h-full rounded-full transition-all duration-500"
+                          style={{ width: `${percent}%` }}
+                        />
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          setSelectedCampaignFilter(camp.name);
+                          setCurrentSubTab("leads");
+                        }}
+                        className="w-full mt-2 py-2 text-xs font-bold text-[#003153] dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 rounded-lg transition-colors cursor-pointer text-center"
+                      >
+                        View All Campaign Leads &rarr;
+                      </button>
+                    </div>
                   </div>
-
-                  <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-zinc-800">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-600 dark:text-zinc-400">Campaign Completion</span>
-                      <span className="font-bold text-slate-900 dark:text-white">
-                        {completed} / {campLeads.length} leads ({percent}%)
-                      </span>
-                    </div>
-
-                    <div className="w-full bg-slate-100 dark:bg-zinc-800 h-2 rounded-full overflow-hidden">
-                      <div
-                        className="bg-sky-500 h-full rounded-full transition-all duration-500"
-                        style={{ width: `${percent}%` }}
-                      />
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        setSelectedCampaignFilter(camp.name);
-                        setCurrentSubTab("leads");
-                      }}
-                      className="w-full mt-2 py-2 text-xs font-bold text-[#003153] dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 rounded-lg transition-colors cursor-pointer text-center"
-                    >
-                      View All Campaign Leads &rarr;
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
@@ -955,7 +964,14 @@ export const AdminMarketingData: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
-                  {staffList.map((staff) => {
+                  {staffList.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="p-8 text-center text-slate-400 dark:text-zinc-500">
+                        No staff accounts created yet. Use the Staff Progress tab to create & provision staff credentials.
+                      </td>
+                    </tr>
+                  ) : (
+                    staffList.map((staff) => {
                     const assignedCount = leads.filter((l) => l.assignedToId === staff.id).length;
                     const isPassVisible = visiblePasswords[staff.id] || false;
                     const pwd = staff.password || "staff123";
@@ -1053,7 +1069,7 @@ export const AdminMarketingData: React.FC = () => {
                         </td>
                       </tr>
                     );
-                  })}
+                  }))}
                 </tbody>
               </table>
             </div>
@@ -1083,7 +1099,14 @@ export const AdminMarketingData: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
-                  {staffList.map((staff) => {
+                  {staffList.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="p-8 text-center text-slate-400 dark:text-zinc-500">
+                        No staff accounts created yet. Use the Staff Progress tab to create & provision staff credentials.
+                      </td>
+                    </tr>
+                  ) : (
+                    staffList.map((staff) => {
                     const assigned = leads.filter((l) => l.assignedToId === staff.id);
                     let callsCount = 0;
                     let interestedCount = 0;
@@ -1127,7 +1150,7 @@ export const AdminMarketingData: React.FC = () => {
                         </td>
                       </tr>
                     );
-                  })}
+                  }))}
                 </tbody>
               </table>
             </div>
