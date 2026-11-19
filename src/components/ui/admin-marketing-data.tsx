@@ -68,16 +68,6 @@ export const AdminMarketingData: React.FC = () => {
   // Sub tab: "leads" | "campaigns" | "staff" | "performance"
   const [currentSubTab, setCurrentSubTab] = useState<"leads" | "campaigns" | "staff" | "performance">("leads");
 
-  // Staff Creation Form State
-  const [showAddStaffModal, setShowAddStaffModal] = useState(false);
-  const [newStaffEmpId, setNewStaffEmpId] = useState("");
-  const [newStaffName, setNewStaffName] = useState("");
-  const [newStaffEmail, setNewStaffEmail] = useState("");
-  const [newStaffPhone, setNewStaffPhone] = useState("");
-  const [newStaffRole, setNewStaffRole] = useState("Senior Tele-Marketing Specialist");
-  const [newStaffPassword, setNewStaffPassword] = useState("staff123");
-  const [showStaffPassword, setShowStaffPassword] = useState(false);
-  const [staffCreatedSuccess, setStaffCreatedSuccess] = useState<StaffMember | null>(null);
   const [visiblePasswords, setVisiblePasswords] = useState<{ [id: string]: boolean }>({});
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -372,51 +362,6 @@ export const AdminMarketingData: React.FC = () => {
     setRespDealValue("");
   };
 
-  // Staff creation handlers
-  const handleOpenAddStaffModal = () => {
-    setNewStaffEmpId(generateNextEmployeeId());
-    setNewStaffName("");
-    setNewStaffEmail("");
-    setNewStaffPhone("");
-    setNewStaffRole("Senior Tele-Marketing Specialist");
-    setNewStaffPassword("staff123");
-    setStaffCreatedSuccess(null);
-    setShowAddStaffModal(true);
-  };
-
-  const handleCreateStaffSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newStaffName.trim() || !newStaffEmail.trim()) {
-      alert("Staff Name and Email are required.");
-      return;
-    }
-    if (!newStaffPassword.trim()) {
-      alert("Password must be specified by the Admin.");
-      return;
-    }
-
-    const created = createStaffMember({
-      name: newStaffName,
-      email: newStaffEmail,
-      phone: newStaffPhone,
-      role: newStaffRole,
-      password: newStaffPassword,
-      customEmployeeId: newStaffEmpId || generateNextEmployeeId(),
-    });
-
-    setStaffCreatedSuccess(created);
-    refreshData();
-  };
-
-  const handleGenerateRandomPassword = () => {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
-    let res = "";
-    for (let i = 0; i < 6; i++) {
-      res += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    setNewStaffPassword(`Trio@${res}`);
-  };
-
   return (
     <div className="space-y-6 pb-12 font-sans">
       {/* Top Banner / Title Bar */}
@@ -433,14 +378,6 @@ export const AdminMarketingData: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2.5 flex-wrap">
-          <button
-            onClick={handleOpenAddStaffModal}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-sm transition-all cursor-pointer"
-            title="Create Staff Portal Account with System-Generated Employee ID"
-          >
-            <UserPlus size={16} />
-            <span>Create Staff Portal</span>
-          </button>
           <button
             onClick={() => setShowAddLeadModal(true)}
             className="flex items-center gap-1.5 px-4 py-2.5 bg-sky-500 hover:bg-sky-400 text-white text-xs font-bold rounded-xl shadow-sm transition-all cursor-pointer"
@@ -997,13 +934,9 @@ export const AdminMarketingData: React.FC = () => {
                 System-generated Employee IDs (<code className="font-mono text-sky-600 dark:text-sky-400 font-bold">TX-M-00020</code>) and admin-assigned passwords for internal tele-calling portals.
               </p>
             </div>
-            <button
-              onClick={handleOpenAddStaffModal}
-              className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
-            >
-              <UserPlus size={15} />
-              <span>+ Create Staff Portal</span>
-            </button>
+            <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium bg-slate-100 dark:bg-zinc-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700">
+              Create & manage staff in <strong className="text-sky-600 dark:text-sky-400 font-semibold">Staff Progress</strong> tab
+            </span>
           </div>
 
           <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800 shadow-xs overflow-hidden">
@@ -1731,252 +1664,6 @@ export const AdminMarketingData: React.FC = () => {
                 )}
               </div>
             </div>
-          </div>
-        </div>
-      )}
-      {/* MODAL 5: CREATE STAFF PORTAL */}
-      {showAddStaffModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-zinc-800 flex flex-col max-h-[90vh]">
-            <div className="p-5 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 flex items-center justify-center font-bold">
-                  <UserPlus size={18} />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white">Create Staff Portal Account</h3>
-                  <p className="text-xs text-slate-500">Auto-generated Employee ID with admin-configured password</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowAddStaffModal(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 cursor-pointer"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {staffCreatedSuccess ? (
-              <div className="p-6 space-y-4 text-xs">
-                <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl space-y-3">
-                  <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-sm">
-                    <CheckCircle2 size={18} className="text-emerald-600" />
-                    <span>Staff Portal Account Created Successfully!</span>
-                  </div>
-                  <p className="text-slate-600 dark:text-zinc-300 text-xs">
-                    This staff member can now log in at <code className="font-bold text-slate-900 dark:text-white">/staff</code> using either their Employee ID or Email with the password below.
-                  </p>
-
-                  <div className="bg-white dark:bg-zinc-900 rounded-lg p-3 border border-emerald-200 dark:border-emerald-800/60 space-y-2 font-mono">
-                    <div className="flex justify-between items-center py-0.5 border-b border-slate-100 dark:border-zinc-800">
-                      <span className="text-slate-500 text-[11px]">Employee ID:</span>
-                      <span className="font-bold text-sky-600 dark:text-sky-400 text-xs">{staffCreatedSuccess.employeeId}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-0.5 border-b border-slate-100 dark:border-zinc-800">
-                      <span className="text-slate-500 text-[11px]">Staff Name:</span>
-                      <span className="font-bold text-slate-900 dark:text-white text-xs">{staffCreatedSuccess.name}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-0.5 border-b border-slate-100 dark:border-zinc-800">
-                      <span className="text-slate-500 text-[11px]">Login Email:</span>
-                      <span className="font-bold text-slate-800 dark:text-zinc-200 text-xs">{staffCreatedSuccess.email}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-0.5 border-b border-slate-100 dark:border-zinc-800">
-                      <span className="text-slate-500 text-[11px]">Password:</span>
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400 text-xs">{staffCreatedSuccess.password}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-0.5">
-                      <span className="text-slate-500 text-[11px]">Login URL:</span>
-                      <span className="font-bold text-slate-600 dark:text-zinc-400 text-xs">/staff</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const txt = `TrioTax Staff Portal Credentials:\nEmployee ID: ${staffCreatedSuccess.employeeId}\nEmail: ${staffCreatedSuccess.email}\nPassword: ${staffCreatedSuccess.password}\nLogin Portal: /staff`;
-                        navigator.clipboard.writeText(txt);
-                        alert("Staff credentials copied to clipboard!");
-                      }}
-                      className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-colors cursor-pointer text-center"
-                    >
-                      Copy Credentials
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setStaffCreatedSuccess(null);
-                        setNewStaffEmpId(generateNextEmployeeId());
-                      }}
-                      className="py-2 px-3 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 rounded-lg font-medium cursor-pointer"
-                    >
-                      + Create Another
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex justify-end pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAddStaffModal(false);
-                      setStaffCreatedSuccess(null);
-                    }}
-                    className="px-4 py-2 bg-slate-900 text-white rounded-lg font-semibold hover:bg-slate-800 cursor-pointer"
-                  >
-                    Done
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleCreateStaffSubmit} className="p-6 space-y-4 overflow-y-auto text-xs">
-                {/* Employee ID (System Auto Generated) */}
-                <div className="p-3 bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 rounded-xl space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-sky-800 dark:text-sky-300">
-                      System-Generated Employee ID
-                    </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-200 dark:bg-sky-900 text-sky-800 dark:text-sky-200 font-bold">
-                      Format: TX-M-00020
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={newStaffEmpId}
-                      onChange={(e) => setNewStaffEmpId(e.target.value.toUpperCase())}
-                      className="w-full font-mono font-black text-sm px-3 py-1.5 rounded-lg border border-sky-300 dark:border-sky-700 bg-white dark:bg-zinc-900 text-sky-700 dark:text-sky-300 outline-none"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setNewStaffEmpId(generateNextEmployeeId())}
-                      className="px-2.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg font-bold text-[11px] whitespace-nowrap cursor-pointer"
-                      title="Regenerate next sequence ID"
-                    >
-                      Next ID
-                    </button>
-                  </div>
-                  <p className="text-[10px] text-sky-600 dark:text-sky-400">
-                    Allocated automatically by sequence. Staff can enter this ID directly on the /staff login screen.
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">
-                    Staff Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Rahul Sharma"
-                    value={newStaffName}
-                    onChange={(e) => setNewStaffName(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white outline-none"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">
-                      Staff Email Address *
-                    </label>
-                    <input
-                      type="email"
-                      placeholder="rahul@triotax.com"
-                      value={newStaffEmail}
-                      onChange={(e) => setNewStaffEmail(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white outline-none"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">
-                      Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      placeholder="+91 98450 12345"
-                      value={newStaffPhone}
-                      onChange={(e) => setNewStaffPhone(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">
-                    Designation / Role
-                  </label>
-                  <select
-                    value={newStaffRole}
-                    onChange={(e) => setNewStaffRole(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white outline-none"
-                  >
-                    <option value="Senior Tele-Marketing Specialist">Senior Tele-Marketing Specialist</option>
-                    <option value="Corporate Outreach Executive">Corporate Outreach Executive</option>
-                    <option value="SME Compliance Specialist">SME Compliance Specialist</option>
-                    <option value="GST Lead Conversion Lead">GST Lead Conversion Lead</option>
-                    <option value="Direct Sales Executive">Direct Sales Executive</option>
-                  </select>
-                </div>
-
-                {/* Password assigned by Admin */}
-                <div className="p-3 bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 rounded-xl space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="font-semibold text-slate-800 dark:text-white flex items-center gap-1.5">
-                      <Key size={13} className="text-amber-500" />
-                      Staff Portal Password (Given by Admin) *
-                    </label>
-                    <button
-                      type="button"
-                      onClick={handleGenerateRandomPassword}
-                      className="text-sky-600 dark:text-sky-400 hover:underline text-[11px] font-semibold cursor-pointer"
-                    >
-                      Generate Strong Password
-                    </button>
-                  </div>
-
-                  <div className="relative">
-                    <input
-                      type={showStaffPassword ? "text" : "password"}
-                      value={newStaffPassword}
-                      onChange={(e) => setNewStaffPassword(e.target.value)}
-                      placeholder="Enter initial password for staff"
-                      className="w-full px-3 py-2 pr-10 font-mono rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white outline-none"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowStaffPassword(!showStaffPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 cursor-pointer"
-                    >
-                      {showStaffPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                    </button>
-                  </div>
-                  <p className="text-[10px] text-slate-500">
-                    Staff member will log in using this password along with their Employee ID (<code className="font-bold">{newStaffEmpId}</code>).
-                  </p>
-                </div>
-
-                <div className="pt-4 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-end gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowAddStaffModal(false)}
-                    className="px-4 py-2 text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg cursor-pointer font-medium"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg cursor-pointer transition-colors shadow-sm"
-                  >
-                    Provision Staff Portal
-                  </button>
-                </div>
-              </form>
-            )}
           </div>
         </div>
       )}

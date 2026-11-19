@@ -26,6 +26,13 @@ import {
   Check,
   Sparkles,
   ExternalLink,
+  UserPlus,
+  Key,
+  Eye,
+  EyeOff,
+  Trash2,
+  Copy,
+  ArrowLeft,
 } from "lucide-react";
 import {
   Lead,
@@ -33,6 +40,9 @@ import {
   StaffMember,
   getStoredLeads,
   getStoredStaff,
+  createStaffMember,
+  deleteStaffMember,
+  generateNextEmployeeId,
   pushMarketingToDatabase,
   syncMarketingWithDatabase,
 } from "@/lib/marketing-data";
@@ -41,8 +51,21 @@ export const AdminStaffProgress: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
 
-  // Sub tabs: "marketing" | "sales" | "compliance"
-  const [activeSubTab, setActiveSubTab] = useState<"marketing" | "sales" | "compliance">("marketing");
+  // Sub tabs: "marketing" | "create-staff" | "sales" | "compliance"
+  const [activeSubTab, setActiveSubTab] = useState<"marketing" | "create-staff" | "sales" | "compliance">("marketing");
+
+  // Create Staff Form State (Full Screen Onboarding)
+  const [newStaffEmpId, setNewStaffEmpId] = useState("");
+  const [newStaffName, setNewStaffName] = useState("");
+  const [newStaffEmail, setNewStaffEmail] = useState("");
+  const [newStaffPhone, setNewStaffPhone] = useState("");
+  const [newStaffRole, setNewStaffRole] = useState("Senior Tele-Marketing Specialist");
+  const [newStaffPassword, setNewStaffPassword] = useState("staff123");
+  const [showStaffPassword, setShowStaffPassword] = useState(false);
+  const [staffCreatedSuccess, setStaffCreatedSuccess] = useState<StaffMember | null>(null);
+  const [staffFormError, setStaffFormError] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [visiblePasswords, setVisiblePasswords] = useState<{ [id: string]: boolean }>({});
 
   // Selected staff member for drilldown inspection
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
@@ -87,6 +110,64 @@ export const AdminStaffProgress: React.FC = () => {
       setSyncStatus("ℹ️ Local database synced. Server note: " + (res.message || "Ready"));
     }
     setTimeout(() => setSyncStatus(null), 4000);
+  };
+
+  // Staff creation & management handlers
+  const handleOpenCreateStaffView = () => {
+    setNewStaffEmpId(generateNextEmployeeId());
+    setNewStaffName("");
+    setNewStaffEmail("");
+    setNewStaffPhone("");
+    setNewStaffRole("Senior Tele-Marketing Specialist");
+    setNewStaffPassword("staff123");
+    setStaffCreatedSuccess(null);
+    setStaffFormError(null);
+    setActiveSubTab("create-staff");
+  };
+
+  const handleRegenerateEmpId = () => {
+    setNewStaffEmpId(generateNextEmployeeId());
+  };
+
+  const handleGenerateRandomPassword = () => {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+    let res = "";
+    for (let i = 0; i < 6; i++) {
+      res += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setNewStaffPassword(`Trio@${res}`);
+  };
+
+  const handleCreateStaffSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setStaffFormError(null);
+    if (!newStaffName.trim() || !newStaffEmail.trim()) {
+      setStaffFormError("Staff Full Name and Login Email are required.");
+      return;
+    }
+    if (!newStaffPassword.trim()) {
+      setStaffFormError("Staff Portal Password is required.");
+      return;
+    }
+
+    const created = createStaffMember({
+      name: newStaffName,
+      email: newStaffEmail,
+      phone: newStaffPhone,
+      role: newStaffRole,
+      password: newStaffPassword,
+      customEmployeeId: newStaffEmpId || generateNextEmployeeId(),
+    });
+
+    setStaffCreatedSuccess(created);
+    refreshData();
+  };
+
+  const handleDeleteStaff = (staffId: string, staffName: string) => {
+    if (window.confirm(`Are you sure you want to deactivate and remove staff portal access for ${staffName}?`)) {
+      deleteStaffMember(staffId);
+      refreshData();
+    }
   };
 
   // Selected staff object
@@ -294,6 +375,14 @@ export const AdminStaffProgress: React.FC = () => {
 
         <div className="flex items-center gap-2.5 flex-wrap">
           <button
+            onClick={handleOpenCreateStaffView}
+            className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
+            title="Create Staff Portal Account with System-Generated Employee ID"
+          >
+            <UserPlus size={15} />
+            <span>Create Staff Portal</span>
+          </button>
+          <button
             onClick={handleManualSync}
             disabled={isSyncing}
             className="flex items-center gap-1.5 px-4 py-2 bg-white/15 hover:bg-white/25 text-white text-xs font-bold rounded-xl backdrop-blur-md border border-white/20 transition-all cursor-pointer"
@@ -304,7 +393,7 @@ export const AdminStaffProgress: React.FC = () => {
           </button>
           <button
             onClick={handleExportStaffProgress}
-            className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 bg-white/15 hover:bg-white/25 text-white text-xs font-bold rounded-xl backdrop-blur-md border border-white/20 transition-all cursor-pointer"
           >
             <Download size={15} />
             <span>Export Progress Report</span>
@@ -319,8 +408,8 @@ export const AdminStaffProgress: React.FC = () => {
         </div>
       )}
 
-      {/* Sub Tabs Navigation: Marketing, Sales, Compliance */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-zinc-800 pb-2">
+      {/* Sub Tabs Navigation: Marketing, Create Staff Portal, Sales, Compliance */}
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-zinc-800 pb-2 flex-wrap">
         <button
           onClick={() => setActiveSubTab("marketing")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
@@ -331,6 +420,18 @@ export const AdminStaffProgress: React.FC = () => {
         >
           <PhoneCall size={14} />
           <span>Marketing Tele-Calling ({staffList.length} Staff)</span>
+        </button>
+
+        <button
+          onClick={handleOpenCreateStaffView}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            activeSubTab === "create-staff"
+              ? "bg-[#003153] text-white shadow-xs"
+              : "text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800"
+          }`}
+        >
+          <UserPlus size={14} />
+          <span>Create Staff Portal</span>
         </button>
 
         <button
@@ -732,6 +833,400 @@ export const AdminStaffProgress: React.FC = () => {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* SUB TAB: FULL SCREEN CREATE STAFF PORTAL & ONBOARDING */}
+      {activeSubTab === "create-staff" && (
+        <div className="space-y-6">
+          {/* Back button and summary badge */}
+          <div className="flex items-center justify-between pb-1">
+            <button
+              onClick={() => setActiveSubTab("marketing")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+            >
+              <ArrowLeft size={14} />
+              <span>Back to Tele-Calling Audit</span>
+            </button>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/60 px-3 py-1 rounded-full border border-sky-200 dark:border-sky-800">
+                {staffList.length} Active Staff Portals Configured
+              </span>
+            </div>
+          </div>
+
+          {/* Success Banner if newly created */}
+          {staffCreatedSuccess && (
+            <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-xs">
+                    <CheckCircle2 size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-emerald-950 dark:text-emerald-200">
+                      Staff Portal Account Created Successfully!
+                    </h3>
+                    <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                      The staff member can immediately access the tele-calling desk at <code className="font-bold">/staff</code> using their Employee ID or Email.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">Allocated ID:</span>
+                  <span className="font-mono text-sm font-black px-3 py-1 bg-white dark:bg-zinc-900 text-sky-700 dark:text-sky-300 rounded-lg border border-emerald-300 dark:border-emerald-700 shadow-xs">
+                    {staffCreatedSuccess.employeeId}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-white dark:bg-zinc-900 p-4 rounded-xl border border-emerald-200/80 dark:border-emerald-900 font-mono text-xs">
+                <div>
+                  <span className="block text-[11px] font-sans text-slate-400 dark:text-zinc-500">Employee ID</span>
+                  <span className="font-bold text-sky-600 dark:text-sky-400 text-sm">{staffCreatedSuccess.employeeId}</span>
+                </div>
+                <div>
+                  <span className="block text-[11px] font-sans text-slate-400 dark:text-zinc-500">Staff Full Name</span>
+                  <span className="font-bold text-slate-900 dark:text-white text-sm">{staffCreatedSuccess.name}</span>
+                </div>
+                <div>
+                  <span className="block text-[11px] font-sans text-slate-400 dark:text-zinc-500">Login Identifier</span>
+                  <span className="font-bold text-slate-800 dark:text-zinc-200">{staffCreatedSuccess.email}</span>
+                </div>
+                <div>
+                  <span className="block text-[11px] font-sans text-slate-400 dark:text-zinc-500">Staff Password</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">{staffCreatedSuccess.password}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 flex-wrap pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const txt = `TrioTax Staff Portal Credentials:\nEmployee ID: ${staffCreatedSuccess.employeeId}\nStaff Name: ${staffCreatedSuccess.name}\nEmail: ${staffCreatedSuccess.email}\nPassword: ${staffCreatedSuccess.password}\nPortal URL: /staff`;
+                    navigator.clipboard.writeText(txt);
+                    setCopiedKey("success_cred");
+                    setTimeout(() => setCopiedKey(null), 3000);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
+                >
+                  {copiedKey === "success_cred" ? <Check size={14} /> : <Copy size={14} />}
+                  <span>{copiedKey === "success_cred" ? "Credentials Copied to Clipboard!" : "Copy Login Credentials"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStaffCreatedSuccess(null);
+                    setNewStaffEmpId(generateNextEmployeeId());
+                    setNewStaffName("");
+                    setNewStaffEmail("");
+                    setNewStaffPhone("");
+                  }}
+                  className="px-4 py-2 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-800 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                >
+                  + Onboard Another Staff Member
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveSubTab("marketing")}
+                  className="px-4 py-2 bg-slate-900 dark:bg-zinc-800 text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                  View in Tele-Calling Audit →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Full Screen Creation Form */}
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200/80 dark:border-zinc-800 shadow-xs p-6 md:p-8 space-y-6">
+            <div className="border-b border-slate-100 dark:border-zinc-800 pb-4">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#003153] text-white flex items-center justify-center">
+                  <UserPlus size={18} />
+                </div>
+                <span>Create Staff Portal Account</span>
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
+                Configure new tele-marketing specialist profiles with system-generated Employee IDs (<code className="font-mono text-sky-600 dark:text-sky-400 font-bold">TX-M-00020</code> format) and admin-controlled access passwords.
+              </p>
+            </div>
+
+            {staffFormError && (
+              <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl text-xs font-semibold text-rose-800 dark:text-rose-300 flex items-center gap-2">
+                <AlertCircle size={16} className="text-rose-600" />
+                <span>{staffFormError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleCreateStaffSubmit} className="space-y-6 text-xs">
+              {/* Top Row: System-Generated Employee ID */}
+              <div className="p-4 bg-sky-50/80 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/60 rounded-xl space-y-2">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-sky-900 dark:text-sky-300 flex items-center gap-1.5">
+                    <Sparkles size={13} className="text-sky-600" />
+                    System-Generated Unique Employee ID
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-200/80 dark:bg-sky-900 text-sky-800 dark:text-sky-200 font-bold">
+                    Standard Format: TX-M-00020
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={newStaffEmpId || generateNextEmployeeId()}
+                    onChange={(e) => setNewStaffEmpId(e.target.value.toUpperCase())}
+                    className="w-full max-w-xs font-mono font-black text-base px-3.5 py-2 rounded-xl border border-sky-300 dark:border-sky-700 bg-white dark:bg-zinc-900 text-sky-700 dark:text-sky-300 outline-none shadow-xs"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={handleRegenerateEmpId}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl font-bold text-xs whitespace-nowrap cursor-pointer transition-colors shadow-xs"
+                    title="Generate next sequential employee number"
+                  >
+                    <RefreshCw size={13} />
+                    <span>Next Sequence ID</span>
+                  </button>
+                </div>
+                <p className="text-[11px] text-sky-700 dark:text-sky-400">
+                  Allocated automatically by sequence. Staff can enter this ID directly on the <code className="font-bold">/staff</code> login screen without needing an email.
+                </p>
+              </div>
+
+              {/* 2-Column Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Column 1: Personal Details */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1.5">
+                      Staff Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Rahul Sharma"
+                      value={newStaffName}
+                      onChange={(e) => setNewStaffName(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-[#003153] transition-all"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1.5">
+                      Staff Login Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="rahul@triotax.com"
+                      value={newStaffEmail}
+                      onChange={(e) => setNewStaffEmail(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-[#003153] transition-all"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1.5">
+                      Contact Phone Number (Optional)
+                    </label>
+                    <input
+                      type="tel"
+                      placeholder="+91 98450 12345"
+                      value={newStaffPhone}
+                      onChange={(e) => setNewStaffPhone(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-[#003153] transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Column 2: Role & Authentication */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1.5">
+                      Department / Designation
+                    </label>
+                    <select
+                      value={newStaffRole}
+                      onChange={(e) => setNewStaffRole(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-[#003153] transition-all"
+                    >
+                      <option value="Senior Tele-Marketing Specialist">Senior Tele-Marketing Specialist</option>
+                      <option value="Corporate Outreach Executive">Corporate Outreach Executive</option>
+                      <option value="SME Compliance Specialist">SME Compliance Specialist</option>
+                      <option value="GST Lead Conversion Lead">GST Lead Conversion Lead</option>
+                      <option value="Statutory Compliance Executive">Statutory Compliance Executive</option>
+                      <option value="Direct Sales Executive">Direct Sales Executive</option>
+                    </select>
+                  </div>
+
+                  <div className="p-4 bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="font-semibold text-slate-800 dark:text-white flex items-center gap-1.5">
+                        <Key size={14} className="text-amber-500" />
+                        Staff Portal Password (Given by Admin) *
+                      </label>
+                      <button
+                        type="button"
+                        onClick={handleGenerateRandomPassword}
+                        className="text-sky-600 dark:text-sky-400 hover:underline text-[11px] font-semibold cursor-pointer"
+                      >
+                        Generate Password
+                      </button>
+                    </div>
+
+                    <div className="relative">
+                      <input
+                        type={showStaffPassword ? "text" : "password"}
+                        value={newStaffPassword}
+                        onChange={(e) => setNewStaffPassword(e.target.value)}
+                        placeholder="Enter password for staff portal"
+                        className="w-full px-3.5 py-2 pr-10 font-mono text-xs rounded-xl border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white outline-none"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowStaffPassword(!showStaffPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 cursor-pointer"
+                      >
+                        {showStaffPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-slate-500 dark:text-zinc-400">
+                      Staff will sign in using this password with their Employee ID (<code className="font-bold">{newStaffEmpId || "TX-M-00020"}</code>).
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit / Reset Actions */}
+              <div className="pt-4 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNewStaffName("");
+                    setNewStaffEmail("");
+                    setNewStaffPhone("");
+                    setNewStaffPassword("staff123");
+                    setStaffFormError(null);
+                  }}
+                  className="px-4 py-2.5 text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl cursor-pointer font-semibold transition-colors"
+                >
+                  Clear Form
+                </button>
+                <button
+                  type="submit"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl cursor-pointer transition-colors shadow-sm"
+                >
+                  <UserPlus size={16} />
+                  <span>Create & Provision Staff Portal</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Full Screen Active Staff Directory */}
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200/80 dark:border-zinc-800 shadow-xs overflow-hidden">
+            <div className="p-5 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <h4 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <span>Active Staff Portals & Calling Specialists</span>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 font-bold">
+                    {staffList.length} Accounts
+                  </span>
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
+                  All onboarded staff members with system Employee IDs, roles, and calling credentials.
+                </p>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 dark:bg-zinc-950 text-slate-600 dark:text-zinc-400 font-bold border-b border-slate-200 dark:border-zinc-800">
+                    <th className="p-3.5">Employee ID</th>
+                    <th className="p-3.5">Staff Name & Email</th>
+                    <th className="p-3.5">Designation / Role</th>
+                    <th className="p-3.5">Phone Number</th>
+                    <th className="p-3.5">Portal Password</th>
+                    <th className="p-3.5 text-center">Assigned Leads</th>
+                    <th className="p-3.5 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
+                  {staffList.map((staff) => {
+                    const assignedCount = leads.filter((l) => l.assignedToId === staff.id).length;
+                    const isPassVisible = visiblePasswords[staff.id];
+
+                    return (
+                      <tr key={staff.id} className="hover:bg-slate-50/70 dark:hover:bg-zinc-800/40 transition-colors">
+                        <td className="p-3.5">
+                          <span className="font-mono text-xs font-black px-2.5 py-1 rounded-lg bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                            {staff.employeeId}
+                          </span>
+                        </td>
+                        <td className="p-3.5">
+                          <div className="font-bold text-slate-900 dark:text-white">{staff.name}</div>
+                          <div className="text-[11px] text-slate-400 font-mono">{staff.email}</div>
+                        </td>
+                        <td className="p-3.5">
+                          <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-semibold text-[11px]">
+                            {staff.role}
+                          </span>
+                        </td>
+                        <td className="p-3.5 text-slate-600 dark:text-zinc-400 font-mono">
+                          {staff.phone || "—"}
+                        </td>
+                        <td className="p-3.5 font-mono">
+                          <div className="flex items-center gap-2">
+                            <span className="text-slate-700 dark:text-zinc-300">
+                              {isPassVisible ? staff.password || "staff123" : "••••••••"}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setVisiblePasswords((prev) => ({ ...prev, [staff.id]: !prev[staff.id] }))
+                              }
+                              className="text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 cursor-pointer"
+                              title={isPassVisible ? "Hide password" : "Show password"}
+                            >
+                              {isPassVisible ? <EyeOff size={13} /> : <Eye size={13} />}
+                            </button>
+                          </div>
+                        </td>
+                        <td className="p-3.5 text-center font-bold text-slate-800 dark:text-zinc-200">
+                          {assignedCount} Leads
+                        </td>
+                        <td className="p-3.5 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedStaffId(staff.id);
+                                setActiveSubTab("marketing");
+                              }}
+                              className="px-2.5 py-1 bg-sky-50 hover:bg-sky-100 dark:bg-sky-950/60 dark:hover:bg-sky-900 text-sky-700 dark:text-sky-300 rounded-lg font-bold text-[11px] transition-colors cursor-pointer"
+                              title="Audit call log in Marketing view"
+                            >
+                              Audit Calls
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteStaff(staff.id, staff.name)}
+                              className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
+                              title="Delete staff account"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       )}
 
