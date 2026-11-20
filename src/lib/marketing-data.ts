@@ -53,6 +53,18 @@ export interface StaffMember {
   createdAt?: string;
 }
 
+export interface StaffTarget {
+  id: string;
+  staffId: string;
+  staffName?: string;
+  employeeId?: string;
+  month: string; // "YYYY-MM", e.g. "2026-11"
+  dealsTarget: number; // e.g. 10
+  revenueTarget: number; // e.g. 150000
+  callsTarget: number; // e.g. 100
+  updatedAt: string;
+}
+
 export interface StaffRoleDefinition {
   id: string;
   name: string;
@@ -467,6 +479,102 @@ export function validateStaffLogin(identifier: string, pass: string): StaffMembe
   return null;
 }
 
+// ─────────────────────────────────────────────────────────────
+// STAFF MONTHLY TARGETS ENGINE
+// ─────────────────────────────────────────────────────────────
+const TARGETS_KEY = "triotax_staff_targets";
+
+export function getStoredStaffTargets(): StaffTarget[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(TARGETS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveStaffTargets(targets: StaffTarget[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(TARGETS_KEY, JSON.stringify(targets));
+    window.dispatchEvent(new CustomEvent("triotax_marketing_updated"));
+    pushMarketingToDatabase().catch(() => {});
+  } catch (e) {
+    console.error("Failed to save staff targets:", e);
+  }
+}
+
+export function getCurrentMonthKey(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+}
+
+export function getStaffTargetForMonth(staffIdOrEmpId: string, monthKey: string = getCurrentMonthKey()): StaffTarget {
+  const targets = getStoredStaffTargets();
+  const found = targets.find(
+    (t) => (t.staffId === staffIdOrEmpId || t.employeeId === staffIdOrEmpId) && t.month === monthKey
+  );
+  if (found) return found;
+
+  const staffList = getStoredStaff();
+  const staff = staffList.find((s) => s.id === staffIdOrEmpId || s.employeeId === staffIdOrEmpId);
+  return {
+    id: `target_${staffIdOrEmpId}_${monthKey}`,
+    staffId: staff?.id || staffIdOrEmpId,
+    staffName: staff?.name || "Staff Member",
+    employeeId: staff?.employeeId || staffIdOrEmpId,
+    month: monthKey,
+    dealsTarget: 10, // Default 10 monthly target deals
+    revenueTarget: 150000,
+    callsTarget: 100,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+export function setStaffTarget(
+  staffId: string,
+  monthKey: string,
+  dealsTarget: number,
+  revenueTarget: number = 150000,
+  callsTarget: number = 100
+): StaffTarget {
+  const targets = getStoredStaffTargets();
+  const staffList = getStoredStaff();
+  const staff = staffList.find((s) => s.id === staffId || s.employeeId === staffId);
+
+  const existingIndex = targets.findIndex(
+    (t) => (t.staffId === staffId || t.employeeId === staffId) && t.month === monthKey
+  );
+
+  const newTarget: StaffTarget = {
+    id: existingIndex >= 0 ? targets[existingIndex].id : `target_${staffId}_${monthKey}`,
+    staffId: staff?.id || staffId,
+    staffName: staff?.name || (staffId === "staff_tx_m_00020" ? "Senior Tele-Marketing Specialist" : "Staff Member"),
+    employeeId: staff?.employeeId || (staffId === "staff_tx_m_00020" ? "TX-M-00020" : staffId),
+    month: monthKey,
+    dealsTarget: Math.max(1, dealsTarget),
+    revenueTarget: Math.max(0, revenueTarget),
+    callsTarget: Math.max(0, callsTarget),
+    updatedAt: new Date().toISOString(),
+  };
+
+  let updatedTargets: StaffTarget[];
+  if (existingIndex >= 0) {
+    updatedTargets = [...targets];
+    updatedTargets[existingIndex] = newTarget;
+  } else {
+    updatedTargets = [...targets, newTarget];
+  }
+
+  saveStaffTargets(updatedTargets);
+  return newTarget;
+}
+
 function recalculateCampaignStats(leads: Lead[]): void {
   const campaigns = getStoredCampaigns();
   let changed = false;
@@ -715,11 +823,13 @@ export async function pushMarketingToDatabase(): Promise<{ success: boolean; mes
     const campaigns = getStoredCampaigns();
     const leads = getStoredLeads();
     const staff = getStoredStaff();
+    const targets = getStoredStaffTargets();
 
     const payload = JSON.stringify({
       campaigns,
       leads,
       staff,
+      targets,
     });
 
     const candidates = getMarketingApiCandidates("marketing/data");
@@ -773,10 +883,11 @@ export async function syncMarketingWithDatabase(): Promise<boolean> {
 
         if (!res.ok) continue;
         const data = await res.json();
-        if (data.success && (data.leads?.length > 0 || data.campaigns?.length > 0 || data.staff?.length > 0)) {
+        if (data.success && (data.leads?.length > 0 || data.campaigns?.length > 0 || data.staff?.length > 0 || data.targets?.length > 0)) {
           const rawCamps = data.campaigns || [];
           const rawLeads = data.leads || [];
           const rawStaff = data.staff || [];
+          const rawTargets = data.targets || [];
           const cleanCamps = rawCamps.filter((c: any) => !DUMMY_CAMPAIGN_NAMES.has(c.name) && !c.id.startsWith("camp-00"));
           const cleanLeads = rawLeads.filter((l: any) => !DUMMY_BUSINESS_NAMES.has(l.businessName) && !l.id.startsWith("lead-00") && !l.id.startsWith("lead-01"));
           const cleanStaff = rawStaff.filter((s: any) => !DUMMY_STAFF_NAMES.has(s.name) && s.id !== "staff_1" && s.id !== "staff_2" && s.id !== "staff_3" && s.id !== "staff_4");
@@ -784,6 +895,9 @@ export async function syncMarketingWithDatabase(): Promise<boolean> {
           localStorage.setItem(CAMPAIGNS_KEY, JSON.stringify(cleanCamps));
           localStorage.setItem(LEADS_KEY, JSON.stringify(cleanLeads));
           localStorage.setItem(STAFF_KEY, JSON.stringify(cleanStaff));
+          if (Array.isArray(rawTargets) && rawTargets.length > 0) {
+            localStorage.setItem(TARGETS_KEY, JSON.stringify(rawTargets));
+          }
           window.dispatchEvent(new CustomEvent("triotax_marketing_updated"));
 
           // If dummy data was pruned from server payload, push clean state back to purge backend database

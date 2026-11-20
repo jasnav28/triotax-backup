@@ -42,6 +42,9 @@ import {
   UserCheck,
   X,
   MessageSquare,
+  Target,
+  Trophy,
+  PartyPopper,
 } from "lucide-react";
 import {
   Lead,
@@ -49,6 +52,7 @@ import {
   Campaign,
   StaffMember,
   StaffNotice,
+  StaffTarget,
   STAFF_ROLES,
   getStoredCampaigns,
   getStoredLeads,
@@ -57,6 +61,8 @@ import {
   saveLeads,
   addLeadResponse,
   updateLeadStatus,
+  getStaffTargetForMonth,
+  getCurrentMonthKey,
   pushMarketingToDatabase,
   syncMarketingWithDatabase,
 } from "@/lib/marketing-data";
@@ -152,6 +158,17 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
   const [copiedActivePhone, setCopiedActivePhone] = useState(false);
   const [sequentialSuccessToast, setSequentialSuccessToast] = useState<string | null>(null);
 
+  // Monthly Target & Celebratory Party Poppers State
+  const [showTargetBriefingModal, setShowTargetBriefingModal] = useState<boolean>(true);
+  const [celebrationActive, setCelebrationActive] = useState<boolean>(false);
+  const [celebrationToast, setCelebrationToast] = useState<{
+    dealValue: number;
+    newClosedCount: number;
+    targetCount: number;
+    businessName: string;
+    motivationalQuote: string;
+  } | null>(null);
+
   // Filters State for Notice Tab
   const [noticeCategory, setNoticeCategory] = useState<string>("ALL");
   const [noticeSearch, setNoticeSearch] = useState("");
@@ -226,7 +243,7 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
 
   const followUpLeads = useMemo(() => {
     return leads.filter(
-      (l) => l.outcome === "FOLLOW_UP_REQUIRED" || l.status === "RESPONSE_PENDING"
+      (l) => l.outcome === "FOLLOW_UP_REQUIRED" || (l.status === "RESPONSE_PENDING" && l.outcome !== "INTERESTED")
     );
   }, [leads]);
 
@@ -240,8 +257,91 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
   }, [leads]);
 
   const closedLeads = useMemo(() => {
-    return leads.filter((l) => l.outcome === "CLOSED" || l.status === "COMPLETED");
+    return leads.filter((l) => l.outcome === "CLOSED" || l.responses?.some((r) => r.outcome === "CLOSED"));
   }, [leads]);
+
+  // Monthly Target & Achievement calculation
+  const currentMonthKey = useMemo(() => getCurrentMonthKey(), []);
+  const currentStaffTarget = useMemo(() => {
+    const staffKey = currentStaff.id || currentStaff.employeeId || "staff_tx_m_00020";
+    return getStaffTargetForMonth(staffKey, currentMonthKey);
+  }, [currentStaff, currentMonthKey, leads]);
+
+  const currentMonthClosedDeals = useMemo(() => {
+    return closedLeads.length;
+  }, [closedLeads]);
+
+  const targetAchievementPct = useMemo(() => {
+    return currentStaffTarget.dealsTarget > 0
+      ? Math.round((currentMonthClosedDeals / currentStaffTarget.dealsTarget) * 100)
+      : 0;
+  }, [currentMonthClosedDeals, currentStaffTarget]);
+
+  // Deal closed celebration trigger
+  const triggerDealCelebration = (dealVal: number, businessName: string) => {
+    const nextClosed = currentMonthClosedDeals + 1;
+    const targetCount = currentStaffTarget.dealsTarget || 10;
+
+    const motivationalQuotes = [
+      "Incredible achievement! Your persuasion and sales execution have unlocked another valuable client for TrioTax!",
+      "Outstanding performance! Another deal closed and revenue won. Your hard work and persistent follow-ups are paying off brilliantly!",
+      "Spectacular conversion! You are setting the benchmark for tele-marketing excellence. Keep up this unstoppable momentum!",
+      "Phenomenal closing! You successfully converted a key enterprise prospect. Management deeply appreciates your winning spirit!",
+      "Stellar victory! Your clarity and consultative guidance won the client's complete trust. Onward to smashing the monthly target!"
+    ];
+    const quote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
+
+    setCelebrationActive(true);
+    setCelebrationToast({
+      dealValue: dealVal,
+      newClosedCount: nextClosed,
+      targetCount,
+      businessName,
+      motivationalQuote: quote,
+    });
+
+    // Native audio celebration chime (no external audio files needed)
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtx) {
+        const ctx = new AudioCtx();
+        const freqs = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        freqs.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.frequency.value = freq;
+          osc.type = "sine";
+          gain.gain.setValueAtTime(0.15, ctx.currentTime + idx * 0.09);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.09 + 0.35);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + idx * 0.09);
+          osc.stop(ctx.currentTime + idx * 0.09 + 0.35);
+        });
+      }
+    } catch {}
+
+    setTimeout(() => setCelebrationActive(false), 6000);
+    setTimeout(() => setCelebrationToast(null), 9000);
+  };
+
+  // Quick close deal directly from pipeline cards
+  const handleQuickCloseDeal = (lead: Lead) => {
+    const promptVal = prompt(`Enter closed deal revenue value for "${lead.businessName}" (₹):`, "25000");
+    if (promptVal === null) return;
+    const val = parseFloat(promptVal) || 25000;
+
+    addLeadResponse(lead.id, {
+      userId: currentStaff.id,
+      userName: currentStaff.name,
+      outcome: "CLOSED",
+      notes: "Deal closed and contracted! Client onboarded with statutory compliance retainer.",
+      dealValue: val,
+    });
+    updateLeadStatus(lead.id, "COMPLETED", "CLOSED", currentStaff.id, currentStaff.name);
+    triggerDealCelebration(val, lead.businessName);
+    refreshData();
+  };
 
   // Calls logged by this current staff member
   const myStaffCalls = useMemo(() => {
@@ -501,6 +601,10 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
 
     updateLeadStatus(currentActiveLead.id, "COMPLETED", outcomeCode);
 
+    if (outcomeCode === "CLOSED") {
+      triggerDealCelebration(!isNaN(val) && val > 0 ? val : 25000, currentActiveLead.businessName);
+    }
+
     setSequentialSuccessToast(
       `Response saved! Lead #${currentActiveLead.sequenceNumber} moved to ${outcomeCode.replace(/_/g, " ")}. Next sequential lead unlocked.`
     );
@@ -597,6 +701,10 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
 
     // Sync to backend database
     pushMarketingToDatabase().catch(() => {});
+
+    if (callOutcome === "CLOSED") {
+      triggerDealCelebration(dealValue ? parseFloat(dealValue) : 25000, selectedLeadForCall.businessName);
+    }
 
     setSaveSuccessMsg("✅ Call logged successfully! Lead advanced in pipeline.");
     setTimeout(() => {
@@ -844,6 +952,18 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
 
           {/* Top Actions */}
           <div className="flex items-center gap-3">
+            {/* Monthly Target Live Tracker Pill */}
+            <button
+              onClick={() => setShowTargetBriefingModal(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs font-black transition-all cursor-pointer shadow-xs"
+              title="Click to view full monthly target briefing"
+            >
+              <Target size={14} className="text-amber-600 dark:text-amber-400" />
+              <span>
+                Target: {currentMonthClosedDeals} / {currentStaffTarget.dealsTarget} Closed ({targetAchievementPct}%)
+              </span>
+            </button>
+
             {/* Calling Pace Tracker */}
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs font-medium">
               <span className="text-slate-500 dark:text-zinc-400">Today&apos;s Responses:</span>
@@ -997,6 +1117,49 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
                     ₹{dashboardMetrics.totalWonRevenue.toLocaleString("en-IN")}
                   </span>
                   <span className="text-[10px] text-emerald-600 font-bold">Converted</span>
+                </div>
+              </div>
+
+              {/* Monthly Target Quota Progress Tracker */}
+              <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-5 rounded-xl border border-amber-500/30 shadow-xs space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Target size={18} className="text-amber-600 dark:text-amber-400" />
+                    <div>
+                      <span className="font-extrabold text-sm text-slate-900 dark:text-white block">
+                        Monthly Deal Closing Quota ({currentMonthKey})
+                      </span>
+                      <span className="text-xs text-amber-800 dark:text-amber-300">
+                        Target allocated by Admin: {currentStaffTarget.dealsTarget} Closed Deals
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-black text-amber-700 dark:text-amber-300">
+                      {currentMonthClosedDeals} / {currentStaffTarget.dealsTarget} Deals Closed ({targetAchievementPct}%)
+                    </span>
+                    <button
+                      onClick={() => setShowTargetBriefingModal(true)}
+                      className="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white text-[11px] font-bold rounded-lg transition-colors cursor-pointer"
+                    >
+                      View Briefing
+                    </button>
+                  </div>
+                </div>
+
+                <div className="w-full h-3 bg-amber-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(targetAchievementPct, 100)}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-zinc-400">
+                  <span>
+                    {Math.max(0, currentStaffTarget.dealsTarget - currentMonthClosedDeals)} more closed deals to achieve monthly target!
+                  </span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                    Won Deal Revenue: ₹{dashboardMetrics.totalWonRevenue.toLocaleString("en-IN")}
+                  </span>
                 </div>
               </div>
 
@@ -1653,7 +1816,15 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
                             onClick={() => handleOpenCallModal(lead)}
                             className="flex-1 py-2 bg-[#003153] hover:bg-[#014d7a] text-white text-xs font-bold rounded-lg transition-colors cursor-pointer text-center"
                           >
-                            Follow Up & Close &rarr;
+                            Follow Up & Log &rarr;
+                          </button>
+                          <button
+                            onClick={() => handleQuickCloseDeal(lead)}
+                            className="py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
+                            title="Directly mark this lead as Closed Deal Won"
+                          >
+                            <Trophy size={13} />
+                            <span>Close Deal</span>
                           </button>
                         </div>
                       </div>
@@ -1739,13 +1910,21 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
                           )}
                         </div>
 
-                        <div className="pt-2 border-t border-slate-100 dark:border-zinc-800">
+                        <div className="pt-2 border-t border-slate-100 dark:border-zinc-800 flex items-center gap-2">
                           <button
                             onClick={() => handleOpenCallModal(lead)}
-                            className="w-full py-2 bg-[#003153] hover:bg-[#014d7a] text-white text-xs font-bold rounded-lg transition-colors cursor-pointer text-center flex items-center justify-center gap-1.5"
+                            className="flex-1 py-2 bg-[#003153] hover:bg-[#014d7a] text-white text-xs font-bold rounded-lg transition-colors cursor-pointer text-center flex items-center justify-center gap-1.5"
                           >
                             <MessageSquare size={13} />
-                            <span>Take Follow-up Response</span>
+                            <span>Take Follow-up</span>
+                          </button>
+                          <button
+                            onClick={() => handleQuickCloseDeal(lead)}
+                            className="py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
+                            title="Directly mark this follow-up as Closed Deal Won"
+                          >
+                            <Trophy size={13} />
+                            <span>Close Deal</span>
                           </button>
                         </div>
                       </div>
@@ -2212,6 +2391,247 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
           </div>
         </div>
       )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* MONTHLY TARGET BRIEFING POPUP MODAL (ON LOGIN / LOAD)         */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {showTargetBriefingModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white dark:bg-zinc-900 w-full max-w-lg rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-2xl overflow-hidden flex flex-col">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-[#003153] via-[#004270] to-[#014d7a] p-6 text-white relative">
+              <button
+                onClick={() => setShowTargetBriefingModal(false)}
+                className="absolute right-4 top-4 p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer"
+                title="Dismiss briefing"
+              >
+                <X size={16} />
+              </button>
+
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-amber-300 text-xs font-bold w-fit mb-2">
+                <Target size={14} />
+                <span>Monthly Target & Performance Quota</span>
+              </div>
+              <h2 className="text-xl font-black text-white">
+                🎯 Monthly Target Briefing
+              </h2>
+              <p className="text-xs text-slate-200 mt-1">
+                Target performance milestones set by TrioTax Administration for {currentMonthKey}
+              </p>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-5">
+              {/* Staff Identification */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#003153] text-white font-black flex items-center justify-center text-sm shadow-xs">
+                    {currentStaff.name.charAt(0)}
+                  </div>
+                  <div>
+                    <span className="font-black text-sm text-slate-900 dark:text-white block">
+                      {currentStaff.name}
+                    </span>
+                    <span className="text-xs text-slate-500 block">
+                      {currentStaff.role || "Senior Tele-Marketing Specialist"}
+                    </span>
+                  </div>
+                </div>
+                <span className="font-mono text-xs font-bold px-2 py-1 rounded-md bg-blue-100 text-blue-900 dark:bg-blue-950/60 dark:text-blue-300">
+                  {currentStaff.employeeId || "TX-M-00020"}
+                </span>
+              </div>
+
+              {/* Target Deal Progress Card */}
+              <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-300">
+                    Monthly Closed Deals Quota
+                  </span>
+                  <span className="font-black text-base text-amber-900 dark:text-amber-300">
+                    {currentMonthClosedDeals} / {currentStaffTarget.dealsTarget} Deals
+                  </span>
+                </div>
+
+                <div className="w-full bg-amber-200/60 dark:bg-zinc-800 h-3 rounded-full overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-amber-500 to-emerald-500 h-full transition-all duration-500 rounded-full"
+                    style={{ width: `${Math.min(targetAchievementPct, 100)}%` }}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between text-xs text-amber-800 dark:text-amber-300 font-semibold">
+                  <span>{targetAchievementPct}% Completed</span>
+                  <span>
+                    {Math.max(0, currentStaffTarget.dealsTarget - currentMonthClosedDeals)} Deals Remaining
+                  </span>
+                </div>
+              </div>
+
+              {/* Secondary Milestones (Calls & Revenue) */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">
+                    Won Revenue Target
+                  </span>
+                  <span className="text-sm font-black text-slate-900 dark:text-white block mt-0.5">
+                    ₹{currentStaffTarget.revenueTarget.toLocaleString("en-IN")}
+                  </span>
+                  <span className="text-[10px] text-emerald-600 font-bold block mt-0.5">
+                    Current: ₹{dashboardMetrics.totalWonRevenue.toLocaleString("en-IN")}
+                  </span>
+                </div>
+                <div className="p-3.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">
+                    Outbound Calls Target
+                  </span>
+                  <span className="text-sm font-black text-slate-900 dark:text-white block mt-0.5">
+                    {currentStaffTarget.callsTarget} Dials
+                  </span>
+                  <span className="text-[10px] text-sky-600 font-bold block mt-0.5">
+                    Logged: {dashboardMetrics.myTotalCalls} Dials
+                  </span>
+                </div>
+              </div>
+
+              {/* Motivational Message */}
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-700 text-xs text-slate-700 dark:text-zinc-300 leading-relaxed">
+                <p className="font-bold text-[#003153] dark:text-sky-300 mb-1 flex items-center gap-1.5">
+                  <Sparkles size={14} className="text-amber-500" />
+                  <span>Management Message:</span>
+                </p>
+                <p className="italic">
+                  &quot;Welcome to your shift, {currentStaff.name}! Management has set a monthly target of {currentStaffTarget.dealsTarget} closed deals for you. Every call is an opportunity to qualify high-ticket corporate clients and create impact. Every closed deal is celebrated system-wide with real-time target updates ({currentMonthClosedDeals}/{currentStaffTarget.dealsTarget})!&quot;
+                </p>
+              </div>
+
+              {/* Dismiss Button */}
+              <button
+                onClick={() => setShowTargetBriefingModal(false)}
+                className="w-full py-3 bg-[#003153] hover:bg-[#014d7a] text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Sparkles size={16} className="text-amber-300" />
+                <span>Let&apos;s Go & Smash Target! &rarr;</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* NON-BLOCKING PARTY POPPERS / CONFETTI CELEBRATION OVERLAY      */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {celebrationActive && (
+        <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+          {/* Confetti & Party Popper Particle Elements */}
+          {Array.from({ length: 42 }).map((_, i) => {
+            const emojis = ["🎉", "🎊", "🏆", "✨", "💥", "🥳", "🎈", "🌟", "💎", "🎯"];
+            const emoji = emojis[i % emojis.length];
+            const leftPercent = (i * 2.4 + (i % 3) * 3) % 100;
+            const delay = (i * 0.12) % 2.5;
+            const duration = 2.5 + ((i % 5) * 0.5);
+            const size = 20 + ((i % 4) * 8);
+
+            return (
+              <span
+                key={i}
+                className="absolute select-none pointer-events-none text-2xl"
+                style={{
+                  left: `${leftPercent}%`,
+                  bottom: "-40px",
+                  fontSize: `${size}px`,
+                  animation: `partyPopperFloat ${duration}s cubic-bezier(0.25, 1, 0.5, 1) ${delay}s infinite`,
+                }}
+              >
+                {emoji}
+              </span>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* FLOATING MOTIVATIONAL DEAL CLOSED TOAST / CELEBRATION BANNER   */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {celebrationToast && (
+        <div className="fixed top-5 right-5 z-50 max-w-md w-full bg-gradient-to-br from-[#003153] via-[#004270] to-[#014d7a] text-white p-5 rounded-2xl shadow-2xl border-2 border-amber-400 animate-slideInRight pointer-events-auto">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 shadow-md">
+                <PartyPopper size={22} className="animate-bounce" />
+              </div>
+              <div>
+                <span className="text-[10px] font-mono font-bold text-amber-300 uppercase tracking-widest block">
+                  🎯 DEAL CLOSED & TARGET ADVANCED!
+                </span>
+                <h4 className="font-black text-sm text-white">
+                  🎉 Outstanding Achievement, {currentStaff.name}!
+                </h4>
+              </div>
+            </div>
+            <button
+              onClick={() => setCelebrationToast(null)}
+              className="p-1 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="mt-3 space-y-2">
+            <p className="text-xs text-sky-100 italic leading-relaxed">
+              &quot;{celebrationToast.motivationalQuote}&quot;
+            </p>
+
+            <div className="p-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 flex items-center justify-between text-xs font-black">
+              <span className="text-slate-200">Monthly Target Progress:</span>
+              <span className="text-amber-300 text-sm">
+                {celebrationToast.newClosedCount} / {celebrationToast.targetCount} Deals Closed (
+                {Math.min(
+                  100,
+                  Math.round((celebrationToast.newClosedCount / celebrationToast.targetCount) * 100)
+                )}
+                %)
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between text-[11px] text-emerald-300 font-bold pt-1">
+              <span>Client: {celebrationToast.businessName}</span>
+              <span>+₹{celebrationToast.dealValue.toLocaleString("en-IN")} Won</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Global CSS keyframe styles for Party Poppers animation */}
+      <style>{`
+        @keyframes partyPopperFloat {
+          0% {
+            transform: translateY(0) scale(0.5) rotate(0deg);
+            opacity: 1;
+          }
+          40% {
+            transform: translateY(-50vh) scale(1.3) rotate(180deg);
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(-110vh) scale(0.9) rotate(360deg);
+            opacity: 0;
+          }
+        }
+        @keyframes slideInRight {
+          0% {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          100% {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        .animate-slideInRight {
+          animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
     </div>
   );
 };

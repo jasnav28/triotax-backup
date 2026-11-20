@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Lock, User, ArrowRight, LayoutDashboard, Users, Settings, LogOut, UserPlus, FileCheck, X, Trash2, ExternalLink, RefreshCw, CheckCircle2, AlertCircle, Megaphone, Play, Pause, Plus, Image as ImageIcon, Link as LinkIcon, Database, Download, Upload, FileText, HardDrive, Search, Target, TrendingUp, ChevronDown, ChevronRight, UserCheck, Briefcase } from "lucide-react";
+import { Shield, Lock, User, ArrowRight, LayoutDashboard, Users, Settings, LogOut, UserPlus, FileCheck, X, Trash2, ExternalLink, RefreshCw, CheckCircle2, AlertCircle, Megaphone, Play, Pause, Plus, Image as ImageIcon, Link as LinkIcon, Database, Download, Upload, FileText, HardDrive, Search, Target, TrendingUp, ChevronDown, ChevronRight, UserCheck, Briefcase, Crosshair } from "lucide-react";
 import { ThemeToggle } from "@/app/components/ui/theme-toggle";
 import { getAdsConfig, DEFAULT_ADS, AdItem } from "@/components/ui/scrolling-ad-banner";
 import { AdminMarketingData } from "@/components/ui/admin-marketing-data";
 import { AdminStaffProgress } from "@/components/ui/admin-staff-progress";
+import { AdminStaffTargets } from "@/components/ui/admin-staff-targets";
 
 interface AdminPageProps {
   isAdminAuth: boolean;
@@ -42,7 +43,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
   useEffect(() => {
     if (["create-user", "gst-tracking", "manage-users", "data-backup"].includes(activeTab)) {
       setExpandedGroups((prev) => ({ ...prev, "end-clients": true }));
-    } else if (["staff-accounts", "staff-progress", "marketing-data"].includes(activeTab)) {
+    } else if (["staff-accounts", "staff-progress", "staff-targets", "marketing-data"].includes(activeTab)) {
       setExpandedGroups((prev) => ({ ...prev, staff: true }));
     }
   }, [activeTab]);
@@ -1231,6 +1232,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
         return <AdminStaffProgress initialSubTab="create-staff" />;
       case "staff-progress":
         return <AdminStaffProgress initialSubTab="marketing" />;
+      case "staff-targets":
+        return <AdminStaffTargets />;
       case "marketing-data":
         return <AdminMarketingData />;
       case "settings":
@@ -1390,7 +1393,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
   const staffItems = [
     { id: "staff-accounts", label: "1. Staff Accounts (Create)", icon: UserCheck },
     { id: "staff-progress", label: "2. Staff Progress", icon: TrendingUp },
-    { id: "marketing-data", label: "3. Marketing Data", icon: Target },
+    { id: "staff-targets", label: "3. Targets", icon: Crosshair },
+    { id: "marketing-data", label: "4. Marketing Data", icon: Target },
   ];
 
   const getTabTitle = (tab: string) => {
@@ -1409,6 +1413,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
         return "Staff / Staff Accounts (Create)";
       case "staff-progress":
         return "Staff / Staff Progress";
+      case "staff-targets":
+        return "Staff / Targets";
       case "marketing-data":
         return "Staff / Marketing Data";
       case "play-ads":
