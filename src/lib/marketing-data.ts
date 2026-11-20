@@ -201,7 +201,7 @@ export const INITIAL_LEADS: Lead[] = [];
 const CAMPAIGNS_KEY = "triotax_marketing_campaigns";
 const LEADS_KEY = "triotax_marketing_leads";
 const STAFF_KEY = "triotax_marketing_staff";
-const PURGE_DUMMY_KEY = "triotax_marketing_clean_v3";
+const PURGE_DUMMY_KEY = "triotax_marketing_clean_v4";
 
 const DUMMY_BUSINESS_NAMES = new Set([
   "Apex Cloud Solutions Pvt Ltd",
@@ -213,7 +213,11 @@ const DUMMY_BUSINESS_NAMES = new Set([
   "Quantum FinTech Labs",
   "BlueHorizon Freight Forwarders",
   "Aura Wellness & Ayurvedic Retail",
-  "Matrix Infotech & Embedded Systems"
+  "Matrix Infotech & Embedded Systems",
+  "Apex Infotech",
+  "Sai Ram Exports",
+  "Delta Logistics",
+  "Modern Steel Fabricators Ltd"
 ]);
 
 const DUMMY_CAMPAIGN_NAMES = new Set([

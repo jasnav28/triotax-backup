@@ -330,12 +330,7 @@ export const AdminMarketingData: React.FC = () => {
   const handleDownloadSampleCsv = () => {
     const csvContent =
       "data:text/csv;charset=utf-8," +
-      "Business Name,Contact Person,Phone,Email,City,State\n" +
-      "Apex Cloud Solutions Pvt Ltd,Rajesh Kumar,+91 98450 11225,rajesh@apexcloud.in,Bengaluru,Karnataka\n" +
-      "Kaveri Logistics & Cold Chain,Ananya Deshmukh,+91 99012 34567,ananya@kaverilogistics.com,Bengaluru,Karnataka\n" +
-      "Shree Ganesh Textiles Mills,Vikram Patel,+91 98200 78901,vikram@ganeshtextiles.in,Surat,Gujarat\n" +
-      "TechNova Systems India LLP,Sneha Rao,+91 97401 55667,sneha.rao@technova.org,Hyderabad,Telangana\n" +
-      "Modern Steel Fabricators Ltd,Amit Verma,+91 98110 33445,amit@modernsteel.com,Pune,Maharashtra\n";
+      "Business Name,Contact Person,Phone,Email,City,State\n";
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -343,18 +338,6 @@ export const AdminMarketingData: React.FC = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
-
-  const handleLoadSampleLeads = () => {
-    const sampleText =
-      "Apex Cloud Solutions Pvt Ltd, Rajesh Kumar, +91 98450 11225, rajesh@apexcloud.in, Bengaluru, Karnataka\n" +
-      "Kaveri Logistics & Cold Chain, Ananya Deshmukh, +91 99012 34567, ananya@kaverilogistics.com, Bengaluru, Karnataka\n" +
-      "Shree Ganesh Textiles Mills, Vikram Patel, +91 98200 78901, vikram@ganeshtextiles.in, Surat, Gujarat\n" +
-      "TechNova Systems India LLP, Sneha Rao, +91 97401 55667, sneha.rao@technova.org, Hyderabad, Telangana\n" +
-      "Modern Steel Fabricators Ltd, Amit Verma, +91 98110 33445, amit@modernsteel.com, Pune, Maharashtra";
-    setBulkRawData(sampleText);
-    setUploadedFile(new File([sampleText], "TrioTax_Sample_Marketing_Leads.csv", { type: "text/csv" }));
-    setUploadSuccessMessage(null);
   };
 
   const handleDocumentUploadSubmit = (e: React.FormEvent) => {
@@ -1186,15 +1169,7 @@ export const AdminMarketingData: React.FC = () => {
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-[11px] font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 shadow-2xs cursor-pointer"
               >
                 <Download size={13} className="text-purple-600" />
-                <span>Download Sample CSV</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleLoadSampleLeads}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-[11px] font-bold text-white shadow-2xs cursor-pointer"
-              >
-                <Sparkles size={13} />
-                <span>Load 5 Demo Leads</span>
+                <span>Download Blank CSV Template</span>
               </button>
             </div>
           </div>
@@ -1760,17 +1735,6 @@ export const AdminMarketingData: React.FC = () => {
                   <label className="font-semibold text-slate-700 dark:text-zinc-300">
                     Paste CSV or Tab-Separated Data
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setBulkRawData(
-                        `Apex Infotech, Vikram Singh, +91 98450 99881, vikram@apex.in, Bengaluru, Karnataka\nSai Ram Exports, Anjali Sharma, +91 99012 88772, anjali@sairam.com, Mumbai, Maharashtra\nDelta Logistics, Rohan Varma, +91 97411 77663, rohan@deltalogistics.in, Hyderabad, Telangana`
-                      );
-                    }}
-                    className="text-sky-600 hover:underline text-[11px]"
-                  >
-                    Load Sample Data
-                  </button>
                 </div>
                 <textarea
                   rows={6}
