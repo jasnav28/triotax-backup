@@ -142,6 +142,16 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
   const [statusFilter, setStatusFilter] = useState("all");
   const [dataSubFilter, setDataSubFilter] = useState<"all" | "available" | "my-leads">("all");
 
+  // Sequential Single-Number Calling Console State (matches reference images)
+  const [activeSequentialLeadId, setActiveSequentialLeadId] = useState<string | null>(null);
+  const [isRecordingResponse, setIsRecordingResponse] = useState(true);
+  const [activeOutcomeOption, setActiveOutcomeOption] = useState<string>("INTERESTED");
+  const [activeDealValue, setActiveDealValue] = useState<string>("");
+  const [activeNotes, setActiveNotes] = useState<string>("");
+  const [activeFollowUpDate, setActiveFollowUpDate] = useState<string>("");
+  const [copiedActivePhone, setCopiedActivePhone] = useState(false);
+  const [sequentialSuccessToast, setSequentialSuccessToast] = useState<string | null>(null);
+
   // Filters State for Notice Tab
   const [noticeCategory, setNoticeCategory] = useState<string>("ALL");
   const [noticeSearch, setNoticeSearch] = useState("");
@@ -357,6 +367,167 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
       return true;
     });
   }, [notices, noticeCategory, noticeSearch]);
+
+  // Sorted queue of all leads by sequenceNumber
+  const sortedQueueLeads = useMemo(() => {
+    let list = [...leads];
+    if (campaignFilter !== "all") {
+      list = list.filter((l) => l.campaignName.toLowerCase() === campaignFilter.toLowerCase());
+    }
+    return list.sort((a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0));
+  }, [leads, campaignFilter]);
+
+  // Current Active Lead (Strictly ONLY ONE lead is active with visible number)
+  const currentActiveLead = useMemo(() => {
+    if (activeSequentialLeadId) {
+      const found = sortedQueueLeads.find((l) => l.id === activeSequentialLeadId);
+      if (found) return found;
+    }
+    // Pick the first lead that is not yet completed
+    const firstUnfinished = sortedQueueLeads.find(
+      (l) => l.status !== "COMPLETED" && (!l.outcome || l.status === "RESPONSE_PENDING")
+    );
+    return firstUnfinished || sortedQueueLeads[0] || null;
+  }, [sortedQueueLeads, activeSequentialLeadId]);
+
+  // Completed leads for recently completed panel (sorted reverse chronological)
+  const completedQueueLeads = useMemo(() => {
+    return sortedQueueLeads
+      .filter((l) => l.status === "COMPLETED" || (l.outcome && l.status !== "RESPONSE_PENDING"))
+      .sort((a, b) => {
+        const timeA = a.responses?.[0]?.createdAt || a.updatedAt || "";
+        const timeB = b.responses?.[0]?.createdAt || b.updatedAt || "";
+        return new Date(timeB).getTime() - new Date(timeA).getTime();
+      });
+  }, [sortedQueueLeads]);
+
+  // Locked upcoming leads (strictly after the active lead in sequence)
+  const lockedUpcomingLeads = useMemo(() => {
+    if (!currentActiveLead) return [];
+    return sortedQueueLeads.filter(
+      (l) =>
+        (l.sequenceNumber || 0) > (currentActiveLead.sequenceNumber || 0) &&
+        l.status !== "COMPLETED" &&
+        !l.outcome
+    );
+  }, [sortedQueueLeads, currentActiveLead]);
+
+  // Campaign Progress Metrics for Top Bar
+  const campaignProgressMetrics = useMemo(() => {
+    const total = sortedQueueLeads.length;
+    const completed = completedQueueLeads.length;
+    const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+    const interested = sortedQueueLeads.filter((l) => l.outcome === "INTERESTED").length;
+    let revenue = 0;
+    sortedQueueLeads.forEach((l) => {
+      l.responses?.forEach((r) => {
+        if (r.dealValue) revenue += r.dealValue;
+      });
+    });
+    return {
+      total,
+      completed,
+      percent,
+      totalCalls: myStaffCalls.length,
+      interested,
+      revenue,
+    };
+  }, [sortedQueueLeads, completedQueueLeads, myStaffCalls]);
+
+  const handleCallCurrentActivePhone = () => {
+    if (!currentActiveLead) return;
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(currentActiveLead.phone);
+      setCopiedActivePhone(true);
+      setTimeout(() => setCopiedActivePhone(false), 2500);
+    }
+  };
+
+  const handleCallNextMarkLater = () => {
+    if (!currentActiveLead) return;
+    updateLeadStatus(currentActiveLead.id, "RESPONSE_PENDING");
+
+    // Advance to next lead in sequence
+    const nextLead = sortedQueueLeads.find(
+      (l) =>
+        (l.sequenceNumber || 0) > (currentActiveLead.sequenceNumber || 0) &&
+        l.status !== "COMPLETED" &&
+        l.id !== currentActiveLead.id
+    );
+
+    if (nextLead) {
+      setActiveSequentialLeadId(nextLead.id);
+    } else {
+      const anyRemaining = sortedQueueLeads.find(
+        (l) => l.status !== "COMPLETED" && l.id !== currentActiveLead.id
+      );
+      if (anyRemaining) setActiveSequentialLeadId(anyRemaining.id);
+    }
+
+    setActiveNotes("");
+    setActiveDealValue("");
+    setActiveFollowUpDate("");
+  };
+
+  const handleSaveSequentialResponse = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentActiveLead) return;
+    if (!activeNotes.trim()) {
+      alert("Please enter Customer Response Notes (Required) describing what was discussed with the client.");
+      return;
+    }
+
+    let outcomeCode: LeadResponse["outcome"] = "INTERESTED";
+    if (activeOutcomeOption === "INTERESTED") outcomeCode = "INTERESTED";
+    else if (activeOutcomeOption === "FOLLOW_UP_REQUIRED" || activeOutcomeOption === "CALL_BACK_LATER") outcomeCode = "FOLLOW_UP_REQUIRED";
+    else if (activeOutcomeOption === "CLOSED") outcomeCode = "CLOSED";
+    else if (activeOutcomeOption === "NO_ANSWER") outcomeCode = "NO_ANSWER";
+    else if (activeOutcomeOption === "WRONG_NUMBER") outcomeCode = "WRONG_NUMBER";
+    else outcomeCode = "NOT_INTERESTED";
+
+    const val = parseFloat(activeDealValue);
+
+    addLeadResponse(currentActiveLead.id, {
+      userId: currentStaff.id,
+      userName: currentStaff.name,
+      outcome: outcomeCode,
+      notes: activeNotes.trim(),
+      followUpDate:
+        activeOutcomeOption === "FOLLOW_UP_REQUIRED" || activeOutcomeOption === "CALL_BACK_LATER"
+          ? activeFollowUpDate
+          : undefined,
+      dealValue: !isNaN(val) && val > 0 ? val : undefined,
+    });
+
+    updateLeadStatus(currentActiveLead.id, "COMPLETED", outcomeCode);
+
+    setSequentialSuccessToast(
+      `Response saved! Lead #${currentActiveLead.sequenceNumber} moved to ${outcomeCode.replace(/_/g, " ")}. Next sequential lead unlocked.`
+    );
+    setTimeout(() => setSequentialSuccessToast(null), 3000);
+
+    // Find next lead in sequence
+    const nextLead = sortedQueueLeads.find(
+      (l) =>
+        (l.sequenceNumber || 0) > (currentActiveLead.sequenceNumber || 0) &&
+        l.status !== "COMPLETED" &&
+        l.id !== currentActiveLead.id
+    );
+
+    if (nextLead) {
+      setActiveSequentialLeadId(nextLead.id);
+    } else {
+      const anyRemaining = sortedQueueLeads.find(
+        (l) => l.status !== "COMPLETED" && l.id !== currentActiveLead.id
+      );
+      setActiveSequentialLeadId(anyRemaining ? anyRemaining.id : null);
+    }
+
+    setActiveNotes("");
+    setActiveDealValue("");
+    setActiveFollowUpDate("");
+    setActiveOutcomeOption("INTERESTED");
+  };
 
   // Open Dialer / Call Logger Modal
   const handleOpenCallModal = (lead: Lead) => {
@@ -1004,269 +1175,403 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
           )}
 
           {/* ───────────────────────────────────────────────────────────── */}
-          {/* TAB 2: DATA (ADMIN UPLOADED LEADS)                            */}
+          {/* TAB 2: DATA (SEQUENTIAL SINGLE-NUMBER CALLING CONSOLE)        */}
           {/* ───────────────────────────────────────────────────────────── */}
           {activeTab === "data" && (
-            <div className="space-y-4">
-              {/* Header Banner */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-slate-200 dark:border-zinc-800">
-                <div>
-                  <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    <span>Admin-Uploaded Lead Records & Calling Queue</span>
-                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-sky-100 text-[#003153] dark:bg-sky-950/60 dark:text-sky-300 font-bold">
-                      {filteredDataLeads.length} Records
-                    </span>
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-                    Data directly synced from Admin Marketing Data uploads. View contact numbers, call manually from your phone, and take customer responses.
-                  </p>
+            <div className="space-y-6">
+              {/* Campaign Filter & Refresh Bar */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-slate-700 dark:text-zinc-300">Campaign Scope:</span>
+                  <select
+                    value={campaignFilter}
+                    onChange={(e) => setCampaignFilter(e.target.value)}
+                    className="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-semibold text-slate-900 dark:text-white outline-none"
+                  >
+                    <option value="all">All Campaigns ({leads.length} Leads)</option>
+                    {campaigns.map((c) => (
+                      <option key={c.id} value={c.name}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <button
                     onClick={refreshData}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-bold hover:bg-slate-50 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer"
                   >
                     <RefreshCw size={13} />
                     <span>Sync Leads</span>
                   </button>
-                  <button
-                    onClick={handleCallNextAvailableLead}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#003153] hover:bg-[#014d7a] text-white text-xs font-bold transition-colors cursor-pointer"
-                  >
-                    <MessageSquare size={13} />
-                    <span>Take Next Response</span>
-                  </button>
                 </div>
               </div>
 
-              {/* Filters & Search Toolbar */}
-              <div className="bg-white dark:bg-zinc-900 p-4 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-xs space-y-3">
-                <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 dark:border-zinc-800 pb-3">
-                  <button
-                    onClick={() => setDataSubFilter("all")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                      dataSubFilter === "all"
-                        ? "bg-[#003153] text-white"
-                        : "bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-200"
-                    }`}
-                  >
-                    All Uploaded Leads ({leads.length})
-                  </button>
-                  <button
-                    onClick={() => setDataSubFilter("available")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                      dataSubFilter === "available"
-                        ? "bg-[#003153] text-white"
-                        : "bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-200"
-                    }`}
-                  >
-                    Available / Unassigned ({leads.filter((l) => l.status === "AVAILABLE").length})
-                  </button>
-                  <button
-                    onClick={() => setDataSubFilter("my-leads")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                      dataSubFilter === "my-leads"
-                        ? "bg-[#003153] text-white"
-                        : "bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-200"
-                    }`}
-                  >
-                    Assigned to Me (
-                    {
-                      leads.filter(
-                        (l) =>
-                          l.assignedToId === currentStaff.id ||
-                          l.assignedToId === currentStaff.employeeId
-                      ).length
-                    }
-                    )
-                  </button>
+              {/* Toast message if present */}
+              {sequentialSuccessToast && (
+                <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center gap-2">
+                  <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+                  <span>{sequentialSuccessToast}</span>
+                </div>
+              )}
+
+              {/* Top Banner: Current Campaign Progress (matching media_1795167190083_ae20e2fc.jpg) */}
+              <div className="bg-[#002744] text-white rounded-2xl p-6 shadow-md space-y-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-sky-300 block mb-1">
+                      CURRENT CAMPAIGN PROGRESS
+                    </span>
+                    <h2 className="text-2xl font-black tracking-tight">
+                      {campaignProgressMetrics.completed} / {campaignProgressMetrics.total} Leads Completed{" "}
+                      <span className="text-base font-semibold text-sky-200">
+                        ({campaignProgressMetrics.percent}% Completed)
+                      </span>
+                    </h2>
+                  </div>
+
+                  <div className="flex items-center gap-6 text-right flex-wrap">
+                    <div>
+                      <span className="text-xs text-sky-200/80 block">Total Calls Logged</span>
+                      <span className="text-2xl font-black">{campaignProgressMetrics.totalCalls}</span>
+                    </div>
+                    <div>
+                      <span className="text-xs text-sky-200/80 block">Interested Leads</span>
+                      <span className="text-2xl font-black text-emerald-400">
+                        {campaignProgressMetrics.interested}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-xs text-sky-200/80 block">Revenue Generated</span>
+                      <span className="text-2xl font-black text-sky-300">
+                        ₹{campaignProgressMetrics.revenue.toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
-                  {/* Search input */}
-                  <div className="md:col-span-2 relative">
-                    <Search
-                      size={14}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Search by company name, contact, phone, city..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 outline-none text-slate-900 dark:text-white"
-                    />
-                  </div>
-
-                  {/* Campaign dropdown */}
-                  <div>
-                    <select
-                      value={campaignFilter}
-                      onChange={(e) => setCampaignFilter(e.target.value)}
-                      className="w-full py-2 px-3 rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-white outline-none font-medium"
-                    >
-                      <option value="all">All Campaigns</option>
-                      {campaigns.map((camp) => (
-                        <option key={camp.id} value={camp.name}>
-                          {camp.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Status dropdown */}
-                  <div>
-                    <select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                      className="w-full py-2 px-3 rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-white outline-none font-medium"
-                    >
-                      <option value="all">All Statuses</option>
-                      <option value="AVAILABLE">AVAILABLE (Uncontacted)</option>
-                      <option value="CALLING">CALLING (In Progress)</option>
-                      <option value="RESPONSE_PENDING">RESPONSE_PENDING (Follow-up)</option>
-                      <option value="COMPLETED">COMPLETED (Closed / Won)</option>
-                    </select>
-                  </div>
+                {/* Progress Bar */}
+                <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
+                  <div
+                    className="bg-[#2563eb] h-full rounded-full transition-all duration-500 shadow-sm"
+                    style={{ width: `${Math.min(campaignProgressMetrics.percent, 100)}%` }}
+                  />
                 </div>
               </div>
 
-              {/* Data Table */}
-              <div className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-xs overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="bg-slate-50 dark:bg-zinc-950 text-slate-600 dark:text-zinc-400 font-bold border-b border-slate-200 dark:border-zinc-800">
-                        <th className="p-3 w-12 text-center">Seq #</th>
-                        <th className="p-3">Business / Entity Name</th>
-                        <th className="p-3">Contact Person</th>
-                        <th className="p-3">Phone & Email</th>
-                        <th className="p-3">Location</th>
-                        <th className="p-3">Campaign</th>
-                        <th className="p-3 text-center">Status</th>
-                        <th className="p-3 text-center">Outcome</th>
-                        <th className="p-3 text-right">Take Response</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
-                      {filteredDataLeads.length === 0 ? (
-                        <tr>
-                          <td colSpan={9} className="p-8 text-center text-slate-400 dark:text-zinc-500">
-                            <p className="font-semibold text-slate-700 dark:text-zinc-300 mb-1">
-                              No leads found matching your filters.
+              {/* 2-Column Grid: Left (Active Lead + Locked Queue), Right (Recently Completed Leads) */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                {/* LEFT COLUMN: 8 COLS */}
+                <div className="lg:col-span-8 space-y-6">
+                  {currentActiveLead ? (
+                    <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200/80 dark:border-zinc-800 p-6 shadow-xs space-y-5">
+                      <div className="flex items-start justify-between gap-4 pb-2 border-b border-slate-100 dark:border-zinc-800">
+                        <div>
+                          <h3 className="text-base font-black uppercase tracking-tight text-slate-900 dark:text-white">
+                            CURRENT ACTIVE LEAD
+                          </h3>
+                          <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
+                            Complete current lead response or move to next number and record notes later.
+                          </p>
+                        </div>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
+                            currentActiveLead.status === "RESPONSE_PENDING"
+                              ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+                              : "bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300 border border-sky-200 dark:border-sky-800"
+                          }`}
+                        >
+                          {currentActiveLead.status === "RESPONSE_PENDING"
+                            ? "RESPONSE PENDING"
+                            : `Lead #${String(currentActiveLead.sequenceNumber).padStart(3, "0")}`}
+                        </span>
+                      </div>
+
+                      {/* Lead Identity Box */}
+                      <div className="rounded-xl border border-slate-200 dark:border-zinc-800 p-5 bg-slate-50/50 dark:bg-zinc-800/30 space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div>
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block mb-1">
+                              SEQUENCE #{String(currentActiveLead.sequenceNumber).padStart(3, "0")}
+                            </span>
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+                              {currentActiveLead.businessName}
+                            </h2>
+                            <p className="text-xs text-slate-500 dark:text-zinc-400">
+                              {[currentActiveLead.city, currentActiveLead.state, "India"].filter(Boolean).join(", ")}
                             </p>
-                            <p className="text-xs">
-                              Ensure Admin has uploaded leads in Admin &gt; Marketing Data, or clear your search filters.
-                            </p>
-                          </td>
-                        </tr>
-                      ) : (
-                        filteredDataLeads.map((lead) => (
-                          <tr
-                            key={lead.id}
-                            className="hover:bg-slate-50 dark:hover:bg-zinc-800/40 transition-colors"
+                          </div>
+
+                          {/* Blue CALL Pill Button (Copies phone to clipboard & triggers phone dialer) */}
+                          <button
+                            type="button"
+                            onClick={handleCallCurrentActivePhone}
+                            className="px-6 py-3 rounded-xl bg-[#2563eb] hover:bg-blue-700 text-white font-black text-sm shadow-md hover:shadow-blue-500/20 transition-all flex items-center gap-2 cursor-pointer self-start sm:self-center shrink-0"
                           >
-                            <td className="p-3 text-center font-mono font-bold text-slate-500">
-                              #{lead.sequenceNumber}
-                            </td>
+                            <Phone size={16} />
+                            <span>
+                              {copiedActivePhone ? "COPIED TO CLIPBOARD!" : `CALL: ${currentActiveLead.phone}`}
+                            </span>
+                          </button>
+                        </div>
 
-                            <td className="p-3">
-                              <span className="font-bold text-slate-900 dark:text-white block">
-                                {lead.businessName}
+                        <div className="pt-3 border-t border-slate-200/70 dark:border-zinc-700/70 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                          <div>
+                            <span className="text-slate-400 block text-[11px]">Phone Number</span>
+                            <span className="font-mono font-black text-slate-900 dark:text-white text-sm">
+                              {currentActiveLead.phone}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 block text-[11px]">Email Address</span>
+                            <span className="font-semibold text-slate-700 dark:text-zinc-300 truncate block">
+                              {currentActiveLead.email || "N/A"}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 block text-[11px]">Contact Person</span>
+                            <span className="font-semibold text-slate-700 dark:text-zinc-300">
+                              {currentActiveLead.contactPerson || "Authorized Signatory"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Prompt Box */}
+                      <div className="rounded-xl border border-sky-200 dark:border-sky-800/60 bg-sky-50/50 dark:bg-sky-950/20 p-4 space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div>
+                            <h4 className="font-black text-xs text-slate-900 dark:text-white">
+                              Did you call the customer on your phone?
+                            </h4>
+                            <p className="text-[11px] text-slate-500 dark:text-zinc-400">
+                              Choose whether to record response notes immediately, or advance to the next number and mark notes later.
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={handleCallNextMarkLater}
+                              className="px-3.5 py-1.5 rounded-lg bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 text-slate-700 dark:text-zinc-200 text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer"
+                            >
+                              &rarr; CALL NEXT (MARK LATER)
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setIsRecordingResponse(true)}
+                              className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                            >
+                              <CheckCircle2 size={13} />
+                              <span>RECORD RESPONSE NOW</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Response Recording Form (Matching media_1795167254316_04f9eaaa.png) */}
+                      <form onSubmit={handleSaveSequentialResponse} className="rounded-xl border border-slate-200 dark:border-zinc-800 p-5 bg-white dark:bg-zinc-900 shadow-2xs space-y-4">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800">
+                          <div className="flex items-center gap-2 font-black text-xs text-slate-900 dark:text-white">
+                            <CheckCircle2 size={15} className="text-emerald-500" />
+                            <span>Record Customer Response for Lead #{currentActiveLead.sequenceNumber} ({currentActiveLead.businessName})</span>
+                          </div>
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                            Response Pending
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300 mb-1">
+                              Response Outcome *
+                            </label>
+                            <select
+                              value={activeOutcomeOption}
+                              onChange={(e) => setActiveOutcomeOption(e.target.value)}
+                              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white font-medium text-xs outline-none focus:ring-2 focus:ring-blue-500/30"
+                            >
+                              <option value="INTERESTED">Interested (Potential Prospect)</option>
+                              <option value="FOLLOW_UP_REQUIRED">Follow-up Required</option>
+                              <option value="NOT_INTERESTED">Not Interested</option>
+                              <option value="CLOSED">Deal Closed (Revenue Generated)</option>
+                              <option value="CALL_BACK_LATER">Call Back Later</option>
+                              <option value="NO_ANSWER">No Answer / Busy</option>
+                              <option value="WRONG_NUMBER">Wrong Number</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300 mb-1">
+                              Deal / Revenue Value (₹)
+                            </label>
+                            <input
+                              type="number"
+                              placeholder="e.g. 150000"
+                              value={activeDealValue}
+                              onChange={(e) => setActiveDealValue(e.target.value)}
+                              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white text-xs outline-none focus:ring-2 focus:ring-blue-500/30 font-medium"
+                            />
+                          </div>
+                        </div>
+
+                        {(activeOutcomeOption === "FOLLOW_UP_REQUIRED" || activeOutcomeOption === "CALL_BACK_LATER") && (
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300 mb-1">
+                              Scheduled Follow-up Date & Time *
+                            </label>
+                            <input
+                              type="datetime-local"
+                              value={activeFollowUpDate}
+                              onChange={(e) => setActiveFollowUpDate(e.target.value)}
+                              className="w-full max-w-sm px-3.5 py-2 rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white text-xs outline-none focus:ring-2 focus:ring-blue-500/30 font-medium"
+                              required
+                            />
+                          </div>
+                        )}
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300 mb-1">
+                            Customer Response Notes (Required) *
+                          </label>
+                          <textarea
+                            rows={3}
+                            placeholder="Detail what the customer said (e.g. Asked for quotation, interested in cloud ERP migration)..."
+                            value={activeNotes}
+                            onChange={(e) => setActiveNotes(e.target.value)}
+                            className="w-full p-3 rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white text-xs outline-none focus:ring-2 focus:ring-blue-500/30 resize-y"
+                            required
+                          />
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                          <button
+                            type="button"
+                            onClick={handleCallNextMarkLater}
+                            className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200 font-bold flex items-center gap-1 cursor-pointer"
+                          >
+                            &rarr; Mark Notes Later & Go to Next Number
+                          </button>
+
+                          <button
+                            type="submit"
+                            className="px-6 py-2.5 rounded-xl bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-xs shadow-md hover:shadow-blue-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                          >
+                            <Send size={13} />
+                            <span>SAVE RESPONSE & UNLOCK NEXT LEAD</span>
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200/80 dark:border-zinc-800 p-12 text-center shadow-xs">
+                      <CheckCircle2 size={48} className="mx-auto text-emerald-500 mb-3" />
+                      <h3 className="text-xl font-black text-slate-900 dark:text-white">All Leads Completed!</h3>
+                      <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 max-w-md mx-auto">
+                        You have completed calling and recording responses for all leads in the current campaign queue. Check the INTERESTED and FOLLOW UP tabs to manage your active pipeline.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Sequential Queue & Lead Progress (Locked Leads) */}
+                  <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200/80 dark:border-zinc-800 p-6 shadow-xs space-y-4">
+                    <div>
+                      <h4 className="text-sm font-black uppercase tracking-tight text-slate-900 dark:text-white">
+                        Sequential Queue & Lead Progress
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
+                        Upcoming leads remain locked and numbers protected until the current lead is completed.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      {lockedUpcomingLeads.length === 0 ? (
+                        <p className="text-xs text-slate-400 italic py-2">No more locked leads in queue.</p>
+                      ) : (
+                        lockedUpcomingLeads.slice(0, 10).map((lead) => (
+                          <div
+                            key={lead.id}
+                            className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50/70 dark:bg-zinc-800/40 border border-slate-200/60 dark:border-zinc-800 text-xs"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Lock size={14} className="text-slate-400 shrink-0" />
+                              <span className="font-bold text-slate-700 dark:text-zinc-300">
+                                Lead #{String(lead.sequenceNumber).padStart(3, "0")} (Locked)
                               </span>
-                              <span className="text-[10px] text-slate-400">
-                                Added {lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "Recently"}
+                              <span className="text-[11px] text-slate-400 font-mono hidden sm:inline">
+                                • Phone Protected until unlocked
                               </span>
-                            </td>
-
-                            <td className="p-3 text-slate-700 dark:text-zinc-300 font-semibold">
-                              {lead.contactPerson || "Authorized Signatory"}
-                            </td>
-
-                            <td className="p-3">
-                              <div className="flex items-center gap-1 font-mono font-bold text-slate-900 dark:text-white">
-                                <Phone size={11} className="text-emerald-500" />
-                                <span>{lead.phone}</span>
-                                <button
-                                  onClick={() => handleCopy(lead.phone, `phone_${lead.id}`)}
-                                  className="text-slate-400 hover:text-slate-600 ml-1"
-                                  title="Copy phone"
-                                >
-                                  {copiedId === `phone_${lead.id}` ? (
-                                    <Check size={11} className="text-emerald-600" />
-                                  ) : (
-                                    <Copy size={11} />
-                                  )}
-                                </button>
-                              </div>
-                              {lead.email && (
-                                <span className="text-[11px] text-slate-400 block truncate max-w-[140px]">
-                                  {lead.email}
-                                </span>
-                              )}
-                            </td>
-
-                            <td className="p-3 text-slate-600 dark:text-zinc-300">
-                              {lead.city || "India"}
-                            </td>
-
-                            <td className="p-3">
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300">
-                                {lead.campaignName}
-                              </span>
-                            </td>
-
-                            <td className="p-3 text-center">
-                              <span
-                                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                                  lead.status === "AVAILABLE"
-                                    ? "bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-zinc-300"
-                                    : lead.status === "CALLING"
-                                    ? "bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300"
-                                    : lead.status === "RESPONSE_PENDING"
-                                    ? "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
-                                    : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-                                }`}
-                              >
-                                {lead.status}
-                              </span>
-                            </td>
-
-                            <td className="p-3 text-center">
-                              {lead.outcome ? (
-                                <span
-                                  className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
-                                    lead.outcome === "INTERESTED"
-                                      ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
-                                      : lead.outcome === "CLOSED"
-                                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-                                      : lead.outcome === "FOLLOW_UP_REQUIRED"
-                                      ? "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
-                                      : "bg-slate-200 text-slate-700 dark:bg-zinc-700 dark:text-zinc-300"
-                                  }`}
-                                >
-                                  {lead.outcome}
-                                </span>
-                              ) : (
-                                <span className="text-[11px] text-slate-400">Uncontacted</span>
-                              )}
-                            </td>
-
-                            <td className="p-3 text-right">
-                              <button
-                                onClick={() => handleOpenCallModal(lead)}
-                                className="px-3 py-1.5 bg-[#003153] hover:bg-[#014d7a] text-white font-bold rounded-lg text-xs transition-colors cursor-pointer inline-flex items-center gap-1.5"
-                              >
-                                <MessageSquare size={12} />
-                                <span>Take Response</span>
-                              </button>
-                            </td>
-                          </tr>
+                            </div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-200/60 dark:bg-zinc-700/60 px-2.5 py-0.5 rounded">
+                              Locked
+                            </span>
+                          </div>
                         ))
                       )}
-                    </tbody>
-                  </table>
+                    </div>
+                  </div>
+                </div>
+
+                {/* RIGHT COLUMN: 4 COLS (Recently Completed Leads) */}
+                <div className="lg:col-span-4 space-y-4">
+                  <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200/80 dark:border-zinc-800 p-6 shadow-xs space-y-4 sticky top-6">
+                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-3">
+                      <h4 className="text-sm font-black text-slate-900 dark:text-white">
+                        Recently Completed Leads
+                      </h4>
+                      <span className="text-[11px] font-bold text-slate-500">
+                        {completedQueueLeads.length} total
+                      </span>
+                    </div>
+
+                    <div className="space-y-2.5 max-h-[680px] overflow-y-auto custom-scrollbar">
+                      {completedQueueLeads.length === 0 ? (
+                        <p className="text-xs text-slate-400 italic p-4 text-center">
+                          No completed leads yet. Call the active lead and record response to see history here.
+                        </p>
+                      ) : (
+                        completedQueueLeads.map((lead) => {
+                          const lastResp = lead.responses?.[0] || lead.responses?.[lead.responses.length - 1];
+                          return (
+                            <div
+                              key={lead.id}
+                              onClick={() => {
+                                setActiveSequentialLeadId(lead.id);
+                              }}
+                              className="p-3.5 rounded-xl border border-slate-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs space-y-1.5 hover:border-blue-400 cursor-pointer transition-colors"
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex items-center gap-1.5 font-bold text-xs text-slate-900 dark:text-white truncate">
+                                  <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
+                                  <span className="truncate">
+                                    #{String(lead.sequenceNumber).padStart(3, "0")} {lead.businessName}
+                                  </span>
+                                </div>
+                                <span
+                                  className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full shrink-0 ${
+                                    lead.outcome === "INTERESTED"
+                                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                                      : lead.outcome === "CLOSED"
+                                      ? "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
+                                      : lead.outcome === "FOLLOW_UP_REQUIRED"
+                                      ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
+                                      : "bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-zinc-300"
+                                  }`}
+                                >
+                                  {lead.outcome ? lead.outcome.replace(/_/g, " ") : "COMPLETED"}
+                                </span>
+                              </div>
+                              {lastResp?.notes && (
+                                <p className="text-[11px] text-slate-500 dark:text-zinc-400 italic line-clamp-2">
+                                  &quot;{lastResp.notes}&quot;
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
