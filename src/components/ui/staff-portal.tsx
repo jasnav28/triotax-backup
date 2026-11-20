@@ -41,6 +41,7 @@ import {
   ChevronDown,
   UserCheck,
   X,
+  MessageSquare,
 } from "lucide-react";
 import {
   Lead,
@@ -672,18 +673,9 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
 
           {/* Top Actions */}
           <div className="flex items-center gap-3">
-            {/* Quick Dial Next Available Lead */}
-            <button
-              onClick={handleCallNextAvailableLead}
-              className="flex items-center gap-2 px-3.5 py-2 bg-[#003153] hover:bg-[#014d7a] text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
-            >
-              <PhoneCall size={14} className="text-emerald-300" />
-              <span>📞 Dial Next Lead</span>
-            </button>
-
             {/* Calling Pace Tracker */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs font-medium">
-              <span className="text-slate-500 dark:text-zinc-400">Today&apos;s Dials:</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs font-medium">
+              <span className="text-slate-500 dark:text-zinc-400">Today&apos;s Responses:</span>
               <span className="font-black text-slate-900 dark:text-white">
                 {dashboardMetrics.callsToday} / {dashboardMetrics.dailyTarget}
               </span>
@@ -744,8 +736,8 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
                     onClick={handleCallNextAvailableLead}
                     className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs rounded-xl transition-all shadow-xs flex items-center gap-2 cursor-pointer"
                   >
-                    <PhoneCall size={14} />
-                    <span>Quick Dial &rarr;</span>
+                    <MessageSquare size={14} />
+                    <span>Take Response &rarr;</span>
                   </button>
                 </div>
               </div>
@@ -891,7 +883,7 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
 
                   {myStaffCalls.length === 0 ? (
                     <div className="p-8 text-center text-slate-400 dark:text-zinc-500 text-xs">
-                      No calls logged yet today. Click &quot;Dial Next Lead&quot; or go to the Data tab to record your first client conversation.
+                      No responses logged yet today. Go to the Data tab to view contacts, call manually from your phone, and record customer responses.
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -1026,7 +1018,7 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
                     </span>
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-                    Data directly synced from Admin Marketing Data uploads. Pick records, dial contacts, and log conversation responses.
+                    Data directly synced from Admin Marketing Data uploads. View contact numbers, call manually from your phone, and take customer responses.
                   </p>
                 </div>
 
@@ -1042,8 +1034,8 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
                     onClick={handleCallNextAvailableLead}
                     className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#003153] hover:bg-[#014d7a] text-white text-xs font-bold transition-colors cursor-pointer"
                   >
-                    <PhoneCall size={13} />
-                    <span>Call Next Available</span>
+                    <MessageSquare size={13} />
+                    <span>Take Next Response</span>
                   </button>
                 </div>
               </div>
@@ -1154,7 +1146,7 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
                         <th className="p-3">Campaign</th>
                         <th className="p-3 text-center">Status</th>
                         <th className="p-3 text-center">Outcome</th>
-                        <th className="p-3 text-right">Dial Action</th>
+                        <th className="p-3 text-right">Take Response</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
@@ -1266,8 +1258,8 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
                                 onClick={() => handleOpenCallModal(lead)}
                                 className="px-3 py-1.5 bg-[#003153] hover:bg-[#014d7a] text-white font-bold rounded-lg text-xs transition-colors cursor-pointer inline-flex items-center gap-1.5"
                               >
-                                <PhoneCall size={12} />
-                                <span>Call & Log</span>
+                                <MessageSquare size={12} />
+                                <span>Take Response</span>
                               </button>
                             </td>
                           </tr>
@@ -1447,8 +1439,8 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
                             onClick={() => handleOpenCallModal(lead)}
                             className="w-full py-2 bg-[#003153] hover:bg-[#014d7a] text-white text-xs font-bold rounded-lg transition-colors cursor-pointer text-center flex items-center justify-center gap-1.5"
                           >
-                            <PhoneCall size={13} />
-                            <span>Execute Callback Now</span>
+                            <MessageSquare size={13} />
+                            <span>Take Follow-up Response</span>
                           </button>
                         </div>
                       </div>
@@ -1715,10 +1707,10 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
               className="p-5 text-white flex items-center justify-between"
             >
               <div className="flex items-center gap-2.5">
-                <PhoneCall size={20} className="text-emerald-300" />
+                <MessageSquare size={20} className="text-emerald-300" />
                 <div>
                   <h3 className="font-black text-base text-white">
-                    Tele-Calling Station & Log Response
+                    Take Call Response & Outcome
                   </h3>
                   <span className="text-xs text-sky-200">
                     Lead Seq #{selectedLeadForCall.sequenceNumber} &bull; {selectedLeadForCall.campaignName}
@@ -1738,7 +1730,7 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
             <form onSubmit={handleSaveCallResponse} className="flex-1 overflow-y-auto p-6 space-y-5">
               {/* Client Details Card */}
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 space-y-2">
-                <div className="flex items-start justify-between gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h4 className="font-black text-sm text-slate-900 dark:text-white">
                       {selectedLeadForCall.businessName}
@@ -1747,14 +1739,34 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
                       Contact: {selectedLeadForCall.contactPerson || "Authorized Signatory"} &bull; {selectedLeadForCall.city || "India"}
                     </p>
                   </div>
-                  <a
-                    href={`tel:${selectedLeadForCall.phone}`}
-                    className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center gap-1.5 transition-colors"
-                  >
-                    <Phone size={13} />
-                    <span>Dial {selectedLeadForCall.phone}</span>
-                  </a>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 font-mono text-xs font-bold">
+                      <Phone size={13} className="text-emerald-600 dark:text-emerald-400" />
+                      <span>{selectedLeadForCall.phone}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(selectedLeadForCall.phone, `modal_${selectedLeadForCall.id}`)}
+                      className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-700 text-xs font-bold flex items-center gap-1 shadow-2xs cursor-pointer"
+                      title="Copy phone number to dial manually from your phone"
+                    >
+                      {copiedId === `modal_${selectedLeadForCall.id}` ? (
+                        <>
+                          <Check size={12} className="text-emerald-600" />
+                          <span>Copied</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy size={12} />
+                          <span>Copy Phone</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400 italic">
+                  ℹ️ Call this number manually from your mobile/office phone, then record the conversation outcome and notes below.
+                </p>
               </div>
 
               {/* Call Outcome Selector */}
