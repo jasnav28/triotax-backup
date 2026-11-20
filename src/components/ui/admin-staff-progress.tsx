@@ -47,12 +47,22 @@ import {
   syncMarketingWithDatabase,
 } from "@/lib/marketing-data";
 
-export const AdminStaffProgress: React.FC = () => {
+interface AdminStaffProgressProps {
+  initialSubTab?: "marketing" | "create-staff" | "sales" | "compliance";
+}
+
+export const AdminStaffProgress: React.FC<AdminStaffProgressProps> = ({ initialSubTab = "marketing" }) => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
 
   // Sub tabs: "marketing" | "create-staff" | "sales" | "compliance"
-  const [activeSubTab, setActiveSubTab] = useState<"marketing" | "create-staff" | "sales" | "compliance">("marketing");
+  const [activeSubTab, setActiveSubTab] = useState<"marketing" | "create-staff" | "sales" | "compliance">(initialSubTab);
+
+  useEffect(() => {
+    if (initialSubTab) {
+      setActiveSubTab(initialSubTab);
+    }
+  }, [initialSubTab]);
 
   // Create Staff Form State (Full Screen Onboarding)
   const [newStaffEmpId, setNewStaffEmpId] = useState("");

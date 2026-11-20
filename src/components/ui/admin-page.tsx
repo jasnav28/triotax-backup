@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Lock, User, ArrowRight, LayoutDashboard, Users, Settings, LogOut, UserPlus, FileCheck, X, Trash2, ExternalLink, RefreshCw, CheckCircle2, AlertCircle, Megaphone, Play, Pause, Plus, Image as ImageIcon, Link as LinkIcon, Database, Download, Upload, FileText, HardDrive, Search, Target, TrendingUp } from "lucide-react";
+import { Shield, Lock, User, ArrowRight, LayoutDashboard, Users, Settings, LogOut, UserPlus, FileCheck, X, Trash2, ExternalLink, RefreshCw, CheckCircle2, AlertCircle, Megaphone, Play, Pause, Plus, Image as ImageIcon, Link as LinkIcon, Database, Download, Upload, FileText, HardDrive, Search, Target, TrendingUp, ChevronDown, ChevronRight, UserCheck, Briefcase } from "lucide-react";
 import { ThemeToggle } from "@/app/components/ui/theme-toggle";
 import { getAdsConfig, DEFAULT_ADS, AdItem } from "@/components/ui/scrolling-ad-banner";
 import { AdminMarketingData } from "@/components/ui/admin-marketing-data";
@@ -25,6 +25,27 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFeedback, setSearchFeedback] = useState<string | null>(null);
+
+  // Nested sidebar navigation groups state (End Clients & Staff)
+  const [expandedGroups, setExpandedGroups] = useState<{ [key: string]: boolean }>({
+    "end-clients": true,
+    staff: true,
+  });
+
+  const toggleGroup = (groupId: string) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [groupId]: !prev[groupId],
+    }));
+  };
+
+  useEffect(() => {
+    if (["create-user", "gst-tracking", "manage-users", "data-backup"].includes(activeTab)) {
+      setExpandedGroups((prev) => ({ ...prev, "end-clients": true }));
+    } else if (["staff-accounts", "staff-progress", "marketing-data"].includes(activeTab)) {
+      setExpandedGroups((prev) => ({ ...prev, staff: true }));
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -1206,72 +1227,402 @@ export const AdminPage: React.FC<AdminPageProps> = ({ isAdminAuth, onLogin, onLo
             </div>
           </div>
         );
+      case "staff-accounts":
+        return <AdminStaffProgress initialSubTab="create-staff" />;
+      case "staff-progress":
+        return <AdminStaffProgress initialSubTab="marketing" />;
       case "marketing-data":
         return <AdminMarketingData />;
-      case "staff-progress":
-        return <AdminStaffProgress />;
+      case "settings":
+        return renderSystemSettings();
       default:
         return null;
     }
   };
 
-  const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "create-user", label: "Create User", icon: UserPlus },
-    { id: "gst-tracking", label: "GST Tracking", icon: FileCheck },
-    { id: "manage-users", label: "Manage Users", icon: Users },
-    { id: "marketing-data", label: "Marketing Data", icon: Target },
-    { id: "staff-progress", label: "Staff Progress", icon: TrendingUp },
-    { id: "data-backup", label: "Data Backup", icon: Database },
-    ...(showPlayAds ? [{ id: "play-ads", label: "Play Ads", icon: Megaphone }] : []),
-    { id: "settings", label: "System Settings", icon: Settings },
+  const renderSystemSettings = () => {
+    return (
+      <div className="space-y-6 max-w-5xl mx-auto">
+        <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-3">
+              <Settings className="text-[#003153] dark:text-sky-400 h-7 w-7" />
+              <h2 className="text-2xl font-black text-gray-800 dark:text-white">
+                System Governance & Platform Settings
+              </h2>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Configure global system parameters, portal security, authentication rules, and database persistence.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 font-bold border border-emerald-200 dark:border-emerald-800">
+              🟢 Production Engine Live
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Card 1: Multi-Portal Architecture */}
+          <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm space-y-4">
+            <h3 className="font-bold text-sm uppercase tracking-wider text-slate-500 dark:text-zinc-400 flex items-center gap-2">
+              <Shield className="text-sky-500" size={16} /> Multi-Portal Endpoint Segregation
+            </h3>
+            <div className="space-y-3 text-xs">
+              <div className="p-3 bg-slate-50 dark:bg-zinc-800/60 rounded-xl border border-slate-200/80 dark:border-zinc-700 flex items-center justify-between">
+                <div>
+                  <span className="font-bold text-slate-900 dark:text-white block">End Clients Portal</span>
+                  <span className="text-slate-500 text-[11px]">Client ERP billing, GST, accounting</span>
+                </div>
+                <code className="font-mono font-bold text-sky-700 dark:text-sky-400 bg-sky-100 dark:bg-sky-950/60 px-2 py-0.5 rounded">
+                  /login
+                </code>
+              </div>
+
+              <div className="p-3 bg-slate-50 dark:bg-zinc-800/60 rounded-xl border border-slate-200/80 dark:border-zinc-700 flex items-center justify-between">
+                <div>
+                  <span className="font-bold text-slate-900 dark:text-white block">Administration Portal</span>
+                  <span className="text-slate-500 text-[11px]">System governance, users, leads audit</span>
+                </div>
+                <code className="font-mono font-bold text-purple-700 dark:text-purple-400 bg-purple-100 dark:bg-purple-950/60 px-2 py-0.5 rounded">
+                  /admin
+                </code>
+              </div>
+
+              <div className="p-3 bg-slate-50 dark:bg-zinc-800/60 rounded-xl border border-slate-200/80 dark:border-zinc-700 flex items-center justify-between">
+                <div>
+                  <span className="font-bold text-slate-900 dark:text-white block">Internal Staff Calling Console</span>
+                  <span className="text-slate-500 text-[11px]">Senior Tele-Marketing Specialist dialer</span>
+                </div>
+                <code className="font-mono font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded">
+                  /staff
+                </code>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Staff Credential Generator */}
+          <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm space-y-4">
+            <h3 className="font-bold text-sm uppercase tracking-wider text-slate-500 dark:text-zinc-400 flex items-center gap-2">
+              <UserCheck className="text-emerald-500" size={16} /> Staff ID Sequence Generator
+            </h3>
+            <div className="space-y-3 text-xs text-slate-600 dark:text-zinc-300">
+              <p>
+                Staff employee credentials follow the standardized enterprise sequence prefix:
+              </p>
+              <div className="p-3 bg-sky-50 dark:bg-sky-950/40 rounded-xl border border-sky-200 dark:border-sky-800 flex items-center justify-between">
+                <div>
+                  <span className="font-mono font-black text-sm text-[#003153] dark:text-sky-300 block">
+                    TX-M-00020
+                  </span>
+                  <span className="text-[11px] text-sky-700 dark:text-sky-400">Sequential auto-increment format</span>
+                </div>
+                <button
+                  onClick={() => setActiveTab("staff-accounts")}
+                  className="px-3 py-1.5 bg-[#003153] hover:bg-[#014d7a] text-white rounded-lg font-bold text-xs cursor-pointer transition-colors"
+                >
+                  Create Staff &rarr;
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-500">
+                Staff accounts can be provisioned in <strong>Staff &gt; Staff Accounts</strong> with custom passwords and roles.
+              </p>
+            </div>
+          </div>
+
+          {/* Card 3: Display & Ads Configuration */}
+          <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm space-y-4">
+            <h3 className="font-bold text-sm uppercase tracking-wider text-slate-500 dark:text-zinc-400 flex items-center gap-2">
+              <Megaphone className="text-amber-500" size={16} /> User Portal Scrolling Ads Banner
+            </h3>
+            <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-zinc-800/60 rounded-xl border border-slate-200/80 dark:border-zinc-700">
+              <div>
+                <span className="font-bold text-slate-900 dark:text-white text-xs block">Show Ads Manager in Sidebar</span>
+                <span className="text-[11px] text-slate-500">Enable or hide the Play Ads navigation item</span>
+              </div>
+              <button
+                onClick={() => {
+                  const nextVal = !showPlayAds;
+                  setShowPlayAds(nextVal);
+                  localStorage.setItem("triotax_show_play_ads", String(nextVal));
+                }}
+                className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-colors cursor-pointer ${
+                  showPlayAds ? "bg-emerald-600 text-white" : "bg-slate-300 text-slate-700 dark:bg-zinc-700 dark:text-zinc-300"
+                }`}
+              >
+                {showPlayAds ? "Enabled (Visible)" : "Hidden"}
+              </button>
+            </div>
+          </div>
+
+          {/* Card 4: Database & Sync Status */}
+          <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm space-y-4">
+            <h3 className="font-bold text-sm uppercase tracking-wider text-slate-500 dark:text-zinc-400 flex items-center gap-2">
+              <Database className="text-sky-500" size={16} /> Database Engine & Persistence
+            </h3>
+            <div className="space-y-3 text-xs">
+              <p className="text-slate-600 dark:text-zinc-300">
+                Dual-sync architecture: Changes to users, compliance records, and marketing tele-calling leads are synchronized to PostgreSQL and local browser storage.
+              </p>
+              <button
+                onClick={() => {
+                  alert("Triggering global synchronization with database...");
+                }}
+                className="w-full py-2 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-800 dark:text-white font-bold rounded-xl transition-colors cursor-pointer text-center flex items-center justify-center gap-2"
+              >
+                <RefreshCw size={14} />
+                <span>Verify & Refresh Database Connection</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const endClientItems = [
+    { id: "create-user", label: "1. Create User", icon: UserPlus },
+    { id: "gst-tracking", label: "2. GST Tracking", icon: FileCheck },
+    { id: "manage-users", label: "3. Manage Users", icon: Users },
+    { id: "data-backup", label: "4. Data Backup", icon: Database },
   ];
+
+  const staffItems = [
+    { id: "staff-accounts", label: "1. Staff Accounts (Create)", icon: UserCheck },
+    { id: "staff-progress", label: "2. Staff Progress", icon: TrendingUp },
+    { id: "marketing-data", label: "3. Marketing Data", icon: Target },
+  ];
+
+  const getTabTitle = (tab: string) => {
+    switch (tab) {
+      case "dashboard":
+        return "Dashboard";
+      case "create-user":
+        return "End Clients / Create User";
+      case "gst-tracking":
+        return "End Clients / GST Tracking";
+      case "manage-users":
+        return "End Clients / Manage Users";
+      case "data-backup":
+        return "End Clients / Data Backup";
+      case "staff-accounts":
+        return "Staff / Staff Accounts (Create)";
+      case "staff-progress":
+        return "Staff / Staff Progress";
+      case "marketing-data":
+        return "Staff / Marketing Data";
+      case "play-ads":
+        return "Play Ads";
+      case "settings":
+        return "System Settings";
+      default:
+        return tab.replace("-", " ");
+    }
+  };
+
+  const renderTreeGroup = (
+    groupId: string,
+    groupTitle: string,
+    groupIcon: React.ElementType,
+    items: Array<{ id: string; label: string; icon: React.ElementType }>
+  ) => {
+    const isExpanded = expandedGroups[groupId] ?? true;
+    const GroupIcon = groupIcon;
+    const isAnyChildActive = items.some((i) => i.id === activeTab);
+
+    return (
+      <div className="space-y-1">
+        {/* Category Header */}
+        <button
+          type="button"
+          onClick={() => toggleGroup(groupId)}
+          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer select-none group ${
+            isAnyChildActive
+              ? "text-white bg-white/10"
+              : "text-slate-300 hover:text-white hover:bg-white/5"
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            <GroupIcon
+              size={15}
+              className={isAnyChildActive ? "text-sky-300" : "text-sky-200/70"}
+            />
+            <span className="uppercase tracking-wider text-[11px] font-black">
+              {groupTitle}
+            </span>
+          </div>
+          <ChevronDown
+            size={14}
+            className={`text-slate-400 group-hover:text-white transition-transform duration-200 ${
+              isExpanded ? "rotate-0" : "-rotate-90"
+            }`}
+          />
+        </button>
+
+        {/* Tree Sub-Branches */}
+        {isExpanded && (
+          <div className="relative pl-1 space-y-0.5 my-1">
+            {items.map((item, idx) => {
+              const isSelected = activeTab === item.id;
+              const isLast = idx === items.length - 1;
+              const ItemIcon = item.icon;
+
+              return (
+                <div key={item.id} className="relative flex items-center min-h-[36px]">
+                  {/* Continuous Vertical Trunk */}
+                  <div
+                    className={`absolute left-4.5 w-px bg-white/20 dark:bg-zinc-700 pointer-events-none ${
+                      isLast ? "top-0 h-1/2" : "top-0 bottom-0"
+                    }`}
+                  />
+
+                  {/* L-shaped curved branch connector into child */}
+                  <div className="absolute left-4.5 top-0 h-1/2 w-4 border-b border-l border-white/25 dark:border-zinc-600 rounded-bl-md pointer-events-none" />
+
+                  {/* Child Item Button */}
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab(item.id)}
+                    className={`w-full ml-9.5 flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition-all text-left cursor-pointer ${
+                      isSelected
+                        ? "bg-white/20 text-white font-black shadow-xs border border-white/25 backdrop-blur-xs"
+                        : "text-slate-300 hover:text-white hover:bg-white/10 font-medium"
+                    }`}
+                  >
+                    <ItemIcon
+                      size={14}
+                      className={`shrink-0 ${
+                        isSelected ? "text-sky-300" : "text-white/60"
+                      }`}
+                    />
+                    <span className="truncate">{item.label}</span>
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-[#0a0a0b] w-full overflow-hidden transition-colors">
-      {/* Sidebar */}
-      <div className="w-64 bg-slate-900 dark:bg-zinc-950 text-white flex flex-col h-full dark:border-r dark:border-zinc-800 transition-colors">
-        <div className="p-6 border-b border-slate-800 dark:border-zinc-800 flex items-center gap-3">
-          <Shield className="text-blue-400 h-6 w-6" />
-          <h1 className="text-xl font-bold">Admin Panel</h1>
+      {/* Sidebar with Prussian Blue #003153 Branding & Tree Branch Sub-Navigation */}
+      <div
+        style={{ backgroundColor: "#003153" }}
+        className="w-72 text-white flex flex-col h-full border-r border-white/10 transition-colors shrink-0 shadow-xl select-none"
+      >
+        {/* Brand Header */}
+        <div className="p-4 border-b border-white/10 flex items-center gap-3">
+          <img
+            src="/Artboard.png"
+            alt="TrioTax Logo"
+            className="h-8 w-auto object-contain"
+            onError={(e) => {
+              (e.target as HTMLElement).style.display = "none";
+            }}
+          />
+          <div>
+            <div className="flex items-center gap-1.5">
+              <Shield className="text-sky-300 h-4 w-4" />
+              <h1 className="text-base font-black tracking-wide text-white">Admin Panel</h1>
+            </div>
+            <span className="text-[10px] text-sky-200 font-semibold tracking-wider uppercase block">
+              Enterprise Governance
+            </span>
+          </div>
         </div>
         
-        <div className="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
-          {navItems.map((item) => (
+        {/* Navigation Items (Dashboard, End Clients Tree, Staff Tree, Play Ads, Settings) */}
+        <div className="flex-1 py-4 px-3 space-y-2 overflow-y-auto custom-scrollbar">
+          {/* Top-Level: Dashboard */}
+          <button
+            type="button"
+            onClick={() => setActiveTab("dashboard")}
+            className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+              activeTab === "dashboard"
+                ? "bg-white/20 text-white font-black shadow-xs border border-white/25"
+                : "text-slate-300 hover:text-white hover:bg-white/10"
+            }`}
+          >
+            <LayoutDashboard
+              size={16}
+              className={activeTab === "dashboard" ? "text-sky-300" : "text-slate-400"}
+            />
+            <span>Dashboard</span>
+          </button>
+
+          {/* Sub-Branch Group 1: End Clients */}
+          {renderTreeGroup("end-clients", "End Clients", Users, endClientItems)}
+
+          {/* Sub-Branch Group 2: Staff */}
+          {renderTreeGroup("staff", "Staff", UserCheck, staffItems)}
+
+          {/* Top-Level: Play Ads (if enabled) */}
+          {showPlayAds && (
             <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-                activeTab === item.id 
-                  ? "bg-blue-600/20 text-blue-400" 
-                  : "text-slate-400 hover:text-white hover:bg-slate-800 dark:hover:bg-zinc-900"
+              type="button"
+              onClick={() => setActiveTab("play-ads")}
+              className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+                activeTab === "play-ads"
+                  ? "bg-white/20 text-white font-black shadow-xs border border-white/25"
+                  : "text-slate-300 hover:text-white hover:bg-white/10"
               }`}
             >
-              <item.icon size={18} /> {item.label}
+              <Megaphone
+                size={16}
+                className={activeTab === "play-ads" ? "text-amber-300" : "text-slate-400"}
+              />
+              <span>Play Ads</span>
             </button>
-          ))}
+          )}
+
+          {/* Top-Level: System Settings */}
+          <button
+            type="button"
+            onClick={() => setActiveTab("settings")}
+            className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+              activeTab === "settings"
+                ? "bg-white/20 text-white font-black shadow-xs border border-white/25"
+                : "text-slate-300 hover:text-white hover:bg-white/10"
+            }`}
+          >
+            <Settings
+              size={16}
+              className={activeTab === "settings" ? "text-sky-300" : "text-slate-400"}
+            />
+            <span>System Settings</span>
+          </button>
         </div>
         
-        <div className="p-4 border-t border-slate-800 dark:border-zinc-800">
+        {/* Sidebar Footer: Sign Out */}
+        <div className="p-3 border-t border-white/10">
           <button 
             onClick={onLogout}
-            className="w-full flex items-center gap-3 text-slate-400 hover:text-white hover:bg-slate-800 dark:hover:bg-zinc-900 px-4 py-3 rounded-lg font-medium transition-colors"
+            className="w-full flex items-center justify-center gap-2 text-white/80 hover:text-white hover:bg-rose-600/80 px-3 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer"
           >
-            <LogOut size={18} /> Sign Out
+            <LogOut size={15} />
+            <span>Sign Out Admin</span>
           </button>
         </div>
       </div>
       
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <header className="bg-white dark:bg-zinc-900/50 border-b border-gray-200 dark:border-zinc-800 h-16 flex items-center px-8 justify-between transition-colors">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-white capitalize">
-            {activeTab.replace("-", " ")}
-          </h2>
+        <header className="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 h-16 flex items-center px-8 justify-between transition-colors shrink-0 shadow-xs">
+          <div className="flex items-center gap-3">
+            <h2 className="text-base font-black text-gray-800 dark:text-white">
+              {getTabTitle(activeTab)}
+            </h2>
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-sky-100 text-[#003153] dark:bg-sky-950/60 dark:text-sky-300 font-bold border border-sky-200 dark:border-sky-800">
+              Admin Console
+            </span>
+          </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Admin User</span>
-            <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-bold flex items-center justify-center rounded-full">
+            <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">Admin User</span>
+            <div className="h-8 w-8 bg-[#003153] text-white font-bold flex items-center justify-center rounded-full text-xs shadow-xs">
               A
             </div>
           </div>
