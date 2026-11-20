@@ -1058,12 +1058,11 @@ export const AdminStaffProgress: React.FC = () => {
                       onChange={(e) => setNewStaffRole(e.target.value)}
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-[#003153] transition-all"
                     >
-                      <option value="Senior Tele-Marketing Specialist">Senior Tele-Marketing Specialist</option>
-                      <option value="Corporate Outreach Executive">Corporate Outreach Executive</option>
-                      <option value="SME Compliance Specialist">SME Compliance Specialist</option>
-                      <option value="GST Lead Conversion Lead">GST Lead Conversion Lead</option>
-                      <option value="Statutory Compliance Executive">Statutory Compliance Executive</option>
-                      <option value="Direct Sales Executive">Direct Sales Executive</option>
+                      <option value="Senior Tele-Marketing Specialist">Senior Tele-Marketing Specialist (Active Calling Portal)</option>
+                      <option value="Corporate Outreach Executive" disabled>Corporate Outreach Executive (Coming Soon - Disabled)</option>
+                      <option value="SME Compliance Specialist" disabled>SME Compliance Specialist (Coming Soon - Disabled)</option>
+                      <option value="GST Lead Conversion Lead" disabled>GST Lead Conversion Lead (Coming Soon - Disabled)</option>
+                      <option value="Direct Sales Executive" disabled>Direct Sales Executive (Coming Soon - Disabled)</option>
                     </select>
                   </div>
 

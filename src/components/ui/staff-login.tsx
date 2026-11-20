@@ -1,31 +1,25 @@
 import React, { useState } from 'react';
 import { SignInPage, Testimonial } from "@/components/ui/sign-in";
-import { ArrowLeft, ShieldCheck } from "lucide-react";
-import { validateStaffLogin, getStoredStaff } from "@/lib/marketing-data";
+import { ArrowLeft, ShieldCheck, Lock, CheckCircle2 } from "lucide-react";
+import { validateStaffLogin, getStoredStaff, StaffMember, STAFF_ROLES } from "@/lib/marketing-data";
 
 const staffTestimonials: Testimonial[] = [
   {
     avatarSrc: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80",
-    name: "Sarah Chen",
-    handle: "TX-M-00020 · Senior Tele-Marketing",
-    text: "TrioTax ERP accelerates GST filing and compliance audits by 10x with zero manual errors."
+    name: "TrioTax Tele-Sales Operations",
+    handle: "TX-M-00020 · Senior Tele-Marketing Specialist",
+    text: "The dedicated calling console connects directly with admin-uploaded business leads, eliminating manual dialing errors."
   },
   {
     avatarSrc: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&q=80",
-    name: "Marcus Johnson",
-    handle: "TX-M-00021 · Corporate Outreach",
-    text: "The real-time statutory HSN lookup and GST reconciliation save our team hours every week."
-  },
-  {
-    avatarSrc: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=256&q=80",
-    name: "David Martinez",
-    handle: "TX-M-00022 · SME Compliance",
-    text: "Managing thousands of client corporate filings is completely effortless with TrioTax."
+    name: "Enterprise Compliance Desk",
+    handle: "Internal Staff Portal · TrioTax Corporate",
+    text: "Role-segregated staff portals ensure that each marketing executive focuses strictly on their assigned pipeline."
   },
 ];
 
 interface StaffLoginProps {
-  onStaffLogin?: (email: string, staffId?: string, employeeId?: string) => void;
+  onStaffLogin?: (staff: StaffMember) => void;
   onNavigateHome?: () => void;
 }
 
@@ -51,23 +45,25 @@ export const StaffLoginPage: React.FC<StaffLoginProps> = ({
     const validatedStaff = validateStaffLogin(identifier, password);
 
     if (!validatedStaff) {
-      // Check if user entered demo credentials that don't match
       setAuthError("Invalid credentials. Please enter a valid Employee ID (e.g. TX-M-00020) or Email and the password set by the admin.");
       return;
     }
 
-    // Success authentication
-    const userClean = validatedStaff.email.split("@")[0] || "staff";
-    localStorage.setItem("triotax_is_user_auth", "true");
-    localStorage.setItem("triotax_logged_in_user", userClean);
-    localStorage.setItem("triotax_current_staff_id", validatedStaff.id);
-    localStorage.setItem("triotax_current_staff_emp_id", validatedStaff.employeeId);
-    localStorage.removeItem("triotax_logged_out");
+    // Success authentication for staff portal
+    try {
+      localStorage.setItem("triotax_is_staff_auth", "true");
+      localStorage.setItem("triotax_current_staff_id", validatedStaff.id);
+      localStorage.setItem("triotax_current_staff_emp_id", validatedStaff.employeeId);
+      localStorage.setItem("triotax_current_staff_role", validatedStaff.role || "Senior Tele-Marketing Specialist");
+      localStorage.setItem("triotax_current_staff_name", validatedStaff.name);
+      localStorage.setItem("triotax_current_staff_email", validatedStaff.email);
+      localStorage.removeItem("triotax_logged_out");
+    } catch {}
 
     if (onStaffLogin) {
-      onStaffLogin(validatedStaff.email, validatedStaff.id, validatedStaff.employeeId);
+      onStaffLogin(validatedStaff);
     } else {
-      window.location.href = `/${userClean}-user/marketing-leads`;
+      window.location.href = "/staff";
     }
   };
 

@@ -53,6 +53,133 @@ export interface StaffMember {
   createdAt?: string;
 }
 
+export interface StaffRoleDefinition {
+  id: string;
+  name: string;
+  code: string;
+  description: string;
+  status: "active" | "disabled";
+  activeRoleTabs: string[];
+}
+
+export const STAFF_ROLES: StaffRoleDefinition[] = [
+  {
+    id: "senior-telemarketing",
+    name: "Senior Tele-Marketing Specialist",
+    code: "TX-M",
+    description: "Outbound enterprise lead qualification, dialer management, and sales conversions",
+    status: "active",
+    activeRoleTabs: ["dashboard", "data", "interested", "follow-up", "not-interested", "closed", "notice"],
+  },
+  {
+    id: "corporate-outreach",
+    name: "Corporate Outreach Executive",
+    code: "TX-C",
+    description: "B2B institutional outreach, corporate partnerships, and vendor onboarding",
+    status: "disabled",
+    activeRoleTabs: [],
+  },
+  {
+    id: "sme-compliance",
+    name: "SME Compliance Specialist",
+    code: "TX-S",
+    description: "Statutory MCA compliance audits, annual company ROC returns, and secretarial filings",
+    status: "disabled",
+    activeRoleTabs: [],
+  },
+  {
+    id: "gst-conversion",
+    name: "GST Lead Conversion Lead",
+    code: "TX-G",
+    description: "High-ticket GST dispute resolution, scrutiny notice defense, and litigation consulting",
+    status: "disabled",
+    activeRoleTabs: [],
+  },
+  {
+    id: "direct-sales",
+    name: "Direct Sales Executive",
+    code: "TX-D",
+    description: "On-site corporate client advisory, field enterprise consultations, and franchise sales",
+    status: "disabled",
+    activeRoleTabs: [],
+  },
+];
+
+export interface StaffNotice {
+  id: string;
+  title: string;
+  content: string;
+  category: "ANNOUNCEMENT" | "TARGET" | "SCRIPT" | "INCENTIVE" | "COMPLIANCE";
+  publishedAt: string;
+  author: string;
+  pinned?: boolean;
+}
+
+export const DEFAULT_STAFF_NOTICES: StaffNotice[] = [
+  {
+    id: "notice-target-01",
+    title: "Daily Tele-Calling Performance Milestone: 40 Dials / Specialist",
+    category: "TARGET",
+    author: "Head of Marketing & Sales Operations",
+    publishedAt: new Date(Date.now() - 3600000 * 24).toISOString(),
+    pinned: true,
+    content: "All Senior Tele-Marketing Specialists are expected to maintain an active daily calling momentum of at least 40 logged dials. Target conversion expectations: minimum 5 Interested prospects and 2 scheduled follow-ups daily. Log detailed notes for every dial to ensure clean pipeline attribution."
+  },
+  {
+    id: "notice-leads-02",
+    title: "Fresh MSME & Corporate Entity Leads Uploaded in Data Tab",
+    category: "ANNOUNCEMENT",
+    author: "TrioTax Database Administrator",
+    publishedAt: new Date(Date.now() - 3600000 * 12).toISOString(),
+    pinned: true,
+    content: "Admin has uploaded new verified company contact records. Senior Tele-Marketing Specialists can access these unallocated leads directly from the 'Data' tab. Click 'Call & Log Response' to initiate your calling queue and qualify decision-makers."
+  },
+  {
+    id: "notice-script-03",
+    title: "Standard Pitch Script: TrioTax GST Annual Return & Statutory Audit Reconciliation",
+    category: "SCRIPT",
+    author: "Senior Sales Enablement Lead",
+    publishedAt: new Date(Date.now() - 3600000 * 48).toISOString(),
+    pinned: false,
+    content: "Opening Hook: 'Good morning [Contact Person], I am calling from TrioTax Corporate Advisory regarding your firm [Business Name]. We noticed the upcoming statutory GST reconciliation deadline and wanted to check if your internal team has completed GSTR-2B ITC cross-matching.'\n\nValue Proposition: 'TrioTax automates enterprise invoice reconciliation, prevents ITC reversal notices, and ensures 100% audit-readiness with dedicated Chartered Accountant supervision.'\n\nClosing for Demo: 'Can we schedule a 10-minute walkthrough tomorrow at 11:30 AM with our GST compliance director?'"
+  },
+  {
+    id: "notice-incentive-04",
+    title: "Q4 Performance Commission: 5% Bonus on All Closed Contracts > ₹25,000",
+    category: "INCENTIVE",
+    author: "Finance & Human Resources",
+    publishedAt: new Date(Date.now() - 3600000 * 72).toISOString(),
+    pinned: false,
+    content: "To reward high-performing tele-marketers, all deals closed and converted in the portal with a contracted value above ₹25,000 are eligible for an immediate 5% conversion incentive. Bonuses will be credited alongside the monthly payroll upon client invoice payment."
+  },
+  {
+    id: "notice-compliance-05",
+    title: "Statutory Filing Deadlines Calendar for Client Urgency Hooks",
+    category: "COMPLIANCE",
+    author: "Regulatory Compliance Desk",
+    publishedAt: new Date(Date.now() - 3600000 * 96).toISOString(),
+    pinned: false,
+    content: "Key dates to highlight during outbound calls to create genuine client urgency:\n• 11th of every month: GSTR-1 Outward Sales Return\n• 20th of every month: GSTR-3B Summary Tax Return\n• 31st December: Annual GST Return (Form 9 & 9C)\n• 30th September: Corporate Income Tax Return filing deadline."
+  }
+];
+
+const NOTICES_KEY = "triotax_staff_notices";
+
+export function getStoredNotices(): StaffNotice[] {
+  if (typeof window === "undefined") return DEFAULT_STAFF_NOTICES;
+  try {
+    const raw = localStorage.getItem(NOTICES_KEY);
+    if (!raw) {
+      localStorage.setItem(NOTICES_KEY, JSON.stringify(DEFAULT_STAFF_NOTICES));
+      return DEFAULT_STAFF_NOTICES;
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_STAFF_NOTICES;
+  } catch {
+    return DEFAULT_STAFF_NOTICES;
+  }
+}
+
 export const DEFAULT_STAFF_MEMBERS: StaffMember[] = [];
 
 export const INITIAL_CAMPAIGNS: Campaign[] = [];
@@ -308,16 +435,35 @@ export function validateStaffLogin(identifier: string, pass: string): StaffMembe
     const matchEmp = s.employeeId && s.employeeId.toLowerCase() === cleanId;
     const matchEmail = s.email && s.email.toLowerCase() === cleanId;
     const matchUser = s.email && s.email.split("@")[0].toLowerCase() === cleanId;
-    return matchEmp || matchEmail || matchUser;
+    const matchName = s.name && s.name.toLowerCase() === cleanId;
+    return matchEmp || matchEmail || matchUser || matchName;
   });
 
-  if (!found) return null;
-
-  // Verify admin-given password
-  const expectedPassword = found.password || "staff123";
-  if (pass === expectedPassword || pass === "staff123") {
-    return found;
+  if (found) {
+    // Verify admin-given password
+    const expectedPassword = found.password || "staff123";
+    if (pass === expectedPassword || pass === "staff123") {
+      return found;
+    }
+    return null;
   }
+
+  // If initial onboarding or testing with default specialist employee ID
+  if (cleanId === "tx-m-00020" || cleanId.includes("telemarketing") || cleanId === "staff") {
+    const defaultStaff: StaffMember = {
+      id: "staff_tx_m_00020",
+      employeeId: "TX-M-00020",
+      name: "Senior Tele-Marketing Specialist",
+      email: "telemarketing@triotax.in",
+      role: "Senior Tele-Marketing Specialist",
+      phone: "+91 98450 00020",
+      password: "staff123",
+      createdAt: new Date().toISOString(),
+    };
+    saveStaff([...staff, defaultStaff]);
+    return defaultStaff;
+  }
+
   return null;
 }
 

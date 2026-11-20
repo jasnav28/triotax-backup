@@ -15,6 +15,7 @@ import TravelConnectSignIn from "@/components/ui/travel-connect-signin-1";
 import AdminPage from "@/components/ui/admin-page";
 import UserDashboard from "@/components/ui/user-dashboard";
 import StaffLoginPage from "@/components/ui/staff-login";
+import StaffPortal from "@/components/ui/staff-portal";
 import { NetworkIndicator } from "@/components/ui/network-indicator";
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
@@ -7141,13 +7142,52 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const [isStaffAuth, setIsStaffAuth] = useState<boolean>(() => {
+    try {
+      if (typeof window !== "undefined" && localStorage.getItem("triotax_logged_out") === "true") {
+        return false;
+      }
+      return localStorage.getItem("triotax_is_staff_auth") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const handleStaffLogin = (staff?: any) => {
+    setIsStaffAuth(true);
+    try {
+      localStorage.setItem("triotax_is_staff_auth", "true");
+      if (staff?.id) localStorage.setItem("triotax_current_staff_id", staff.id);
+      if (staff?.employeeId) localStorage.setItem("triotax_current_staff_emp_id", staff.employeeId);
+      if (staff?.role) localStorage.setItem("triotax_current_staff_role", staff.role);
+      localStorage.removeItem("triotax_logged_out");
+    } catch {}
+    window.history.pushState(null, "", "/staff");
+    setActivePage("staff");
+  };
+
+  const handleStaffLogout = () => {
+    setIsStaffAuth(false);
+    try {
+      localStorage.removeItem("triotax_is_staff_auth");
+      localStorage.removeItem("triotax_current_staff_id");
+      localStorage.removeItem("triotax_current_staff_emp_id");
+      localStorage.removeItem("triotax_current_staff_role");
+      localStorage.setItem("triotax_logged_out", "true");
+    } catch {}
+    window.history.pushState(null, "", "/staff");
+    setActivePage("staff");
+  };
+
   const handleLogout = () => {
     setIsAdminAuth(false);
     setIsUserAuth(false);
+    setIsStaffAuth(false);
     setUsername("");
     try {
       localStorage.removeItem("triotax_is_admin_auth");
       localStorage.removeItem("triotax_is_user_auth");
+      localStorage.removeItem("triotax_is_staff_auth");
       localStorage.removeItem("triotax_logged_in_user");
       localStorage.setItem("triotax_logged_out", "true");
     } catch {}
@@ -7166,9 +7206,9 @@ export default function App() {
     return () => observer.disconnect();
   }, []);
 
-  // Enforce theme restrictions: Only allow dark mode on User and Admin pages
+  // Enforce theme restrictions: Only allow dark mode on User, Admin, and Staff pages
   useEffect(() => {
-    if (activePage !== "user" && activePage !== "admin") {
+    if (activePage !== "user" && activePage !== "admin" && activePage !== "staff") {
       document.documentElement.classList.remove("dark");
     } else {
       const savedTheme = localStorage.getItem("theme");
@@ -7327,21 +7367,18 @@ export default function App() {
         if (typeof window !== "undefined" && window.location.pathname !== "/staff") {
           window.history.replaceState(null, "", "/staff");
         }
+        if (isStaffAuth) {
+          return (
+            <StaffPortal
+              onLogout={handleStaffLogout}
+              staffId={typeof window !== "undefined" ? localStorage.getItem("triotax_current_staff_id") || undefined : undefined}
+              employeeId={typeof window !== "undefined" ? localStorage.getItem("triotax_current_staff_emp_id") || undefined : undefined}
+            />
+          );
+        }
         return (
           <StaffLoginPage
-            onStaffLogin={(email, staffId, employeeId) => {
-              const u = email.split("@")[0] || employeeId || "staff";
-              setUsername(u);
-              setIsUserAuth(true);
-              setUserTab("marketing-leads");
-              localStorage.setItem("triotax_is_user_auth", "true");
-              localStorage.setItem("triotax_logged_in_user", u);
-              if (staffId) localStorage.setItem("triotax_current_staff_id", staffId);
-              if (employeeId) localStorage.setItem("triotax_current_staff_emp_id", employeeId);
-              localStorage.removeItem("triotax_logged_out");
-              window.history.pushState(null, "", `/${u}-user/marketing-leads`);
-              setActivePage("user");
-            }}
+            onStaffLogin={handleStaffLogin}
             onNavigateHome={() => navigateToPage("home")}
           />
         );
