@@ -121,10 +121,12 @@ export interface StaffNotice {
   id: string;
   title: string;
   content: string;
-  category: "ANNOUNCEMENT" | "TARGET" | "SCRIPT" | "INCENTIVE" | "COMPLIANCE";
+  category: "ANNOUNCEMENT" | "TARGET" | "SCRIPT" | "INCENTIVE" | "COMPLIANCE" | "URGENT";
   publishedAt: string;
   author: string;
   pinned?: boolean;
+  priority?: "NORMAL" | "HIGH" | "URGENT";
+  targetRole?: string;
 }
 
 export const DEFAULT_STAFF_NOTICES: StaffNotice[] = [
@@ -190,6 +192,86 @@ export function getStoredNotices(): StaffNotice[] {
   } catch {
     return DEFAULT_STAFF_NOTICES;
   }
+}
+
+export function saveStaffNotices(notices: StaffNotice[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(NOTICES_KEY, JSON.stringify(notices));
+    window.dispatchEvent(new CustomEvent("triotax_staff_notices_updated"));
+    pushMarketingToDatabase().catch(() => {});
+  } catch (e) {
+    console.error("Failed to save staff notices:", e);
+  }
+}
+
+export function createStaffNotice(data: {
+  title: string;
+  content: string;
+  category?: StaffNotice["category"];
+  author?: string;
+  pinned?: boolean;
+  priority?: StaffNotice["priority"];
+  targetRole?: string;
+}): StaffNotice {
+  const notices = getStoredNotices();
+  const newNotice: StaffNotice = {
+    id: `notice-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+    title: data.title.trim(),
+    content: data.content.trim(),
+    category: data.category || "ANNOUNCEMENT",
+    publishedAt: new Date().toISOString(),
+    author: data.author?.trim() || "TrioTax Administration Desk",
+    pinned: data.pinned ?? false,
+    priority: data.priority || "NORMAL",
+    targetRole: data.targetRole || "ALL",
+  };
+  saveStaffNotices([newNotice, ...notices]);
+  return newNotice;
+}
+
+export function deleteStaffNotice(noticeId: string): void {
+  const notices = getStoredNotices();
+  saveStaffNotices(notices.filter((n) => n.id !== noticeId));
+}
+
+export function togglePinStaffNotice(noticeId: string): void {
+  const notices = getStoredNotices();
+  const updated = notices.map((n) => (n.id === noticeId ? { ...n, pinned: !n.pinned } : n));
+  saveStaffNotices(updated);
+}
+
+const READ_NOTICES_KEY = "triotax_read_notices";
+
+export function getReadNoticeIds(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(READ_NOTICES_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function markNoticeAsRead(noticeId: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    const current = getReadNoticeIds();
+    if (!current.includes(noticeId)) {
+      localStorage.setItem(READ_NOTICES_KEY, JSON.stringify([...current, noticeId]));
+      window.dispatchEvent(new CustomEvent("triotax_read_notices_updated"));
+    }
+  } catch {}
+}
+
+export function markAllNoticesAsRead(): void {
+  if (typeof window === "undefined") return;
+  try {
+    const notices = getStoredNotices();
+    const ids = notices.map((n) => n.id);
+    localStorage.setItem(READ_NOTICES_KEY, JSON.stringify(ids));
+    window.dispatchEvent(new CustomEvent("triotax_read_notices_updated"));
+  } catch {}
 }
 
 export const DEFAULT_STAFF_MEMBERS: StaffMember[] = [];
@@ -828,12 +910,14 @@ export async function pushMarketingToDatabase(): Promise<{ success: boolean; mes
     const leads = getStoredLeads();
     const staff = getStoredStaff();
     const targets = getStoredStaffTargets();
+    const notices = getStoredNotices();
 
     const payload = JSON.stringify({
       campaigns,
       leads,
       staff,
       targets,
+      notices,
     });
 
     const candidates = getMarketingApiCandidates("marketing/data");
@@ -887,11 +971,12 @@ export async function syncMarketingWithDatabase(): Promise<boolean> {
 
         if (!res.ok) continue;
         const data = await res.json();
-        if (data.success && (data.leads?.length > 0 || data.campaigns?.length > 0 || data.staff?.length > 0 || data.targets?.length > 0)) {
+        if (data.success && (data.leads?.length > 0 || data.campaigns?.length > 0 || data.staff?.length > 0 || data.targets?.length > 0 || data.notices?.length > 0)) {
           const rawCamps = data.campaigns || [];
           const rawLeads = data.leads || [];
           const rawStaff = data.staff || [];
           const rawTargets = data.targets || [];
+          const rawNotices = data.notices || [];
           const cleanCamps = rawCamps.filter((c: any) => !DUMMY_CAMPAIGN_NAMES.has(c.name) && !c.id.startsWith("camp-00"));
           const cleanLeads = rawLeads.filter((l: any) => !DUMMY_BUSINESS_NAMES.has(l.businessName) && !l.id.startsWith("lead-00") && !l.id.startsWith("lead-01"));
           const cleanStaff = rawStaff.filter((s: any) => !DUMMY_STAFF_NAMES.has(s.name) && s.id !== "staff_1" && s.id !== "staff_2" && s.id !== "staff_3" && s.id !== "staff_4");
@@ -902,7 +987,11 @@ export async function syncMarketingWithDatabase(): Promise<boolean> {
           if (Array.isArray(rawTargets) && rawTargets.length > 0) {
             localStorage.setItem(TARGETS_KEY, JSON.stringify(rawTargets));
           }
+          if (Array.isArray(rawNotices) && rawNotices.length > 0) {
+            localStorage.setItem(NOTICES_KEY, JSON.stringify(rawNotices));
+          }
           window.dispatchEvent(new CustomEvent("triotax_marketing_updated"));
+          window.dispatchEvent(new CustomEvent("triotax_staff_notices_updated"));
 
           // If dummy data was pruned from server payload, push clean state back to purge backend database
           if (rawCamps.length !== cleanCamps.length || rawLeads.length !== cleanLeads.length || rawStaff.length !== cleanStaff.length) {

@@ -63,6 +63,9 @@ import {
   updateLeadStatus,
   getStaffTargetForMonth,
   getCurrentMonthKey,
+  getReadNoticeIds,
+  markNoticeAsRead,
+  markAllNoticesAsRead,
   pushMarketingToDatabase,
   syncMarketingWithDatabase,
 } from "@/lib/marketing-data";
@@ -99,6 +102,8 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [notices, setNotices] = useState<StaffNotice[]>([]);
+  const [readNoticeIds, setReadNoticeIds] = useState<Set<string>>(() => new Set(getReadNoticeIds()));
+  const [latestNoticeToast, setLatestNoticeToast] = useState<StaffNotice | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Active Staff Member Profile
@@ -206,14 +211,47 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
     }
   };
 
+  const unreadNoticesCount = useMemo(() => {
+    return notices.filter((n) => !readNoticeIds.has(n.id)).length;
+  }, [notices, readNoticeIds]);
+
+  const handleTabClick = (tabId: StaffTab) => {
+    setActiveTab(tabId);
+    if (tabId === "notice") {
+      markAllNoticesAsRead();
+      setReadNoticeIds(new Set(getReadNoticeIds()));
+      setLatestNoticeToast(null);
+    }
+  };
+
   useEffect(() => {
     refreshData();
     syncMarketingWithDatabase().then(() => refreshData());
 
-    const handleUpdate = () => refreshData();
+    const handleUpdate = () => {
+      refreshData();
+      const freshNotices = getStoredNotices();
+      const readSet = new Set(getReadNoticeIds());
+      setReadNoticeIds(readSet);
+
+      if (freshNotices.length > 0) {
+        const newest = freshNotices[0];
+        if (!readSet.has(newest.id) && activeTab !== "notice") {
+          setLatestNoticeToast(newest);
+          setTimeout(() => setLatestNoticeToast(null), 9000);
+        }
+      }
+    };
+
     window.addEventListener("triotax_marketing_updated", handleUpdate);
-    return () => window.removeEventListener("triotax_marketing_updated", handleUpdate);
-  }, []);
+    window.addEventListener("triotax_staff_notices_updated", handleUpdate);
+    window.addEventListener("triotax_read_notices_updated", handleUpdate);
+    return () => {
+      window.removeEventListener("triotax_marketing_updated", handleUpdate);
+      window.removeEventListener("triotax_staff_notices_updated", handleUpdate);
+      window.removeEventListener("triotax_read_notices_updated", handleUpdate);
+    };
+  }, [activeTab]);
 
   // Copy helper
   const handleCopy = (text: string, id: string) => {
@@ -858,28 +896,48 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
           {navTabs.map((tab) => {
             const Icon = tab.icon;
             const isSelected = activeTab === tab.id;
+            const isNotice = tab.id === "notice";
+            const hasUnreadNotice = isNotice && unreadNoticesCount > 0;
 
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+                onClick={() => handleTabClick(tab.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer relative ${
                   isSelected
                     ? "bg-white text-[#003153] shadow-md transform translate-x-1"
+                    : hasUnreadNotice
+                    ? "bg-gradient-to-r from-amber-500/25 via-rose-500/25 to-amber-500/25 border-2 border-amber-400 text-amber-200 animate-pulse font-black shadow-lg shadow-amber-500/20"
                     : "text-white/80 hover:text-white hover:bg-white/10"
                 }`}
-                title={tab.label}
+                title={hasUnreadNotice ? `📢 ${unreadNoticesCount} New Notice from Admin!` : tab.label}
               >
+                {/* Collapsed dot alert */}
+                {isSidebarCollapsed && hasUnreadNotice && (
+                  <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white animate-ping" />
+                )}
+
                 <Icon
                   size={16}
                   className={`shrink-0 ${
-                    isSelected ? "text-[#003153]" : "text-white/70"
+                    isSelected
+                      ? "text-[#003153]"
+                      : hasUnreadNotice
+                      ? "text-amber-300 animate-bounce"
+                      : "text-white/70"
                   }`}
                 />
                 {!isSidebarCollapsed && (
                   <div className="flex items-center justify-between flex-1 truncate">
-                    <span className="truncate">{tab.label}</span>
-                    {typeof tab.badgeCount === "number" && tab.badgeCount > 0 && (
+                    <span className={`truncate ${hasUnreadNotice && !isSelected ? "text-amber-200 font-black tracking-wide" : ""}`}>
+                      {tab.label}
+                    </span>
+                    {hasUnreadNotice ? (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-600 text-white font-black ml-1.5 shrink-0 animate-pulse shadow-xs flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                        <span>{unreadNoticesCount} NEW</span>
+                      </span>
+                    ) : typeof tab.badgeCount === "number" && tab.badgeCount > 0 ? (
                       <span
                         className={`text-[10px] px-2 py-0.5 rounded-full text-white font-bold ml-1.5 shrink-0 ${
                           isSelected
@@ -889,7 +947,7 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
                       >
                         {tab.badgeCount}
                       </span>
-                    )}
+                    ) : null}
                   </div>
                 )}
               </button>
@@ -2599,6 +2657,41 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
               <span>+₹{celebrationToast.dealValue.toLocaleString("en-IN")} Won</span>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* FLOATING ADMIN NOTICE TOAST ALERT (ON NEW BROADCAST)          */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {latestNoticeToast && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-sm w-full bg-gradient-to-r from-[#003153] via-[#004270] to-[#014d7a] border-2 border-amber-400 text-white p-4 rounded-2xl shadow-2xl animate-slideInRight flex items-start justify-between gap-3 pointer-events-auto">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 shadow-md">
+              <Megaphone size={18} className="animate-bounce" />
+            </div>
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono font-bold text-amber-300 uppercase block tracking-wider">
+                📢 NEW ADMIN NOTICE FROM DESK
+              </span>
+              <h4 className="font-black text-xs text-white truncate max-w-[210px]">
+                {latestNoticeToast.title}
+              </h4>
+              <button
+                onClick={() => handleTabClick("notice")}
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-sky-200 hover:text-white underline cursor-pointer pt-0.5"
+              >
+                <span>Open Notice Board</span>
+                <span>&rarr;</span>
+              </button>
+            </div>
+          </div>
+          <button
+            onClick={() => setLatestNoticeToast(null)}
+            className="text-white/60 hover:text-white p-1 rounded-md cursor-pointer"
+            title="Dismiss notice toast"
+          >
+            <X size={15} />
+          </button>
         </div>
       )}
 
