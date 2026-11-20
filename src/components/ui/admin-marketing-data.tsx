@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   Target,
   Plus,
@@ -36,6 +36,11 @@ import {
   EyeOff,
   Check,
   Megaphone,
+  FileText,
+  Info,
+  Download,
+  Sparkles,
+  HelpCircle,
 } from "lucide-react";
 import {
   Lead,
@@ -66,8 +71,8 @@ export const AdminMarketingData: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
 
-  // Sub tab: "leads" | "campaigns" | "staff" | "performance"
-  const [currentSubTab, setCurrentSubTab] = useState<"leads" | "campaigns" | "staff" | "performance">("leads");
+  // Sub tab: "leads" | "upload" | "campaigns" | "staff" | "performance"
+  const [currentSubTab, setCurrentSubTab] = useState<"leads" | "upload" | "campaigns" | "staff" | "performance">("leads");
 
   const [visiblePasswords, setVisiblePasswords] = useState<{ [id: string]: boolean }>({});
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -116,6 +121,14 @@ export const AdminMarketingData: React.FC = () => {
     city: string;
     state: string;
   }>>([]);
+
+  // Document Upload Interface State (matches media_1795164303763_eaf64394.jpg)
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [desiredLaunchDate, setDesiredLaunchDate] = useState("2026-04-28");
+  const [additionalRequirements, setAdditionalRequirements] = useState("");
+  const [uploadSuccessMessage, setUploadSuccessMessage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // New Response Form (inside Responses Modal)
   const [respOutcome, setRespOutcome] = useState<LeadResponse["outcome"]>("INTERESTED");
@@ -301,6 +314,69 @@ export const AdminMarketingData: React.FC = () => {
     setShowBulkUploadModal(false);
   };
 
+  // Handlers for Dedicated Document Upload Interface
+  const handleFileSelected = (file: File) => {
+    if (!file) return;
+    setUploadedFile(file);
+    setUploadSuccessMessage(null);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = (e.target?.result as string) || "";
+      setBulkRawData(text);
+    };
+    reader.readAsText(file);
+  };
+
+  const handleDownloadSampleCsv = () => {
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      "Business Name,Contact Person,Phone,Email,City,State\n" +
+      "Apex Cloud Solutions Pvt Ltd,Rajesh Kumar,+91 98450 11225,rajesh@apexcloud.in,Bengaluru,Karnataka\n" +
+      "Kaveri Logistics & Cold Chain,Ananya Deshmukh,+91 99012 34567,ananya@kaverilogistics.com,Bengaluru,Karnataka\n" +
+      "Shree Ganesh Textiles Mills,Vikram Patel,+91 98200 78901,vikram@ganeshtextiles.in,Surat,Gujarat\n" +
+      "TechNova Systems India LLP,Sneha Rao,+91 97401 55667,sneha.rao@technova.org,Hyderabad,Telangana\n" +
+      "Modern Steel Fabricators Ltd,Amit Verma,+91 98110 33445,amit@modernsteel.com,Pune,Maharashtra\n";
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "TrioTax_Leads_Template.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleLoadSampleLeads = () => {
+    const sampleText =
+      "Apex Cloud Solutions Pvt Ltd, Rajesh Kumar, +91 98450 11225, rajesh@apexcloud.in, Bengaluru, Karnataka\n" +
+      "Kaveri Logistics & Cold Chain, Ananya Deshmukh, +91 99012 34567, ananya@kaverilogistics.com, Bengaluru, Karnataka\n" +
+      "Shree Ganesh Textiles Mills, Vikram Patel, +91 98200 78901, vikram@ganeshtextiles.in, Surat, Gujarat\n" +
+      "TechNova Systems India LLP, Sneha Rao, +91 97401 55667, sneha.rao@technova.org, Hyderabad, Telangana\n" +
+      "Modern Steel Fabricators Ltd, Amit Verma, +91 98110 33445, amit@modernsteel.com, Pune, Maharashtra";
+    setBulkRawData(sampleText);
+    setUploadedFile(new File([sampleText], "TrioTax_Sample_Marketing_Leads.csv", { type: "text/csv" }));
+    setUploadSuccessMessage(null);
+  };
+
+  const handleDocumentUploadSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (bulkParsePreview.length === 0) {
+      alert("Please select or drop a valid CSV file with lead records first.");
+      return;
+    }
+    const targetCamp = bulkTargetCampaign.trim() || campaigns[0]?.name || "General";
+    const assignedStaff = staffList.find((s) => s.id === bulkAssignToStaffId) || null;
+
+    bulkAddLeads(bulkParsePreview, targetCamp, assignedStaff);
+    const count = bulkParsePreview.length;
+    setBulkRawData("");
+    setUploadedFile(null);
+    setBulkParsePreview([]);
+    setUploadSuccessMessage(`Successfully imported ${count} leads into campaign "${targetCamp}"!`);
+    setTimeout(() => {
+      setCurrentSubTab("leads");
+    }, 1500);
+  };
+
   // Handle create campaign
   const handleCreateCampaignSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -387,11 +463,18 @@ export const AdminMarketingData: React.FC = () => {
             <span>Add Single Lead</span>
           </button>
           <button
+            onClick={() => setCurrentSubTab("upload")}
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-[#6d28d9] hover:bg-[#5b21b6] text-white text-xs font-bold rounded-xl shadow-sm transition-all cursor-pointer"
+          >
+            <Upload size={16} />
+            <span>Upload Document / CSV</span>
+          </button>
+          <button
             onClick={() => setShowBulkUploadModal(true)}
             className="flex items-center gap-1.5 px-4 py-2.5 bg-white/15 hover:bg-white/25 text-white text-xs font-bold rounded-xl backdrop-blur-md border border-white/20 transition-all cursor-pointer"
           >
             <FileSpreadsheet size={16} />
-            <span>Bulk CSV / Paste</span>
+            <span>Quick Paste Modal</span>
           </button>
           <button
             onClick={() => setShowNewCampaignModal(true)}
@@ -458,10 +541,10 @@ export const AdminMarketingData: React.FC = () => {
       </div>
 
       {/* Sub Tabs Navigation */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-zinc-800 pb-2">
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-zinc-800 pb-2 overflow-x-auto">
         <button
           onClick={() => setCurrentSubTab("leads")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
             currentSubTab === "leads"
               ? "bg-[#003153] text-white shadow-xs"
               : "text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800"
@@ -472,8 +555,20 @@ export const AdminMarketingData: React.FC = () => {
         </button>
 
         <button
+          onClick={() => setCurrentSubTab("upload")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+            currentSubTab === "upload"
+              ? "bg-[#6d28d9] text-white shadow-xs"
+              : "text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/30 hover:bg-purple-100 dark:hover:bg-purple-900/40 border border-purple-200 dark:border-purple-800"
+          }`}
+        >
+          <Upload size={14} />
+          <span>Upload Document / CSV</span>
+        </button>
+
+        <button
           onClick={() => setCurrentSubTab("campaigns")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
             currentSubTab === "campaigns"
               ? "bg-[#003153] text-white shadow-xs"
               : "text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800"
@@ -485,7 +580,7 @@ export const AdminMarketingData: React.FC = () => {
 
         <button
           onClick={() => setCurrentSubTab("staff")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
             currentSubTab === "staff"
               ? "bg-[#003153] text-white shadow-xs"
               : "text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800"
@@ -497,7 +592,7 @@ export const AdminMarketingData: React.FC = () => {
 
         <button
           onClick={() => setCurrentSubTab("performance")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
             currentSubTab === "performance"
               ? "bg-[#003153] text-white shadow-xs"
               : "text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800"
@@ -828,6 +923,279 @@ export const AdminMarketingData: React.FC = () => {
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SUB TAB: UPLOAD DOCUMENT / CSV INTERFACE (Matches media_1795164303763_eaf64394.jpg) */}
+      {currentSubTab === "upload" && (
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200/80 dark:border-zinc-800 p-6 md:p-8 shadow-xs space-y-6">
+          {/* Top Options Bar (Target Campaign & Staff Assignment) */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-zinc-800">
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-700 dark:text-zinc-300">Target Campaign:</span>
+                <select
+                  value={bulkTargetCampaign}
+                  onChange={(e) => setBulkTargetCampaign(e.target.value)}
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-purple-500/20"
+                >
+                  {campaigns.map((c) => (
+                    <option key={c.id} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))}
+                  <option value="General">General</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-700 dark:text-zinc-300">Assign To Staff:</span>
+                <select
+                  value={bulkAssignToStaffId}
+                  onChange={(e) => setBulkAssignToStaffId(e.target.value)}
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-medium text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-purple-500/20"
+                >
+                  <option value="">Leave Unassigned (Available)</option>
+                  {staffList.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} ({s.role})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 font-bold text-[11px] border border-purple-200/70 dark:border-purple-800">
+                <FileSpreadsheet size={13} />
+                CSV / Excel / TXT
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 font-medium text-[11px]">
+                Auto Sequence Allocation
+              </span>
+            </div>
+          </div>
+
+          {/* Success Banner */}
+          {uploadSuccessMessage && (
+            <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center gap-2">
+              <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+              <span>{uploadSuccessMessage}</span>
+            </div>
+          )}
+
+          {/* Large Dashed Dropzone matching user's image */}
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragOver(true);
+            }}
+            onDragLeave={() => setIsDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setIsDragOver(false);
+              const file = e.dataTransfer.files?.[0];
+              if (file) handleFileSelected(file);
+            }}
+            className={`relative rounded-2xl border-2 border-dashed transition-all p-8 md:p-12 flex flex-col items-center justify-center text-center cursor-pointer ${
+              isDragOver
+                ? "border-purple-500 bg-purple-50/70 dark:bg-purple-950/30 scale-[1.005]"
+                : "border-purple-300/80 dark:border-purple-800/60 bg-gradient-to-b from-[#fbf8ff] via-[#f5f0ff] to-white dark:from-purple-950/20 dark:via-zinc-900/60 dark:to-zinc-900"
+            }`}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept=".csv,.xlsx,.xls,.txt"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFileSelected(file);
+              }}
+            />
+
+            {/* Badges in center (TXT Lilac badge + Violet Upload badge) */}
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <div className="w-14 h-16 rounded-xl bg-white dark:bg-zinc-800 shadow-sm border border-purple-100 dark:border-purple-900/50 flex flex-col items-center justify-center relative transform -rotate-6">
+                <span className="text-[10px] font-black tracking-widest text-purple-600 dark:text-purple-400 uppercase bg-purple-100 dark:bg-purple-950/60 px-1.5 py-0.5 rounded">
+                  CSV
+                </span>
+                <div className="w-6 h-0.5 bg-slate-200 dark:bg-zinc-700 mt-2 rounded" />
+                <div className="w-4 h-0.5 bg-slate-200 dark:bg-zinc-700 mt-1 rounded" />
+              </div>
+
+              <div className="w-12 h-12 rounded-xl bg-[#6d28d9] text-white shadow-md flex items-center justify-center">
+                <Upload size={22} className="stroke-[2.5]" />
+              </div>
+            </div>
+
+            <h4 className="text-base font-bold text-slate-800 dark:text-zinc-100 mb-1">
+              Drag and drop your files here or upload manually
+            </h4>
+
+            {/* Select file pill button */}
+            <div className="my-3">
+              <span className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs font-bold text-slate-700 dark:text-zinc-200 shadow-xs hover:bg-slate-50 dark:hover:bg-zinc-700">
+                <Upload size={14} />
+                Select file
+              </span>
+            </div>
+
+            <p className="text-xs text-slate-400 dark:text-zinc-500 max-w-md">
+              Supported file types: CSV (.csv), Excel (.xlsx, .xls), Text (.txt)
+            </p>
+
+            {/* If file is selected */}
+            {uploadedFile && (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="mt-4 px-4 py-2.5 rounded-xl bg-white dark:bg-zinc-800 border border-purple-200 dark:border-purple-800/60 shadow-xs inline-flex items-center gap-3 text-xs"
+              >
+                <div className="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold">
+                  <FileText size={16} />
+                </div>
+                <div className="text-left">
+                  <div className="font-bold text-slate-800 dark:text-white truncate max-w-xs">{uploadedFile.name}</div>
+                  <div className="text-[11px] text-slate-400">
+                    {(uploadedFile.size / 1024).toFixed(1)} KB • {bulkParsePreview.length} leads detected
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUploadedFile(null);
+                    setBulkRawData("");
+                    setBulkParsePreview([]);
+                  }}
+                  className="p-1 rounded-md text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                  title="Remove file"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Live Parsed Leads Preview Table (if leads detected) */}
+          {bulkParsePreview.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-800 dark:text-zinc-200 flex items-center gap-2">
+                  <CheckCircle2 size={15} className="text-emerald-500" />
+                  Live Preview: {bulkParsePreview.length} Valid Leads Parsed for Import
+                </span>
+                <span className="text-[11px] text-slate-400">
+                  Target Campaign: <strong className="text-purple-700 dark:text-purple-400">{bulkTargetCampaign || "General"}</strong>
+                </span>
+              </div>
+
+              <div className="max-h-56 overflow-y-auto border border-slate-200 dark:border-zinc-800 rounded-xl bg-slate-50/50 dark:bg-zinc-900/50">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-100 dark:bg-zinc-800/80 text-[11px] font-bold text-slate-600 dark:text-zinc-400 sticky top-0">
+                    <tr>
+                      <th className="p-2.5">#</th>
+                      <th className="p-2.5">Business Name</th>
+                      <th className="p-2.5">Contact Person</th>
+                      <th className="p-2.5">Phone Number</th>
+                      <th className="p-2.5">Email</th>
+                      <th className="p-2.5">Location</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-zinc-800 text-[11px]">
+                    {bulkParsePreview.slice(0, 10).map((row, idx) => (
+                      <tr key={idx} className="hover:bg-purple-50/40 dark:hover:bg-purple-950/20">
+                        <td className="p-2.5 font-bold text-slate-400">{idx + 1}</td>
+                        <td className="p-2.5 font-bold text-slate-900 dark:text-white">{row.businessName}</td>
+                        <td className="p-2.5 text-slate-600 dark:text-zinc-300">{row.contactPerson || "—"}</td>
+                        <td className="p-2.5 font-mono text-emerald-600 dark:text-emerald-400">{row.phone}</td>
+                        <td className="p-2.5 text-slate-500">{row.email || "—"}</td>
+                        <td className="p-2.5 text-slate-500">{[row.city, row.state].filter(Boolean).join(", ") || "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {bulkParsePreview.length > 10 && (
+                <p className="text-[11px] text-slate-400 text-right italic">
+                  + {bulkParsePreview.length - 10} more leads will be imported
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Form Fields: Desired delivery date & Additional requirements */}
+          <div className="space-y-4 pt-2">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300 mb-1.5 flex items-center gap-1.5">
+                <span>Desired campaign launch date</span>
+                <span title="The scheduled date when marketing staff start calling these leads">
+                  <Info size={14} className="text-slate-400 cursor-help" />
+                </span>
+              </label>
+              <div className="max-w-sm relative">
+                <input
+                  type="date"
+                  value={desiredLaunchDate}
+                  onChange={(e) => setDesiredLaunchDate(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs text-slate-800 dark:text-zinc-200 outline-none focus:ring-2 focus:ring-purple-500/20 font-medium"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300 mb-1.5">
+                Additional requirements
+              </label>
+              <textarea
+                rows={4}
+                value={additionalRequirements}
+                onChange={(e) => setAdditionalRequirements(e.target.value)}
+                placeholder="Type your request here (e.g. priority calling hours 10:00 AM - 4:00 PM, follow up strictly with SME decision makers)..."
+                className="w-full p-3.5 rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs text-slate-800 dark:text-zinc-200 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-purple-500/20 resize-y"
+              />
+            </div>
+          </div>
+
+          {/* Centered Purple Submit Button */}
+          <div className="flex justify-center pt-2">
+            <button
+              type="button"
+              onClick={handleDocumentUploadSubmit}
+              disabled={bulkParsePreview.length === 0}
+              className="px-8 py-3 rounded-full bg-[#5b21b6] hover:bg-[#4c1d95] disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold tracking-wide shadow-md hover:shadow-purple-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer min-w-[200px]"
+            >
+              <Upload size={16} />
+              <span>Submit and Import Leads ({bulkParsePreview.length})</span>
+            </button>
+          </div>
+
+          {/* Bottom Card matching "Have any questions?" */}
+          <div className="rounded-xl p-4 bg-gradient-to-r from-purple-50/60 via-slate-50 to-purple-50/60 dark:from-purple-950/20 dark:via-zinc-800/50 dark:to-purple-950/20 border border-purple-100 dark:border-purple-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-800 dark:text-zinc-200">Have any questions?</span>
+              <span className="text-slate-500 dark:text-zinc-400">Our tele-calling and data operations team is here to help at any time!</span>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={handleDownloadSampleCsv}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-[11px] font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 shadow-2xs cursor-pointer"
+              >
+                <Download size={13} className="text-purple-600" />
+                <span>Download Sample CSV</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleLoadSampleLeads}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-[11px] font-bold text-white shadow-2xs cursor-pointer"
+              >
+                <Sparkles size={13} />
+                <span>Load 5 Demo Leads</span>
+              </button>
             </div>
           </div>
         </div>

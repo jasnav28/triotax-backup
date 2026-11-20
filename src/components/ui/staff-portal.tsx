@@ -569,51 +569,6 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
           </div>
         )}
 
-        {/* Staff Roles Selection / Roster (Requested 5 Roles with 4 Disabled) */}
-        {!isSidebarCollapsed && (
-          <div className="px-4 py-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-sky-200/70 block mb-1.5">
-              TrioTax Staff Roles
-            </span>
-            <div className="space-y-1">
-              {STAFF_ROLES.map((role) => {
-                const isActiveRole = role.id === "senior-telemarketing";
-                return (
-                  <div
-                    key={role.id}
-                    className={`flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-colors ${
-                      isActiveRole
-                        ? "bg-white/15 text-white font-bold border border-white/20"
-                        : "opacity-45 text-white/60 cursor-not-allowed select-none bg-black/10"
-                    }`}
-                    title={
-                      isActiveRole
-                        ? "Active Tele-Calling Portal"
-                        : `${role.name} portal is coming soon / disabled in this release`
-                    }
-                  >
-                    <div className="flex items-center gap-2 truncate">
-                      <Briefcase
-                        size={12}
-                        className={isActiveRole ? "text-amber-300" : "text-white/40"}
-                      />
-                      <span className="truncate text-[11px]">{role.name}</span>
-                    </div>
-
-                    {isActiveRole ? (
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-                    ) : (
-                      <span className="text-[9px] uppercase px-1.5 py-0.2 rounded bg-white/10 text-white/50 font-bold shrink-0">
-                        Disabled
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
         {/* Tele-Marketing Specialist Navigation Tabs */}
         <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1 custom-scrollbar">
           <span className="text-[10px] font-bold uppercase tracking-wider text-sky-200/70 block px-2 mb-1.5">
